@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>Comments — Baseline (AAPL)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #0d0d0d;
+    --surface: #1c1c1e;
+    --border: #2c2c2e;
+    --text-primary: #ffffff;
+    --text-secondary: #8a8a8e;
+    --text-tertiary: #3d3d3f;
+    --bull: #008932;
+    --bear: #ff453a;
+  }
+
+  html, body {
+    background: #1a1a1a;
+    min-height: 100vh;
+    font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 0 48px;
+  }
+
+  /* Phone shell */
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: var(--bg);
+    border-radius: 50px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+
+  /* Scrollable content area inside phone */
+  .phone-scroll {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    bottom: 82px;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .phone-scroll::-webkit-scrollbar { display: none; }
+
+  /* ── Status bar ── */
+  .status-bar {
+    height: 44px;
+    background: #0d1016;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .status-time { font-size: 15px; font-weight: 510; color: white; letter-spacing: 0; }
+  .status-right { display: flex; align-items: center; gap: 6px; }
+
+  /* ── Top nav ── */
+  .top-nav {
+    background: #0d1016;
+    padding: 0 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 44px;
+    z-index: 20;
+  }
+
+  .nav-back-btn {
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; background: none;
+    border-radius: 50%; flex-shrink: 0;
+  }
+
+  .nav-center {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column; gap: 2px;
+    height: 38px; justify-content: center; padding-left: 2px;
+  }
+  .nav-title-row { display: flex; align-items: center; }
+  .nav-title { font-size: 16px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.4px; }
+  .nav-subtitle-row { display: flex; align-items: center; gap: 3px; }
+  .nav-flag { width: 16px; height: 16px; object-fit: contain; }
+  .nav-subtitle-text { font-size: 12px; font-weight: 510; color: #949495; letter-spacing: 0; }
+  .nav-chevron { width: 16px; height: 16px; object-fit: contain; }
+
+  .nav-trailing {
+    width: 82px; height: 44px;
+    display: flex; align-items: center; justify-content: flex-end;
+    flex-shrink: 0; background: none;
+  }
+  .nav-trailing-inner { display: flex; align-items: center; gap: 10px; padding: 8px; }
+
+  /* ── Price header ── */
+  .price-header { padding: 8px 16px 10px; background: var(--bg); }
+  .price-row-1 { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .price-main { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px; }
+  .price-change { font-size: 14px; font-weight: 510; color: var(--bull); letter-spacing: 0; }
+  .price-share { margin-left: auto; cursor: pointer; }
+  .price-row-2 { display: flex; align-items: center; gap: 4px; }
+  .price-time { font-size: 11px; color: var(--text-secondary); letter-spacing: 0; }
+
+  /* ── Section tabs ── */
+  .section-tabs {
+    display: flex; overflow-x: auto; scrollbar-width: none;
+    padding: 0 16px; gap: 0;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--bg);
+    position: sticky; top: 98px; z-index: 15;
+  }
+  .section-tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0; padding: 10px 12px;
+    font-size: 13px; font-weight: 510; color: var(--text-secondary);
+    letter-spacing: 0; cursor: pointer; white-space: nowrap;
+    border-bottom: 2px solid transparent; margin-bottom: -0.5px;
+  }
+  .tab.active { color: var(--text-primary); border-bottom-color: var(--text-primary); }
+
+  /* ── Compose row ── */
+  .compose-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px 14px; background: var(--bg);
+  }
+  .compose-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #5e2d8c; color: white;
+    font-size: 12px; font-weight: 700; letter-spacing: -0.3px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .compose-input-wrap {
+    flex: 1; background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 20px; padding: 8px 14px;
+  }
+  .compose-input {
+    width: 100%; background: transparent; border: none; outline: none;
+    font-size: 14px; color: var(--text-primary); font-family: inherit; letter-spacing: -0.2px;
+  }
+  .compose-input::placeholder { color: var(--text-secondary); }
+  .compose-send {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #F5A623; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    opacity: 0.35; transition: opacity 0.2s;
+  }
+  .compose-send.active { opacity: 1; }
+
+  /* ── Comment rows ── */
+  .comments-list { background: var(--bg); padding-bottom: 100px; }
+
+  .comment { padding: 16px 16px 14px; }
+  .comment-inner { display: flex; gap: 10px; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    font-size: 13px; font-weight: 700; color: white; letter-spacing: 0;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .comment-content { flex: 1; min-width: 0; }
+
+  .comment-header { display: flex; align-items: center; margin-bottom: 1px; }
+  .comment-author {
+    font-size: 14px; font-weight: 700; color: var(--text-primary);
+    letter-spacing: 0; line-height: 1;
+  }
+  .comment-meta {
+    display: flex; align-items: center; gap: 6px;
+    margin-left: auto; flex-shrink: 0;
+  }
+  .comment-subline {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--text-secondary); letter-spacing: 0;
+    margin-bottom: 5px; margin-top: 3px;
+  }
+  .comment-time { font-size: 12px; color: var(--text-secondary); letter-spacing: 0; }
+  .comment-more {
+    font-size: 14px; color: var(--text-tertiary); cursor: pointer;
+    letter-spacing: 2px; line-height: 1; padding: 0 2px;
+  }
+
+  /* Action sheet */
+  .action-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 200; opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .action-overlay.open { opacity: 1; pointer-events: all; }
+  .action-sheet {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #1c1c1e; border-radius: 16px 16px 0 0;
+    z-index: 201; padding: 0 0 56px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .action-sheet.open { transform: translateY(0); }
+  .sheet-handle {
+    width: 36px; height: 4px; background: rgba(255,255,255,0.2);
+    border-radius: 2px; margin: 10px auto 16px;
+  }
+  .sheet-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 20px; font-size: 14px; color: var(--text-primary);
+    cursor: pointer; letter-spacing: -0.3px;
+  }
+  .sheet-item:active { background: rgba(255,255,255,0.06); }
+  .sheet-item svg { flex-shrink: 0; color: var(--text-primary); }
+  .sheet-item.destructive { color: #ff453a; }
+  .sheet-item.destructive svg { color: #ff453a; }
+  .sheet-divider { height: 0.5px; background: rgba(255,255,255,0.1); margin: 4px 0; }
+  .sheet-cancel {
+    margin: 8px 16px 0; padding: 14px; text-align: center;
+    font-size: 14px; font-weight: 500; color: var(--text-primary);
+    background: #2c2c2e; border-radius: 12px; cursor: pointer; letter-spacing: -0.3px;
+  }
+  .sheet-cancel:active { opacity: 0.7; }
+
+  .comment-body {
+    font-size: 14px; color: var(--text-primary); line-height: 1.45;
+    letter-spacing: 0; margin-bottom: 8px;
+  }
+
+  .comment-actions {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .action-btn {
+    display: flex; align-items: center; gap: 4px;
+    cursor: pointer; color: var(--text-secondary);
+  }
+  .action-btn.liked { color: var(--bull); }
+  .action-icon { display: flex; align-items: center; }
+  .action-count { font-size: 12px; font-weight: 510; letter-spacing: 0; }
+  .reply-action {
+    display: flex; align-items: center; gap: 4px;
+    cursor: pointer; margin-left: auto;
+  }
+  .reply-text { font-size: 12px; color: var(--text-secondary); letter-spacing: 0; }
+
+  /* ── Thread replies ── */
+  .thread-replies {
+    margin-top: 10px;
+    margin-left: 46px;
+    border-left: 1.5px solid var(--border);
+    padding-left: 12px;
+  }
+  .reply-row {
+    display: flex; gap: 8px; padding: 8px 0;
+    border-bottom: 0.5px solid rgba(255,255,255,0.04);
+  }
+  .reply-row:last-of-type { border-bottom: none; }
+  .see-all-replies {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--text-secondary); padding: 6px 0 4px;
+    cursor: pointer; transition: color 0.15s; letter-spacing: -0.1px;
+  }
+  .see-all-replies:active { color: var(--text-primary); }
+
+  /* Inline reply compose */
+  .inline-compose {
+    display: flex; align-items: flex-end; gap: 8px;
+    padding: 10px 0 4px; margin-top: 4px;
+    border-top: 0.5px solid rgba(255,255,255,0.05);
+  }
+  .inline-compose-avatar {
+    width: 22px; height: 22px; border-radius: 50%; background: #5e2d8c;
+    font-size: 9px; font-weight: 700; color: white; flex-shrink: 0; letter-spacing: -0.3px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .inline-compose-wrap {
+    flex: 1; min-width: 0; background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 16px; padding: 6px 12px;
+  }
+  .inline-compose-wrap:focus-within { border-color: rgba(255,255,255,0.2); }
+  .mention-pill {
+    display: inline-flex; align-items: center;
+    background: rgba(245,166,35,0.18); border: 0.5px solid rgba(245,166,35,0.4);
+    color: #F5A623; border-radius: 10px; padding: 1px 7px;
+    font-size: 12px; font-weight: 600; letter-spacing: -0.2px;
+    white-space: nowrap; user-select: none; vertical-align: middle;
+    margin-right: 2px;
+  }
+  .inline-compose-input {
+    display: block; width: 100%; outline: none;
+    font-size: 13px; color: var(--text-primary); font-family: inherit; letter-spacing: -0.2px;
+    line-height: 1.45; max-height: 80px; overflow-y: auto;
+    white-space: pre-wrap; word-break: break-word;
+    box-sizing: border-box;
+  }
+  .inline-compose-input:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-secondary); pointer-events: none;
+  }
+  .inline-compose-send {
+    width: 26px; height: 26px; border-radius: 50%; background: #F5A623;
+    border: none; cursor: pointer; flex-shrink: 0; opacity: 0.35; transition: opacity 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .inline-compose-send.active { opacity: 1; }
+  .reply-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    font-size: 10px; font-weight: 700; color: white;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .reply-content { flex: 1; min-width: 0; }
+  .reply-header { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+  .reply-header .comment-more { margin-left: auto; }
+  .reply-author { font-size: 13px; font-weight: 700; color: var(--text-primary); letter-spacing: 0; }
+  .reply-time { font-size: 11px; color: var(--text-secondary); letter-spacing: 0; }
+  .reply-body { font-size: 13px; color: var(--text-primary); line-height: 1.4; letter-spacing: 0; margin-bottom: 6px; }
+  .reply-actions { display: flex; align-items: center; gap: 10px; }
+  .reply-action-btn {
+    display: flex; align-items: center; gap: 4px;
+    cursor: pointer; color: var(--text-secondary); font-size: 12px; font-weight: 510;
+  }
+  .reply-cta { display: flex; align-items: center; gap: 4px; cursor: pointer; margin-left: auto; }
+  .reply-cta-text { font-size: 12px; color: var(--text-secondary); letter-spacing: 0; }
+
+  /* ── Bottom tab bar ── */
+  .bottom-tab-bar {
+    position: absolute; bottom: 0; left: 0;
+    width: 375px; height: 94px;
+    background: linear-gradient(to top, #0d1016 0%, rgba(13,16,22,0) 100%);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-end; padding: 0 16px 4px; gap: 4px; z-index: 30;
+  }
+  .tab-bar-buttons { position: relative; height: 62px; width: 100%; display: flex; align-items: center; }
+  .tab-bar-fill {
+    position: absolute; inset: 0; border-radius: 100px;
+    background: rgba(13,16,22,0.6);
+  }
+  .tab-bar-glass {
+    position: absolute; inset: 0 -4px; border-radius: 100px;
+    background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  }
+  .tab-bar-tabs { position: relative; display: flex; flex: 1; align-items: center; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 6px 8px 7px; position: relative; cursor: pointer; }
+  .tab-item.active::before { content: ''; position: absolute; inset: 0 0.2px; border-radius: 100px; background: rgba(148,148,149,0.2); }
+  .tab-item img.tab-icon { width: 28px; height: 28px; position: relative; z-index: 1; }
+  .tab-label { font-size: 10px; font-weight: 510; color: var(--text-secondary); letter-spacing: 0; position: relative; z-index: 1; }
+  .tab-item.active .tab-label { color: var(--text-primary); }
+  .home-indicator-bar { height: 20px; width: 100%; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; }
+  .home-bar { width: 134px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 100px; }
+
+  /* Toast */
+  .toast {
+    position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(44,44,46,0.95); color: white; padding: 8px 16px;
+    border-radius: 20px; font-size: 13px; font-weight: 500; letter-spacing: 0;
+    opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; z-index: 200; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="phone">
+<div class="phone-scroll">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <div class="status-time">9:41</div>
+    <div class="status-right">
+      <img src="https://www.figma.com/api/mcp/asset/87821541-3318-42f5-b1b9-9de12059544e" width="18" height="12" alt="" style="object-fit:contain;">
+      <img src="https://www.figma.com/api/mcp/asset/67efa52e-5f8c-44a3-a6cd-bab47b604787" width="21" height="15" alt="" style="object-fit:contain;">
+      <img src="https://www.figma.com/api/mcp/asset/955a9b75-2b51-4f70-8996-c7e5e54a3389" width="25" height="12" alt="" style="object-fit:contain;">
+    </div>
+  </div>
+
+  <!-- Top nav -->
+  <div class="top-nav">
+    <div class="nav-back-btn" onclick="showToast('Back')">
+      <svg width="12" height="20" viewBox="0 0 12 20" fill="none"><path d="M10 18L2 10L10 2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="nav-center">
+      <div class="nav-title-row"><span class="nav-title">Apple</span></div>
+      <div class="nav-subtitle-row">
+        <img src="https://www.figma.com/api/mcp/asset/dfb2a53b-9823-46a5-8133-e9e28f161c19" class="nav-flag" alt="US flag">
+        <span class="nav-subtitle-text">NASDAQ (AAPL)</span>
+        <img src="https://www.figma.com/api/mcp/asset/ddc4c97c-90fe-4781-8648-00c34be2d41e" class="nav-chevron" alt="">
+      </div>
+    </div>
+    <div class="nav-trailing">
+      <div class="nav-trailing-inner">
+        <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;" onclick="showToast('Watchlist')">
+          <svg width="21" height="21" viewBox="0 0 21 21" fill="none"><path d="M10.5 1.5L12.9 7.4L19.3 7.9L14.7 11.9L16.2 18.1L10.5 14.6L4.8 18.1L6.3 11.9L1.7 7.9L8.1 7.4L10.5 1.5Z" stroke="white" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        </div>
+        <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;" onclick="showToast('More')">
+          <svg width="20" height="4" viewBox="0 0 20 4" fill="none"><circle cx="2" cy="2" r="2" fill="white"/><circle cx="10" cy="2" r="2" fill="white"/><circle cx="18" cy="2" r="2" fill="white"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Price header -->
+  <div class="price-header">
+    <div class="price-row-1">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 12V2M7 2L2 7M7 2L12 7" stroke="#008932" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="price-main">312.40</span>
+      <span class="price-change">+0.41 (+0.13%)</span>
+      <div class="price-share"><svg width="16" height="18" viewBox="0 0 16 18" fill="none"><path d="M12 1L15 4L12 7" stroke="#8a8a8e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 9V14C1 15.1 1.9 16 3 16H13C14.1 16 15 15.1 15 14V9" stroke="#8a8a8e" stroke-width="1.5" stroke-linecap="round"/><path d="M15 4H7C3.7 4 1 6.7 1 10" stroke="#8a8a8e" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="price-row-2">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#8a8a8e" stroke-width="1"/><path d="M6 3.5V6L7.5 7.5" stroke="#8a8a8e" stroke-width="1" stroke-linecap="round"/></svg>
+      <span class="price-time">19:32:30 &middot; Real Time. Currency in USD</span>
+    </div>
+  </div>
+
+  <!-- Section tabs -->
+  <div class="section-tabs">
+    <div class="tab">Earnings</div>
+    <div class="tab">Dividends</div>
+    <div class="tab">Profile</div>
+    <div class="tab active">Comments</div>
+    <div class="tab">Chart</div>
+  </div>
+
+  <!-- Compose row -->
+  <div class="compose-row">
+    <div class="compose-avatar">ML</div>
+    <div class="compose-input-wrap">
+      <input class="compose-input" type="text" placeholder="Write your thoughts about Apple" oninput="this.closest('.compose-row').querySelector('.compose-send').classList.toggle('active', this.value.length > 0)">
+    </div>
+    <button class="compose-send" onclick="showToast('Comment posted!')">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <!-- Comments list -->
+  <div class="comments-list">
+
+    <!-- Comment 1: FDL808 -->
+    <div class="comment">
+      <div class="comment-inner">
+        <div class="avatar" style="background:#2d6a4f;">FD</div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">FDL808</span>
+            <div class="comment-meta"><span class="comment-more" onclick="openMenu(this,event)">···</span></div>
+          </div>
+          <div class="comment-subline"><span class="comment-time">2h ago</span></div>
+          <div class="comment-body">Strong quarter, holding long. The services revenue growth continues to surprise me.</div>
+          <div class="comment-actions">
+            <div class="action-btn liked"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count" style="color:var(--bull);">47</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">0</span></div>
+            <div class="reply-action" onclick="openCompose('c1')"><span class="reply-text">Reply (8)</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="thread-replies" id="tr-c1">
+        <div class="see-all-replies" onclick="showToast('Loading all replies…')">See all 8 replies <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="reply-row">
+          <div class="reply-avatar" style="background:#1a4a8a;">MW</div>
+          <div class="reply-content">
+            <div class="reply-header"><span class="reply-author">MarketWatcher</span><span class="reply-time">1h ago</span><span class="comment-more" onclick="openMenu(this,event)">···</span></div>
+            <div class="reply-body">Agreed, services margin is the real story here.</div>
+            <div class="reply-actions">
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>12</span></div>
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>0</span></div>
+              <div class="reply-cta" onclick="setMention('c1','MarketWatcher')"><span class="reply-cta-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment 2: TechBull99 -->
+    <div class="comment">
+      <div class="comment-inner">
+        <div class="avatar" style="background:#1d4ed8;">TB</div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">TechBull99</span>
+            <div class="comment-meta"><span class="comment-more" onclick="openMenu(this,event)">···</span></div>
+          </div>
+          <div class="comment-subline"><span class="comment-time">5h ago</span></div>
+          <div class="comment-body">Services + India growth = underrated combo. This stock should be at $350 by EOY.</div>
+          <div class="comment-actions">
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">31</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">2</span></div>
+            <div class="reply-action" onclick="openCompose('c2')"><span class="reply-text">Reply (3)</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="thread-replies" id="tr-c2">
+        <div class="reply-row">
+          <div class="reply-avatar" style="background:#2d6a4f;">FD</div>
+          <div class="reply-content">
+            <div class="reply-header"><span class="reply-author">FDL808</span><span class="reply-time">4h ago</span><span class="comment-more" onclick="openMenu(this,event)">···</span></div>
+            <div class="reply-body">India services number was buried in the footnotes — totally underreported.</div>
+            <div class="reply-actions">
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>7</span></div>
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>0</span></div>
+              <div class="reply-cta" onclick="setMention('c2','FDL808')"><span class="reply-cta-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment 3: EuroWatcher -->
+    <div class="comment">
+      <div class="comment-inner">
+        <div class="avatar" style="background:#7c3aed;">EW</div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">EuroWatcher</span>
+            <div class="comment-meta"><span class="comment-more" onclick="openMenu(this,event)">···</span></div>
+          </div>
+          <div class="comment-subline"><span class="comment-time">4h ago</span></div>
+          <div class="comment-body">Valuation stretched at these levels. Margin expansion story is already priced in — where does the upside come from?</div>
+          <div class="comment-actions">
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">22</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">0</span></div>
+            <div class="reply-action" onclick="openCompose('c3')"><span class="reply-text">Reply (6)</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="thread-replies" id="tr-c3">
+        <div class="see-all-replies" onclick="showToast('Loading all replies…')">See all 6 replies <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="reply-row">
+          <div class="reply-avatar" style="background:#b45309;">MH</div>
+          <div class="reply-content">
+            <div class="reply-header"><span class="reply-author">MarketHawk</span><span class="reply-time">3h ago</span><span class="comment-more" onclick="openMenu(this,event)">···</span></div>
+            <div class="reply-body">AI integration cycle hasn't even started yet. That's the next leg.</div>
+            <div class="reply-actions">
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>9</span></div>
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>0</span></div>
+              <div class="reply-cta" onclick="setMention('c3','MarketHawk')"><span class="reply-cta-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment 4: MarketHawk -->
+    <div class="comment">
+      <div class="comment-inner">
+        <div class="avatar" style="background:#b45309;">MH</div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">MarketHawk</span>
+            <div class="comment-meta"><span class="comment-more" onclick="openMenu(this,event)">···</span></div>
+          </div>
+          <div class="comment-subline"><span class="comment-time">12h ago</span></div>
+          <div class="comment-body">The buyback program alone justifies holding. $90B returned to shareholders this year.</div>
+          <div class="comment-actions">
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">19</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">3</span></div>
+            <div class="reply-action" onclick="openCompose('c4')"><span class="reply-text">Reply (14)</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="thread-replies" id="tr-c4">
+        <div class="see-all-replies" onclick="showToast('Loading all replies…')">See all 14 replies <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="reply-row">
+          <div class="reply-avatar" style="background:#1d4ed8;">TB</div>
+          <div class="reply-content">
+            <div class="reply-header"><span class="reply-author">TechBull99</span><span class="reply-time">11h ago</span><span class="comment-more" onclick="openMenu(this,event)">···</span></div>
+            <div class="reply-body">The dollar is topping out though. DXY broke below 104 this week.</div>
+            <div class="reply-actions">
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>5</span></div>
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>0</span></div>
+              <div class="reply-cta" onclick="setMention('c4','TechBull99')"><span class="reply-cta-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment 5: Kwaku Acquah -->
+    <div class="comment">
+      <div class="comment-inner">
+        <div class="avatar" style="background:#7b3f00;">KA</div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">Kwaku Acquah</span>
+            <div class="comment-meta"><span class="comment-more" onclick="openMenu(this,event)">···</span></div>
+          </div>
+          <div class="comment-subline"><span class="comment-time">May 01</span></div>
+          <div class="comment-body">The best continuous follow-up</div>
+          <div class="comment-actions">
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">8</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">0</span></div>
+            <div class="reply-action" onclick="showToast('Opening replies...')"><span class="reply-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment 6: Parash -->
+    <div class="comment">
+      <div class="comment-inner">
+        <div class="avatar" style="background:#6b21a8;">PS</div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">Parash shahi Thakuree</span>
+            <div class="comment-meta"><span class="comment-more" onclick="openMenu(this,event)">···</span></div>
+          </div>
+          <div class="comment-subline"><span class="comment-time">Mar 19</span></div>
+          <div class="comment-body">hello</div>
+          <div class="comment-actions">
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">1</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">1</span></div>
+            <div class="reply-action" onclick="showToast('Opening replies...')"><span class="reply-text">Reply (1)</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+</div><!-- /phone-scroll -->
+
+  <!-- Action sheet -->
+  <div class="action-overlay" id="action-overlay" onclick="closeMenu()"></div>
+  <div class="action-sheet" id="action-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-item" onclick="showToast('Comment saved'); closeMenu()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 3h14a2 2 0 012 2v16l-7-3-7 3V5a2 2 0 012-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      Save comment
+    </div>
+    <div class="sheet-item" onclick="showToast('Link copied'); closeMenu()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8.59 13.51a4.5 4.5 0 006.36 0l3-3a4.5 4.5 0 00-6.36-6.36l-1.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M15.41 10.49a4.5 4.5 0 00-6.36 0l-3 3a4.5 4.5 0 006.36 6.36l1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Share comment
+    </div>
+    <div class="sheet-item" onclick="showToast('Reported as spam'); closeMenu()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="4" y1="22" x2="4" y2="15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Report as spam
+    </div>
+    <div class="sheet-item" onclick="showToast('User blocked'); closeMenu()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Block user
+    </div>
+    <div class="sheet-divider"></div>
+    <div class="sheet-item destructive" onclick="deleteComment()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9 6V4h6v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Delete comment
+    </div>
+    <div class="sheet-cancel" onclick="closeMenu()">Cancel</div>
+  </div>
+
+  <!-- Bottom tab bar -->
+  <div class="bottom-tab-bar">
+    <div class="tab-bar-buttons">
+      <div class="tab-bar-fill"></div>
+      <div class="tab-bar-glass"></div>
+      <div class="tab-bar-tabs">
+        <div class="tab-item active" onclick="showToast('Markets')">
+          <img class="tab-icon" src="https://www.figma.com/api/mcp/asset/78ebaec0-97a9-4754-8f1b-12548a2c3de1" alt="Markets">
+          <span class="tab-label">Markets</span>
+        </div>
+        <div class="tab-item" onclick="showToast('News')">
+          <img class="tab-icon" src="https://www.figma.com/api/mcp/asset/fa25c0a2-a88a-4fa4-bc4f-016f2e6e31b9" alt="News">
+          <span class="tab-label">News</span>
+        </div>
+        <div class="tab-item" onclick="showToast('Ideas')">
+          <img class="tab-icon" src="https://www.figma.com/api/mcp/asset/42881952-46cb-47b4-969c-cc4dc71e49b2" alt="Ideas">
+          <span class="tab-label">Ideas</span>
+        </div>
+        <div class="tab-item" onclick="showToast('Watchlist')">
+          <img class="tab-icon" src="https://www.figma.com/api/mcp/asset/fb4dba5c-8eb7-4c78-9dc8-9a2f1dcbc28d" alt="Watchlist">
+          <span class="tab-label">Watchlist</span>
+        </div>
+        <div class="tab-item" onclick="showToast('More')">
+          <img class="tab-icon" src="https://www.figma.com/api/mcp/asset/a0184353-8ce1-491a-b865-c9923aafc227" alt="More">
+          <span class="tab-label">More</span>
+        </div>
+      </div>
+    </div>
+    <div class="home-indicator-bar"><div class="home-bar"></div></div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  // Action sheet
+  let activeMenuTarget = null;
+  function openMenu(el, evt) {
+    if (evt) evt.stopPropagation();
+    activeMenuTarget = el.closest('.reply-row') || el.closest('.comment');
+    document.getElementById('action-sheet').classList.add('open');
+    document.getElementById('action-overlay').classList.add('open');
+  }
+  function closeMenu() {
+    document.getElementById('action-sheet').classList.remove('open');
+    document.getElementById('action-overlay').classList.remove('open');
+  }
+  function deleteComment() {
+    if (!activeMenuTarget) return;
+    const body = activeMenuTarget.querySelector('.comment-body, .reply-body');
+    if (body) body.innerHTML = '<em style="color:var(--text-secondary);font-style:italic">This comment was deleted.</em>';
+    closeMenu();
+  }
+
+  const openComposes = new Set();
+
+  function openCompose(commentId) {
+    const container = document.getElementById('tr-' + commentId);
+    if (!container) return;
+    if (openComposes.has(commentId)) {
+      openComposes.delete(commentId);
+      const existing = container.querySelector('.inline-compose');
+      if (existing) existing.remove();
+      return;
+    }
+    openComposes.add(commentId);
+    const sendId = 'is-' + commentId;
+    const inputId = 'ii-' + commentId;
+    container.insertAdjacentHTML('beforeend', `
+      <div class="inline-compose">
+        <div class="inline-compose-avatar">ML</div>
+        <div class="inline-compose-wrap">
+          <div class="inline-compose-input" id="${inputId}" contenteditable="true"
+            data-placeholder="Reply to thread…"
+            oninput="updateSendBtn('${commentId}')"
+            onkeydown="handleComposeKey(event,'${commentId}')"></div>
+        </div>
+        <button class="inline-compose-send" id="${sendId}" onclick="showToast('Reply posted!')">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>`);
+    setTimeout(() => {
+      document.getElementById(inputId).focus();
+      container.querySelector('.inline-compose').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+  }
+
+  function setMention(commentId, author) {
+    if (!openComposes.has(commentId)) openCompose(commentId);
+    setTimeout(() => {
+      const input = document.getElementById('ii-' + commentId);
+      if (!input) return;
+      // Insert pill as inline element at start of contenteditable
+      input.innerHTML = '';
+      const pill = document.createElement('span');
+      pill.className = 'mention-pill';
+      pill.contentEditable = 'false';
+      pill.textContent = '@' + author;
+      input.appendChild(pill);
+      // Place cursor after pill
+      const space = document.createTextNode(' ');
+      input.appendChild(space);
+      const range = document.createRange();
+      range.setStartAfter(space);
+      range.collapse(true);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      input.focus();
+      updateSendBtn(commentId);
+      input.closest('.inline-compose').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 60);
+  }
+
+  function updateSendBtn(commentId) {
+    const input = document.getElementById('ii-' + commentId);
+    const btn = document.getElementById('is-' + commentId);
+    if (!btn || !input) return;
+    const hasPill = !!input.querySelector('.mention-pill');
+    const hasText = input.textContent.replace(/ /g, '').trim().length > 0;
+    btn.classList.toggle('active', hasPill || hasText);
+  }
+
+  function handleComposeKey(e, commentId) {
+    if (e.key === 'Backspace') {
+      const input = document.getElementById('ii-' + commentId);
+      if (!input) return;
+      const pill = input.querySelector('.mention-pill');
+      if (!pill) return;
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      // If cursor is right after the pill with nothing else typed, remove pill
+      const textAfterPill = input.textContent.replace(pill.textContent, '').replace(/ /g, '').trim();
+      if (range.collapsed && textAfterPill.length === 0) {
+        pill.remove();
+        // Clear any leftover nbsp
+        input.innerHTML = input.innerHTML.replace(/&nbsp;| /g, '');
+        e.preventDefault();
+        updateSendBtn(commentId);
+      }
+    }
+  }
+</script>
+
+</body>
+</html>

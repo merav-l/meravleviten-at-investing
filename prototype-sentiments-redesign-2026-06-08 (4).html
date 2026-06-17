@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Community Sentiments - Redesign Prototype</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-page: #080B10;
+    --bg-card: #0D1016;
+    --bg-card-border: #1A1E27;
+    --bg-inner: #151B24;
+    --bg-inner-border: #2A2F38;
+    --green: #6AC64C;
+    --red: #E8443A;
+    --red-spec: #E7544D;
+    --text-primary: #FFFFFF;
+    --text-gray: #949495;
+    --divider: #2C3037;
+  }
+
+  html, body {
+    background: var(--bg-page);
+    min-height: 100vh;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- PAGE LAYOUT ---- */
+  .page {
+    width: 390px;
+    margin: 0 auto;
+    padding: 32px 16px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ---- CARD ---- */
+  .card {
+    width: 100%;
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 16px;
+    position: relative;
+  }
+
+  /* ---- HEADER ---- */
+  .card-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    margin-bottom: 16px;
+    line-height: normal;
+  }
+
+  /* ---- PRE-VOTE STATE ---- */
+  .prevote-question {
+    font-size: 14px;
+    font-weight: 510;
+    color: var(--text-primary);
+    text-align: center;
+    line-height: normal;
+  }
+
+  .prevote-hint {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-gray);
+    text-align: center;
+    line-height: normal;
+    letter-spacing: 0;
+  }
+
+  /* ---- VOTE BUTTONS (circular) ---- */
+  .vote-buttons {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .vote-btn {
+    width: 76px;
+    height: 76px;
+    border-radius: 100px;
+    border: 2px solid transparent;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    flex-shrink: 0;
+  }
+
+  .vote-btn:active { transform: scale(0.93); }
+  .vote-btn:hover { opacity: 0.85; }
+
+  .vote-btn.bear {
+    border-color: var(--red-spec);
+  }
+
+  .vote-btn.bull {
+    border-color: var(--green);
+  }
+
+  .vote-btn-icon { width: 48px; height: 48px; flex-shrink: 0; display: block; }
+
+  /* ---- FOOTER LINK ---- */
+  .footer-link {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    opacity: 0.9;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .footer-link:active { opacity: 0.6; }
+
+  /* ---- COMMUNITY BAR ---- */
+  .bar-wrapper { margin-top: 16px; margin-bottom: 16px; }
+
+  .bar-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .bar-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: block;
+    transition: opacity 0.2s ease;
+  }
+
+  .bar-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .bar-track {
+    width: 100%;
+    height: 4px;
+    border-radius: 12px;
+    display: flex;
+    overflow: hidden;
+    gap: 1.75px;
+  }
+
+  .bar-fill-bear {
+    height: 100%;
+    width: 12%;
+    background: var(--red-spec);
+    border-radius: 12px;
+  }
+
+  .bar-fill-bull {
+    height: 100%;
+    flex: 1;
+    background: var(--green);
+    border-radius: 12px;
+  }
+
+  .bar-pcts {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .bar-pct-bear {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--red-spec);
+  }
+
+  .bar-votes {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-gray);
+    text-align: center;
+  }
+
+  .bar-pct-bull {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--green);
+  }
+
+  /* ---- DURATION CTA PILL ---- */
+  .duration-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .duration-cta-btn {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-gray);
+    cursor: pointer;
+    background: #1A1E27;
+    border: 1px solid #2A2F38;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-family: 'DM Sans', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.12s, border-color 0.12s;
+    white-space: nowrap;
+  }
+
+  .duration-cta-btn:active { opacity: 0.6; }
+  .duration-cta-btn:hover { background: #222836; border-color: #3A3F48; }
+
+  /* Dropdown overlay */
+  .duration-dropdown {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    background: #1A1E27;
+    border: 1px solid #2A2F38;
+    border-radius: 14px;
+    padding: 6px;
+    flex-direction: column;
+    white-space: nowrap;
+    z-index: 20;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    min-width: 120px;
+  }
+
+  .duration-dropdown.open { display: flex; }
+
+  .duration-option {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-gray);
+    background: none;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    text-align: left;
+    transition: background 0.1s, color 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .duration-option:hover { background: #222836; color: var(--text-primary); }
+
+  .duration-option.end-prediction {
+    color: #E7544D;
+  }
+  .duration-option.end-prediction:hover {
+    background: rgba(231,84,77,0.1);
+    color: #E7544D;
+  }
+
+  /* Ended state for duration chip */
+  .duration-cta-btn.ended {
+    color: rgba(148,148,149,0.4);
+    border-color: rgba(42,47,56,0.5);
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* Duration option: selected state (day-0 default) */
+  .duration-option.selected {
+    color: var(--text-primary);
+    background: #222836;
+  }
+
+  /* Duration option: Close button (muted/secondary) */
+  .duration-option.close-btn {
+    color: rgba(148,148,149,0.55);
+    font-size: 12px;
+    margin-top: 2px;
+    border-top: 1px solid rgba(42,47,56,0.6);
+    padding-top: 10px;
+  }
+  .duration-option.close-btn:hover {
+    color: rgba(148,148,149,0.8);
+    background: rgba(34,40,54,0.5);
+  }
+
+  /* Day-0 duration option: inactive */
+  .duration-option.day0-opt {
+    color: var(--text-gray);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .duration-option.day0-opt .day0-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text-gray);
+    flex-shrink: 0;
+  }
+  .duration-option.day0-opt.selected .day0-dot {
+    background: var(--text-primary);
+    border-color: var(--text-primary);
+  }
+  .duration-option.day0-opt.selected {
+    color: var(--text-primary);
+  }
+
+  /* Select date input hidden but functional */
+  .date-input-hidden {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* ---- TRANSITION ---- */
+  .fade-in {
+    animation: fadeIn 0.2s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- IN-CARD STATE PANELS ---- */
+  .card-state {
+    transition: opacity 0.3s ease;
+  }
+
+  .card-state.state-hidden {
+    display: none;
+  }
+
+  .card-state.state-fading-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .card-state.state-fading-in {
+    animation: fadeIn 0.3s ease forwards;
+  }
+
+  /* =============================================
+     POST-VOTE LAYOUT - Two equal side-by-side boxes
+     ============================================= */
+
+  .option-b-boxes {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    overflow: visible;
+    align-items: stretch;
+    /* Flash tint overlay - applied via JS */
+    position: relative;
+    border-radius: 10px;
+  }
+
+  /* Tint overlay for the flash effect - sits over both boxes */
+  .boxes-tint-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 2;
+    transition: opacity 0.3s ease;
+  }
+
+  /* "✓ Final" badge */
+  .final-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(106, 198, 76, 0.18);
+    border: 1px solid rgba(106, 198, 76, 0.35);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6AC64C;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 3;
+    transition: opacity 0.3s ease;
+  }
+
+  .option-b-box {
+    flex: 1;
+    background: #1A1D26;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .option-b-cap-label {
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-gray);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+
+  .option-b-direction {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    line-height: 1.2;
+    margin-bottom: 3px;
+  }
+
+  .option-b-price-dur {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: nowrap;
+  }
+
+  .option-b-price-text {
+    color: var(--text-gray);
+  }
+
+  .option-b-pct {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.1;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .option-b-status {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
+  /* ---- PAGE HEADER ---- */
+  .page-header {
+    padding-top: 12px;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .page-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(148,148,149,0.5);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .page-subtitle {
+    font-size: 11px;
+    color: rgba(148,148,149,0.35);
+    margin-top: 2px;
+  }
+
+  /* ---- FOOTER ROW ---- */
+  .footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ---- POST-VOTE CONTENT wrapper ---- */
+  .post-vote-content {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  .post-vote-content.fading-out {
+    opacity: 0;
+  }
+
+  /* ---- END PREDICTION EXPANSION PANEL ---- */
+  /* Uses position:fixed so getBoundingClientRect coords map 1:1 to top/left */
+  .end-panel {
+    position: fixed;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    overflow: hidden;
+    transition: none;
+    cursor: pointer;
+  }
+
+  .end-panel.expanding {
+    transition:
+      top 0.65s cubic-bezier(0.34, 1.56, 0.64, 1),
+      left 0.65s cubic-bezier(0.34, 1.56, 0.64, 1),
+      width 0.65s cubic-bezier(0.34, 1.56, 0.64, 1),
+      height 0.65s cubic-bezier(0.34, 1.56, 0.64, 1),
+      border-radius 0.65s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.2s ease;
+    pointer-events: auto;
+  }
+
+  .end-panel.collapsing {
+    transition:
+      top 0.25s cubic-bezier(0.55, 0, 1, 0.45),
+      left 0.25s cubic-bezier(0.55, 0, 1, 0.45),
+      width 0.25s cubic-bezier(0.55, 0, 1, 0.45),
+      height 0.25s cubic-bezier(0.55, 0, 1, 0.45),
+      border-radius 0.25s cubic-bezier(0.55, 0, 1, 0.45),
+      opacity 0.2s ease;
+    pointer-events: none;
+  }
+
+  .end-panel-pct {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .end-panel-pct.visible {
+    opacity: 1;
+  }
+
+  .end-panel-label {
+    font-size: 17px;
+    font-weight: 500;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    text-align: center;
+  }
+
+  .end-panel-label.visible {
+    opacity: 1;
+  }
+
+  /* Confetti canvas sits inside the panel */
+  #confetti-canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-title">Sentiments Redesign</div>
+    <div class="page-subtitle">Tap Bear or Bull to cast a vote</div>
+  </div>
+
+  <!-- ===================================
+       SINGLE COMMUNITY SENTIMENTS CARD
+       =================================== -->
+  <div class="card" id="pre-vote-card" style="position:relative; padding: 16px 16px 20px; overflow: visible;">
+
+    <!-- Card title: fixed, never transitions -->
+    <div class="card-title">Community Sentiments</div>
+
+    <!-- End prediction expansion panel (positioned via JS, inside single card) -->
+    <div class="end-panel" id="end-panel" onclick="collapseEndPanel()">
+      <canvas id="confetti-canvas"></canvas>
+      <div class="end-panel-pct" id="end-panel-pct"></div>
+      <div class="end-panel-label" id="end-panel-label"></div>
+    </div>
+
+    <!-- PRE-VOTE STATE -->
+    <div class="card-state" id="pre-vote-inner">
+      <!-- Text block: centered, question + hint -->
+      <div style="display:flex; flex-direction:column; gap:6px; align-items:center; margin-bottom:16px;">
+        <div class="prevote-question">Where is AAPL headed?</div>
+        <div class="prevote-hint">Vote to see community results</div>
+      </div>
+
+      <!-- Circular vote buttons -->
+      <div class="vote-buttons" style="margin-bottom:16px;">
+        <!-- Bear: red border circle -->
+        <button class="vote-btn bear" onclick="castVote('bear')">
+          <svg class="vote-btn-icon" viewBox="0 0 30.3563 27.01" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.9837 26.9911C14.7014 26.9911 14.2356 27.0335 13.784 26.9911C13.2052 26.9204 12.6407 26.8073 12.0761 26.6518C11.3986 26.4681 10.7352 26.2419 10.0859 25.9874C8.87201 25.5209 7.77106 24.8424 6.82537 23.9801C5.89379 23.1461 5.00456 22.2272 4.22825 21.2377C3.59309 20.4178 3.08495 19.4848 2.66151 18.5377C2.19572 17.5058 1.87108 16.4314 1.68759 15.3005C1.47587 14.0424 1.54644 12.7984 1.58879 11.5403C1.6029 10.9607 1.77228 10.3812 1.8852 9.81571C1.94166 9.56126 1.91343 9.33508 1.68759 9.15131C1.13711 8.68482 0.713671 8.10524 0.44549 7.45497C0.261998 7.03089 0.0926211 6.57853 0.0502767 6.12618C-0.0485267 5.2356 -0.0202972 4.35916 0.304343 3.49686C0.699556 2.45079 1.33472 1.61675 2.23807 0.980628C2.80266 0.584816 3.42371 0.259686 4.11533 0.174869C4.67992 0.104188 5.25863 0.00523522 5.80911 0.0617797C7.13589 0.203141 8.27919 0.796858 9.15431 1.81466C9.59187 2.32356 9.69067 2.35183 10.3399 2.16806C10.7352 2.05497 11.1586 1.97016 11.5679 1.94188C13.2194 1.8712 14.8708 1.78639 16.5222 1.77225C17.2985 1.77225 18.0748 1.85707 18.837 1.94188C19.3875 2.01257 19.938 2.13979 20.4744 2.25288C20.7143 2.30942 20.8837 2.22461 21.0107 2.04084C21.66 1.10785 22.5916 0.542408 23.6361 0.217277C24.4406 -0.0371732 25.2875 -0.0654454 26.1485 0.118324C27.5176 0.415183 28.5762 1.12199 29.3949 2.23874C29.8183 2.81832 30.143 3.44031 30.2277 4.16126C30.2841 4.62775 30.3688 5.09424 30.3547 5.5466C30.2982 6.88953 29.776 8.06283 28.788 8.98168C28.4492 9.30681 28.421 9.6178 28.5198 10.0136C28.8868 11.4838 28.9009 12.9963 28.7738 14.4948C28.7033 15.3005 28.5339 16.1204 28.2939 16.8838C27.7435 18.6367 26.9107 20.234 25.7533 21.6759C24.7088 22.9764 23.509 24.0791 22.1258 24.9838C21.1519 25.6199 20.0933 26.1005 18.9923 26.4539C17.7361 26.8639 16.4658 27.0618 14.9696 26.9628L14.9837 26.9911ZM21.4483 19.2869C21.5471 18.6508 21.293 17.9298 21.0107 17.2372C20.5308 16.0639 19.7969 15.0602 18.8229 14.2262C18.0043 13.5194 17.0727 13.0105 16.0141 12.855C14.7438 12.6712 13.5299 12.8974 12.4148 13.6183C10.4952 14.8623 9.3378 16.6152 8.92847 18.8628C8.73086 19.9654 9.02728 20.9267 9.60598 21.8314C10.2976 22.8916 11.2998 23.5136 12.4854 23.9236C13.5299 24.277 14.5885 24.4325 15.6753 24.3759C15.9435 24.3759 16.1976 24.277 16.4658 24.2487C17.4115 24.1497 18.2866 23.8529 19.1052 23.3723C20.5732 22.4817 21.4765 21.2377 21.4483 19.2869ZM8.82967 9.37749C8.58972 9.37749 8.33565 9.37749 8.0957 9.37749C7.89809 9.37749 7.77106 9.49058 7.77106 9.71675C7.77106 10.2398 7.94044 10.6921 8.25096 11.1021C8.80144 11.8089 9.57775 12.0775 10.4105 12.2471C10.7916 12.3178 11.0739 12.0775 11.0739 11.6817C11.0739 11.512 11.0739 11.1586 11.0457 10.5366C10.8057 10.0419 10.2553 9.68848C9.80359 9.39162 9.32369 9.34921 8.82967 9.39162V9.37749ZM19.3593 11.3707C19.3593 11.4838 19.3593 11.611 19.3593 11.7241C19.3734 12.0916 19.6698 12.3461 20.0086 12.2471C20.4885 12.1199 20.9684 11.9785 21.4059 11.7382C22.154 11.3283 22.6057 10.6921 22.6622 9.80157C22.6763 9.49058 22.5351 9.36335 22.2528 9.36335C21.8576 9.36335 21.4483 9.32094 21.0531 9.36335C20.7708 9.39162 20.5026 9.50471 20.2485 9.6178C19.5287 9.9712 19.3593 10.6215 19.3593 11.3565V11.3707Z" fill="#E7544D"/><path d="M15.2519 16.2476C16.0865 16.2475 16.9739 16.4173 17.6091 17.0534C18.5689 17.9864 18.4277 19.4424 17.1715 20.2199C16.3952 20.7005 15.5201 20.8843 14.645 20.7429C13.7981 20.6016 12.9794 20.2764 12.4713 19.5131C11.9067 18.6649 12.0196 17.7461 12.8665 16.9827C13.5299 16.3749 14.0766 16.2477 15.2519 16.2476Z" fill="#E7544D"/></svg>
+        </button>
+        <!-- Bull: green border circle -->
+        <button class="vote-btn bull" onclick="castVote('bull')">
+          <svg class="vote-btn-icon" viewBox="0 0 42.75 31.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.3838 30.6031C19.4575 30.5336 17.9907 30.2211 16.6829 29.4224C15.3751 28.6237 14.4915 27.5473 14.5622 25.9152C14.5975 25.186 14.8803 24.5435 15.3575 23.9879C15.5695 23.7449 15.5872 23.5539 15.4458 23.2587C14.4385 21.1578 13.4488 19.057 12.4592 16.9387C12.3355 16.6783 12.1941 16.5568 11.9113 16.7998C11.1514 17.477 10.2678 17.7721 9.24275 17.668C8.44748 17.5812 7.81127 17.1818 7.26342 16.6436C7.2104 16.5915 7.26342 16.3137 7.35178 16.2269C8.27076 15.2546 9.18973 14.2823 10.1617 13.3621C11.2574 12.3203 12.1057 11.1049 12.4061 9.64647C12.5652 8.86516 12.4945 8.01439 12.4768 7.19835C12.4592 6.52121 12.4061 6.48649 13.0777 6.36495C14.4562 6.10451 15.817 5.82671 17.1954 5.68781C18.8213 5.51419 20.4472 5.39265 22.0731 5.42737C24.6886 5.4621 27.3041 5.70517 29.849 6.36495C30.1671 6.45176 30.2908 6.55594 30.2555 6.92055C30.1848 7.63242 30.1671 8.34428 30.2024 9.05615C30.3085 10.6188 31.1037 11.8862 32.1641 12.9974C33.1891 14.0566 34.2141 15.1157 35.2745 16.1574C35.5396 16.4179 35.5749 16.5915 35.2568 16.8519C33.843 18.0152 32.2878 18.0326 30.8387 16.8519C30.5559 16.6262 30.3968 16.6089 30.2378 16.9561C29.3011 18.9528 28.3645 20.9669 27.3925 22.9462C27.1628 23.415 27.1274 23.7275 27.4809 24.1963C28.6826 25.7763 28.2761 27.5646 26.8093 28.8495C25.2895 30.1864 23.045 30.6552 21.3838 30.6031ZM17.9907 17.286H18.0614C17.9553 16.8693 17.8846 16.4526 17.7079 16.088C17.3015 15.2719 16.5062 15.1157 15.6756 15.1157C15.2691 15.1157 14.6682 15.0809 14.4738 15.3067C14.1911 15.6539 14.4385 16.1748 14.6682 16.5915C15.1984 17.5812 16.1351 17.9805 17.1777 18.1715C17.7786 18.2757 17.9377 18.102 17.973 17.4943C17.973 17.4249 17.973 17.3554 17.973 17.286H17.9907ZM27.5339 15.133C27.2865 15.133 27.1628 15.0983 27.0567 15.0983C25.8903 15.0636 25.1658 15.4456 24.8653 16.3658C24.7239 16.7825 24.777 17.2686 24.7593 17.7201C24.7593 18.0152 24.936 18.1888 25.2188 18.1541C25.5369 18.1368 25.855 18.0847 26.1554 17.9979C27.1274 17.7027 27.905 17.1645 28.1878 16.1574C28.5412 14.9247 28.2938 15.1851 27.5162 15.1157L27.5339 15.133ZM23.8403 26.3666C23.8403 26.9222 24.1938 27.3042 24.7416 27.3042C25.2718 27.3042 25.6606 26.8875 25.6606 26.3492C25.6606 25.8457 25.2718 25.4638 24.7416 25.4638C24.1761 25.4638 23.8403 25.7936 23.8403 26.3666ZM18.8743 26.3666C18.8743 25.811 18.5385 25.4638 17.9907 25.4638C17.4782 25.4638 17.0187 25.8631 17.001 26.3492C17.001 26.8528 17.4782 27.3042 17.9907 27.3042C18.5032 27.3042 18.8743 26.9048 18.8743 26.3666Z" fill="#6AC64C"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.1285 1.41378C36.881 1.54552 36.7719 1.70978 36.4663 2.4108C35.8316 3.86666 35.3195 4.60395 34.5746 5.13438C34.1678 5.42404 33.7921 5.61667 32.4701 6.21346C32.0618 6.39779 31.9434 6.8255 31.9723 8.01173C31.9919 8.81875 32.0264 9.06309 32.1964 9.59958C32.4298 10.3361 33.0332 11.5889 33.2516 11.7905C33.5072 12.0264 33.6522 11.9782 34.4486 11.3929C35.4478 10.6584 36.4629 9.62776 37.0841 8.71692C37.6639 7.86681 38.1685 6.68157 38.4041 5.61635C38.6637 4.44268 38.5896 2.11875 38.2796 1.71252C38.023 1.3762 37.4692 1.23251 37.1285 1.41378Z" fill="#6AC64C"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.71799 1.38014C5.96294 1.51648 6.06897 1.68277 6.36135 2.38939C6.9687 3.85688 7.46692 4.60364 8.20175 5.14794C8.60306 5.44516 8.97508 5.6448 10.2856 6.26626C10.6904 6.4582 10.8008 6.88806 10.7497 8.07354C10.715 8.88005 10.6759 9.1237 10.4958 9.65691C10.2487 10.3889 9.6219 11.6302 9.39973 11.8276C9.13976 12.0587 8.99568 12.0078 8.21046 11.4077C7.22513 10.6546 6.22954 9.60514 5.6255 8.68282C5.06173 7.82199 4.57944 6.6275 4.36383 5.55806C4.12627 4.37973 4.2439 2.0576 4.56152 1.65725C4.82437 1.32579 5.38072 1.19251 5.71799 1.38014Z" fill="#6AC64C"/></svg>
+        </button>
+      </div>
+
+      <!-- My Sentiments link: centered with chevron -->
+      <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
+        <span class="footer-link" style="font-size:14px; font-weight:510;">My Sentiments</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 4L10 8L6 12" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div><!-- /pre-vote-inner -->
+
+    <!-- POST-VOTE STATE (hidden until vote cast) -->
+    <div class="card-state state-hidden" id="post-vote-inner">
+
+      <!-- Post-vote content: fades out on "End prediction" -->
+      <div class="post-vote-content" id="post-vote-content">
+
+        <!-- Two equal side-by-side boxes (tint target) -->
+        <div class="option-b-boxes" id="boxes-container" style="position:relative;">
+          <!-- Left box: YOU VOTED -->
+          <div class="option-b-box">
+            <div class="option-b-cap-label">You voted</div>
+            <div class="option-b-direction" id="b-direction"></div>
+            <div class="option-b-price-dur">
+              <span class="option-b-price-text">at 183.14</span>
+            </div>
+          </div>
+
+          <!-- Right box: SINCE YOUR VOTE -->
+          <div class="option-b-box">
+            <div class="option-b-cap-label">Since your vote</div>
+            <div class="option-b-pct" id="b-pct"></div>
+            <div class="option-b-status" id="b-status"></div>
+          </div>
+        </div>
+
+        <!-- Community bar -->
+        <div class="bar-wrapper">
+          <div class="bar-row">
+            <svg class="bar-icon" id="b-bear-icon" viewBox="0 0 30.3563 27.01" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.9837 26.9911C14.7014 26.9911 14.2356 27.0335 13.784 26.9911C13.2052 26.9204 12.6407 26.8073 12.0761 26.6518C11.3986 26.4681 10.7352 26.2419 10.0859 25.9874C8.87201 25.5209 7.77106 24.8424 6.82537 23.9801C5.89379 23.1461 5.00456 22.2272 4.22825 21.2377C3.59309 20.4178 3.08495 19.4848 2.66151 18.5377C2.19572 17.5058 1.87108 16.4314 1.68759 15.3005C1.47587 14.0424 1.54644 12.7984 1.58879 11.5403C1.6029 10.9607 1.77228 10.3812 1.8852 9.81571C1.94166 9.56126 1.91343 9.33508 1.68759 9.15131C1.13711 8.68482 0.713671 8.10524 0.44549 7.45497C0.261998 7.03089 0.0926211 6.57853 0.0502767 6.12618C-0.0485267 5.2356 -0.0202972 4.35916 0.304343 3.49686C0.699556 2.45079 1.33472 1.61675 2.23807 0.980628C2.80266 0.584816 3.42371 0.259686 4.11533 0.174869C4.67992 0.104188 5.25863 0.00523522 5.80911 0.0617797C7.13589 0.203141 8.27919 0.796858 9.15431 1.81466C9.59187 2.32356 9.69067 2.35183 10.3399 2.16806C10.7352 2.05497 11.1586 1.97016 11.5679 1.94188C13.2194 1.8712 14.8708 1.78639 16.5222 1.77225C17.2985 1.77225 18.0748 1.85707 18.837 1.94188C19.3875 2.01257 19.938 2.13979 20.4744 2.25288C20.7143 2.30942 20.8837 2.22461 21.0107 2.04084C21.66 1.10785 22.5916 0.542408 23.6361 0.217277C24.4406 -0.0371732 25.2875 -0.0654454 26.1485 0.118324C27.5176 0.415183 28.5762 1.12199 29.3949 2.23874C29.8183 2.81832 30.143 3.44031 30.2277 4.16126C30.2841 4.62775 30.3688 5.09424 30.3547 5.5466C30.2982 6.88953 29.776 8.06283 28.788 8.98168C28.4492 9.30681 28.421 9.6178 28.5198 10.0136C28.8868 11.4838 28.9009 12.9963 28.7738 14.4948C28.7033 15.3005 28.5339 16.1204 28.2939 16.8838C27.7435 18.6367 26.9107 20.234 25.7533 21.6759C24.7088 22.9764 23.509 24.0791 22.1258 24.9838C21.1519 25.6199 20.0933 26.1005 18.9923 26.4539C17.7361 26.8639 16.4658 27.0618 14.9696 26.9628L14.9837 26.9911ZM21.4483 19.2869C21.5471 18.6508 21.293 17.9298 21.0107 17.2372C20.5308 16.0639 19.7969 15.0602 18.8229 14.2262C18.0043 13.5194 17.0727 13.0105 16.0141 12.855C14.7438 12.6712 13.5299 12.8974 12.4148 13.6183C10.4952 14.8623 9.3378 16.6152 8.92847 18.8628C8.73086 19.9654 9.02728 20.9267 9.60598 21.8314C10.2976 22.8916 11.2998 23.5136 12.4854 23.9236C13.5299 24.277 14.5885 24.4325 15.6753 24.3759C15.9435 24.3759 16.1976 24.277 16.4658 24.2487C17.4115 24.1497 18.2866 23.8529 19.1052 23.3723C20.5732 22.4817 21.4765 21.2377 21.4483 19.2869ZM8.82967 9.37749C8.58972 9.37749 8.33565 9.37749 8.0957 9.37749C7.89809 9.37749 7.77106 9.49058 7.77106 9.71675C7.77106 10.2398 7.94044 10.6921 8.25096 11.1021C8.80144 11.8089 9.57775 12.0775 10.4105 12.2471C10.7916 12.3178 11.0739 12.0775 11.0739 11.6817C11.0739 11.512 11.0739 11.1586 11.0457 10.5366C10.8057 10.0419 10.2553 9.68848C9.80359 9.39162 9.32369 9.34921 8.82967 9.39162V9.37749ZM19.3593 11.3707C19.3593 11.4838 19.3593 11.611 19.3593 11.7241C19.3734 12.0916 19.6698 12.3461 20.0086 12.2471C20.4885 12.1199 20.9684 11.9785 21.4059 11.7382C22.154 11.3283 22.6057 10.6921 22.6622 9.80157C22.6763 9.49058 22.5351 9.36335 22.2528 9.36335C21.8576 9.36335 21.4483 9.32094 21.0531 9.36335C20.7708 9.39162 20.5026 9.50471 20.2485 9.6178C19.5287 9.9712 19.3593 10.6215 19.3593 11.3565V11.3707Z" fill="#E7544D"/><path d="M15.2519 16.2476C16.0865 16.2475 16.9739 16.4173 17.6091 17.0534C18.5689 17.9864 18.4277 19.4424 17.1715 20.2199C16.3952 20.7005 15.5201 20.8843 14.645 20.7429C13.7981 20.6016 12.9794 20.2764 12.4713 19.5131C11.9067 18.6649 12.0196 17.7461 12.8665 16.9827C13.5299 16.3749 14.0766 16.2477 15.2519 16.2476Z" fill="#E7544D"/></svg>
+            <div class="bar-inner">
+              <div class="bar-track">
+                <div class="bar-fill-bear"></div>
+                <div class="bar-fill-bull"></div>
+              </div>
+              <div class="bar-pcts">
+                <span class="bar-pct-bear">12%</span>
+                <span class="bar-votes">3,241 votes</span>
+                <span class="bar-pct-bull">88%</span>
+              </div>
+            </div>
+            <svg class="bar-icon" id="b-bull-icon" viewBox="0 0 42.75 31.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.3838 30.6031C19.4575 30.5336 17.9907 30.2211 16.6829 29.4224C15.3751 28.6237 14.4915 27.5473 14.5622 25.9152C14.5975 25.186 14.8803 24.5435 15.3575 23.9879C15.5695 23.7449 15.5872 23.5539 15.4458 23.2587C14.4385 21.1578 13.4488 19.057 12.4592 16.9387C12.3355 16.6783 12.1941 16.5568 11.9113 16.7998C11.1514 17.477 10.2678 17.7721 9.24275 17.668C8.44748 17.5812 7.81127 17.1818 7.26342 16.6436C7.2104 16.5915 7.26342 16.3137 7.35178 16.2269C8.27076 15.2546 9.18973 14.2823 10.1617 13.3621C11.2574 12.3203 12.1057 11.1049 12.4061 9.64647C12.5652 8.86516 12.4945 8.01439 12.4768 7.19835C12.4592 6.52121 12.4061 6.48649 13.0777 6.36495C14.4562 6.10451 15.817 5.82671 17.1954 5.68781C18.8213 5.51419 20.4472 5.39265 22.0731 5.42737C24.6886 5.4621 27.3041 5.70517 29.849 6.36495C30.1671 6.45176 30.2908 6.55594 30.2555 6.92055C30.1848 7.63242 30.1671 8.34428 30.2024 9.05615C30.3085 10.6188 31.1037 11.8862 32.1641 12.9974C33.1891 14.0566 34.2141 15.1157 35.2745 16.1574C35.5396 16.4179 35.5749 16.5915 35.2568 16.8519C33.843 18.0152 32.2878 18.0326 30.8387 16.8519C30.5559 16.6262 30.3968 16.6089 30.2378 16.9561C29.3011 18.9528 28.3645 20.9669 27.3925 22.9462C27.1628 23.415 27.1274 23.7275 27.4809 24.1963C28.6826 25.7763 28.2761 27.5646 26.8093 28.8495C25.2895 30.1864 23.045 30.6552 21.3838 30.6031ZM17.9907 17.286H18.0614C17.9553 16.8693 17.8846 16.4526 17.7079 16.088C17.3015 15.2719 16.5062 15.1157 15.6756 15.1157C15.2691 15.1157 14.6682 15.0809 14.4738 15.3067C14.1911 15.6539 14.4385 16.1748 14.6682 16.5915C15.1984 17.5812 16.1351 17.9805 17.1777 18.1715C17.7786 18.2757 17.9377 18.102 17.973 17.4943C17.973 17.4249 17.973 17.3554 17.973 17.286H17.9907ZM27.5339 15.133C27.2865 15.133 27.1628 15.0983 27.0567 15.0983C25.8903 15.0636 25.1658 15.4456 24.8653 16.3658C24.7239 16.7825 24.777 17.2686 24.7593 17.7201C24.7593 18.0152 24.936 18.1888 25.2188 18.1541C25.5369 18.1368 25.855 18.0847 26.1554 17.9979C27.1274 17.7027 27.905 17.1645 28.1878 16.1574C28.5412 14.9247 28.2938 15.1851 27.5162 15.1157L27.5339 15.133ZM23.8403 26.3666C23.8403 26.9222 24.1938 27.3042 24.7416 27.3042C25.2718 27.3042 25.6606 26.8875 25.6606 26.3492C25.6606 25.8457 25.2718 25.4638 24.7416 25.4638C24.1761 25.4638 23.8403 25.7936 23.8403 26.3666ZM18.8743 26.3666C18.8743 25.811 18.5385 25.4638 17.9907 25.4638C17.4782 25.4638 17.0187 25.8631 17.001 26.3492C17.001 26.8528 17.4782 27.3042 17.9907 27.3042C18.5032 27.3042 18.8743 26.9048 18.8743 26.3666Z" fill="#6AC64C"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.1285 1.41378C36.881 1.54552 36.7719 1.70978 36.4663 2.4108C35.8316 3.86666 35.3195 4.60395 34.5746 5.13438C34.1678 5.42404 33.7921 5.61667 32.4701 6.21346C32.0618 6.39779 31.9434 6.8255 31.9723 8.01173C31.9919 8.81875 32.0264 9.06309 32.1964 9.59958C32.4298 10.3361 33.0332 11.5889 33.2516 11.7905C33.5072 12.0264 33.6522 11.9782 34.4486 11.3929C35.4478 10.6584 36.4629 9.62776 37.0841 8.71692C37.6639 7.86681 38.1685 6.68157 38.4041 5.61635C38.6637 4.44268 38.5896 2.11875 38.2796 1.71252C38.023 1.3762 37.4692 1.23251 37.1285 1.41378Z" fill="#6AC64C"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.71799 1.38014C5.96294 1.51648 6.06897 1.68277 6.36135 2.38939C6.9687 3.85688 7.46692 4.60364 8.20175 5.14794C8.60306 5.44516 8.97508 5.6448 10.2856 6.26626C10.6904 6.4582 10.8008 6.88806 10.7497 8.07354C10.715 8.88005 10.6759 9.1237 10.4958 9.65691C10.2487 10.3889 9.6219 11.6302 9.39973 11.8276C9.13976 12.0587 8.99568 12.0078 8.21046 11.4077C7.22513 10.6546 6.22954 9.60514 5.6255 8.68282C5.06173 7.82199 4.57944 6.6275 4.36383 5.55806C4.12627 4.37973 4.2439 2.0576 4.56152 1.65725C4.82437 1.32579 5.38072 1.19251 5.71799 1.38014Z" fill="#6AC64C"/></svg>
+          </div>
+        </div>
+
+        <!-- Footer row (fades with post-vote content) -->
+        <div class="footer-row">
+          <span class="footer-link" style="font-size:14px; font-weight:500;">My Sentiments ›</span>
+          <!-- Duration chip -->
+          <div class="duration-cta" style="display:flex; align-items:center; gap:6px; position:relative;">
+            <button class="duration-cta-btn" id="dur-btn-b" onclick="toggleDuration()">
+              <span id="dur-label-b">27D left ›</span>
+            </button>
+
+            <!-- DAY-0 PICKER (shown immediately after casting vote) -->
+            <div class="duration-dropdown" id="picker-day0" style="min-width:150px;">
+              <button class="duration-option day0-opt" onclick="selectDay0Duration(1)" data-days="1">
+                <span class="day0-dot"></span> 1D
+              </button>
+              <button class="duration-option day0-opt" onclick="selectDay0Duration(3)" data-days="3">
+                <span class="day0-dot"></span> 3D
+              </button>
+              <button class="duration-option day0-opt" onclick="selectDay0Duration(7)" data-days="7">
+                <span class="day0-dot"></span> 7D
+              </button>
+              <button class="duration-option day0-opt selected" onclick="selectDay0Duration(30)" data-days="30">
+                <span class="day0-dot"></span> 30D
+              </button>
+              <button class="duration-option" onclick="openDatePicker('day0')">Select Date</button>
+              <button class="duration-option close-btn" onclick="closeDuration()">Close</button>
+              <input type="date" id="date-input-day0" class="date-input-hidden" onchange="onDateSelected(this, 'day0')">
+            </div>
+
+            <!-- RETURNING-USER PICKER (shown when tapping "27D left" or after first selection) -->
+            <div class="duration-dropdown" id="picker-b">
+              <button class="duration-option" onclick="selectDuration('7more')">7 More Days</button>
+              <button class="duration-option" onclick="selectDuration('30more')">30 More Days</button>
+              <button class="duration-option" onclick="openDatePicker('returning')">Select Date</button>
+              <button class="duration-option close-btn" onclick="closeDuration()">Close</button>
+              <input type="date" id="date-input-returning" class="date-input-hidden" onchange="onDateSelected(this, 'returning')">
+              <button class="duration-option end-prediction" onclick="selectDuration('end')">End prediction</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /post-vote-content -->
+
+    </div><!-- /post-vote-inner -->
+
+  </div><!-- /pre-vote-card (single unified card) -->
+
+</div><!-- /page -->
+
+<script>
+  // ---- SVG arrow helpers ----
+  function arrowUp(color) {
+    return `<svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0; display:inline-block; vertical-align:middle; margin-right:2px;"><path d="M7 13V3M7 3L3 7M7 3L11 7" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+  function arrowDown(color) {
+    return `<svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0; display:inline-block; vertical-align:middle; margin-right:2px;"><path d="M7 3V13M7 13L3 9M7 13L11 9" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  }
+
+  // ---- State ----
+  let currentVote = null;
+  let daysLeft = 27;
+  let endPanelTimer = null;
+  let isDay0 = false; // true = just voted, show day-0 picker; false = returning user, show returning picker
+  let day0SelectedDays = 30; // default selected in day-0 picker
+
+  function castVote(direction) {
+    currentVote = direction;
+    isDay0 = true; // Fresh vote = day 0
+    day0SelectedDays = 30; // Reset default selection
+    const isBull = direction === 'bull';
+    const colorGreen = '#6AC64C';
+    const colorRed = '#E7544D';
+    const color = isBull ? colorGreen : colorRed;
+    const pctNum = isBull ? '4.57%' : '-1.23%';
+    const arrow = isBull ? arrowUp(color) : arrowDown(color);
+    const pctHTML = `${arrow}<span style="color:#FFFFFF;">${pctNum}</span>`;
+    const status = isBull ? 'On track' : 'Behind';
+    const dirLabel = isBull ? 'Bullish' : 'Bearish';
+
+    // Populate post-vote fields
+    const bDir = document.getElementById('b-direction');
+    bDir.textContent = dirLabel;
+    bDir.style.color = color;
+    document.getElementById('b-pct').innerHTML = pctHTML;
+    const bStatus = document.getElementById('b-status');
+    bStatus.textContent = status;
+    bStatus.style.color = color;
+    document.getElementById('b-bear-icon').style.opacity = '0.3';
+    document.getElementById('b-bull-icon').style.opacity = '1';
+
+    // Day 0: chip shows "30D ›" (just set)
+    daysLeft = 30;
+    document.getElementById('dur-label-b').textContent = '30D ›';
+    const btn = document.getElementById('dur-btn-b');
+    btn.classList.remove('ended');
+    btn.style.pointerEvents = '';
+
+    // Reset day-0 picker selection visual
+    resetDay0Selection(30);
+
+    // Cross-fade: fade out pre-vote, fade in post-vote within same card
+    const preInner = document.getElementById('pre-vote-inner');
+    const postInner = document.getElementById('post-vote-inner');
+
+    // Fade out pre-vote content
+    preInner.style.transition = 'opacity 0.25s ease';
+    preInner.style.opacity = '0';
+
+    setTimeout(() => {
+      preInner.classList.add('state-hidden');
+      preInner.style.opacity = '';
+      preInner.style.transition = '';
+
+      // Show post-vote with fade-in
+      postInner.classList.remove('state-hidden');
+      postInner.style.opacity = '0';
+      postInner.style.transition = 'opacity 0.3s ease';
+      // Reset post-vote-content opacity in case it was faded by end-panel
+      const postVoteContent = document.getElementById('post-vote-content');
+      postVoteContent.style.transition = 'none';
+      postVoteContent.style.opacity = '1';
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          postInner.style.opacity = '1';
+        });
+      });
+
+      setTimeout(() => {
+        postInner.style.opacity = '';
+        postInner.style.transition = '';
+      }, 350);
+    }, 250);
+  }
+
+  function resetDay0Selection(days) {
+    const opts = document.querySelectorAll('#picker-day0 .day0-opt');
+    opts.forEach(o => o.classList.remove('selected'));
+    const match = document.querySelector(`#picker-day0 .day0-opt[data-days="${days}"]`);
+    if (match) match.classList.add('selected');
+  }
+
+  function toggleDuration() {
+    // Which picker to show depends on state
+    const pickerDay0 = document.getElementById('picker-day0');
+    const pickerReturning = document.getElementById('picker-b');
+
+    if (isDay0) {
+      const isOpen = pickerDay0.classList.contains('open');
+      pickerDay0.classList.toggle('open', !isOpen);
+      pickerReturning.classList.remove('open');
+    } else {
+      const isOpen = pickerReturning.classList.contains('open');
+      pickerReturning.classList.toggle('open', !isOpen);
+      pickerDay0.classList.remove('open');
+    }
+  }
+
+  function closeDuration() {
+    document.getElementById('picker-b').classList.remove('open');
+    document.getElementById('picker-day0').classList.remove('open');
+  }
+
+  function selectDay0Duration(days) {
+    day0SelectedDays = days;
+    daysLeft = days;
+    // Update chip label to reflect chosen duration (still day 0 feel)
+    document.getElementById('dur-label-b').textContent = days + 'D ›';
+    // Update selection visual
+    resetDay0Selection(days);
+    // Transition to returning-user mode after picking
+    // Small delay so user sees the selection flash, then close
+    setTimeout(() => {
+      closeDuration();
+      // Now switch to returning-user mode with days-left chip
+      isDay0 = false;
+      // Simulate a bit of time: chip now shows "Xd left ›"
+      document.getElementById('dur-label-b').textContent = daysLeft + 'D left ›';
+    }, 180);
+  }
+
+  function openDatePicker(context) {
+    const inputId = context === 'day0' ? 'date-input-day0' : 'date-input-returning';
+    const input = document.getElementById(inputId);
+    input.style.pointerEvents = 'auto';
+    input.click();
+    setTimeout(() => { input.style.pointerEvents = 'none'; }, 500);
+  }
+
+  function onDateSelected(input, context) {
+    const val = input.value;
+    if (!val) return;
+    const d = new Date(val);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const diffMs = d - today;
+    const diffDays = Math.max(1, Math.round(diffMs / 86400000));
+    daysLeft = diffDays;
+    document.getElementById('dur-label-b').textContent = diffDays + 'D left ›';
+    closeDuration();
+    // After a date selection, switch to returning-user mode
+    isDay0 = false;
+    input.value = '';
+  }
+
+  function selectDuration(code) {
+    const labelEl = document.getElementById('dur-label-b');
+    const btn = document.getElementById('dur-btn-b');
+
+    if (code === '7more') {
+      daysLeft += 7;
+      labelEl.textContent = daysLeft + 'D left ›';
+      closeDuration();
+      return;
+    }
+    if (code === '30more') {
+      daysLeft += 30;
+      labelEl.textContent = daysLeft + 'D left ›';
+      closeDuration();
+      return;
+    }
+
+    // ---- "End prediction" ----
+    closeDuration();
+    btn.classList.add('ended');
+    labelEl.textContent = 'Ended';
+
+    const isWin = currentVote === 'bull';
+    triggerEndPanel(isWin);
+  }
+
+  // ---- END PANEL EXPANSION ----
+  function triggerEndPanel(isWin) {
+    const card = document.getElementById('pre-vote-card');
+    const boxesContainer = document.getElementById('boxes-container');
+    const rightBox = boxesContainer.querySelectorAll('.option-b-box')[1]; // "SINCE YOUR VOTE" box
+    const postVoteContent = document.getElementById('post-vote-content');
+    const panel = document.getElementById('end-panel');
+    const pctEl = document.getElementById('end-panel-pct');
+    const labelEl = document.getElementById('end-panel-label');
+
+    // --- Populate panel content ---
+    const colorGreen = '#6AC64C';
+    const colorRed = '#E7544D';
+
+    if (isWin) {
+      const arrow = arrowUp(colorGreen);
+      pctEl.innerHTML = `${arrow}<span style="color:${colorGreen};">4.57%</span>`;
+    } else {
+      const arrow = arrowDown(colorRed);
+      pctEl.innerHTML = `${arrow}<span style="color:${colorRed};">1.23%</span>`;
+    }
+
+    labelEl.textContent = isWin ? 'Amazing!' : 'Not this time';
+    labelEl.classList.remove('visible');
+    pctEl.classList.remove('visible');
+    panel.style.background = 'var(--bg-card)';
+    panel.style.border = 'none';
+
+    // --- Capture positions using getBoundingClientRect for true viewport coords ---
+    // The panel is position:fixed, so top/left map directly to viewport coords.
+    const sourceRect = rightBox.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const titleEl = card.querySelector('.card-title');
+    const titleRect = titleEl.getBoundingClientRect();
+
+    // Source: the exact screen position & size of the SINCE YOUR VOTE box
+    const srcTop = sourceRect.top;
+    const srcLeft = sourceRect.left;
+    const srcW = sourceRect.width;
+    const srcH = sourceRect.height;
+
+    // Target: full card content area below the title, in viewport coords
+    const targetTop = titleRect.bottom + 12;
+    const targetLeft = cardRect.left + 16;
+    const targetW = cardRect.width - 32;
+    const targetH = (cardRect.bottom - 16) - targetTop; // card bottom minus padding
+
+    // --- Step 1: Snap panel to exact source position (no transition) ---
+    panel.style.transition = 'none';
+    panel.classList.remove('expanding', 'collapsing');
+    panel.style.top = srcTop + 'px';
+    panel.style.left = srcLeft + 'px';
+    panel.style.width = srcW + 'px';
+    panel.style.height = srcH + 'px';
+    panel.style.borderRadius = '10px';
+    panel.style.opacity = '1';
+
+    // Force reflow so browser commits the initial state before we add the transition
+    void panel.getBoundingClientRect();
+
+    // --- Step 2: Fade out post-vote content simultaneously ---
+    postVoteContent.style.transition = 'opacity 0.2s ease';
+    postVoteContent.style.opacity = '0';
+
+    // --- Step 3: Begin expansion to target in next paint ---
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        panel.classList.add('expanding');
+        panel.style.top = targetTop + 'px';
+        panel.style.left = targetLeft + 'px';
+        panel.style.width = targetW + 'px';
+        panel.style.height = targetH + 'px';
+        panel.style.borderRadius = '0px';
+      });
+    });
+
+    // --- Step 4: Fade in panel content after expansion is mostly complete ---
+    setTimeout(() => {
+      pctEl.classList.add('visible');
+    }, 500);
+
+    setTimeout(() => {
+      labelEl.classList.add('visible');
+      if (isWin) {
+        launchConfetti();
+      }
+    }, 650);
+
+    // Auto-collapse after 5s (from when expansion starts)
+    if (endPanelTimer) clearTimeout(endPanelTimer);
+    endPanelTimer = setTimeout(() => {
+      collapseEndPanel();
+    }, 5000);
+  }
+
+  function collapseEndPanel() {
+    if (endPanelTimer) {
+      clearTimeout(endPanelTimer);
+      endPanelTimer = null;
+    }
+
+    const panel = document.getElementById('end-panel');
+    const postVoteContent = document.getElementById('post-vote-content');
+    const labelEl = document.getElementById('end-panel-label');
+    const pctEl = document.getElementById('end-panel-pct');
+    const btn = document.getElementById('dur-btn-b');
+
+    // Instantly hide panel content, stop confetti
+    labelEl.style.transition = 'none';
+    pctEl.style.transition = 'none';
+    labelEl.classList.remove('visible');
+    pctEl.classList.remove('visible');
+    stopConfetti();
+
+    // Collapse panel quickly (~250ms) then fade back to pre-vote within same card
+    panel.classList.remove('expanding');
+    panel.classList.add('collapsing');
+    panel.style.opacity = '0';
+
+    // After panel collapses, cross-fade post-vote -> pre-vote (total ~300ms)
+    setTimeout(() => {
+      // Reset panel
+      panel.style.transition = 'none';
+      panel.classList.remove('collapsing');
+      panel.style.opacity = '0';
+
+      // Restore post-vote content opacity instantly
+      postVoteContent.style.transition = 'none';
+      postVoteContent.style.opacity = '1';
+
+      // Cross-fade back to pre-vote state within same card
+      const preInner = document.getElementById('pre-vote-inner');
+      const postInner = document.getElementById('post-vote-inner');
+
+      // Fade out post-vote
+      postInner.style.transition = 'opacity 0.25s ease';
+      postInner.style.opacity = '0';
+
+      setTimeout(() => {
+        postInner.classList.add('state-hidden');
+        postInner.style.opacity = '';
+        postInner.style.transition = '';
+
+        // Fade in pre-vote
+        preInner.classList.remove('state-hidden');
+        preInner.style.opacity = '0';
+        preInner.style.transition = 'opacity 0.3s ease';
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            preInner.style.opacity = '1';
+          });
+        });
+
+        setTimeout(() => {
+          preInner.style.opacity = '';
+          preInner.style.transition = '';
+        }, 350);
+
+        // Reset chip and state
+        const labelChip = document.getElementById('dur-label-b');
+        btn.classList.remove('ended');
+        daysLeft = 27;
+        isDay0 = false;
+        labelChip.textContent = '27D left ›';
+        currentVote = null;
+
+        // Reset text transitions
+        labelEl.style.transition = '';
+        pctEl.style.transition = '';
+      }, 250);
+    }, 300);
+  }
+
+  // ---- CONFETTI ----
+  let confettiAnimId = null;
+  let confettiParticles = [];
+
+  function launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    const panel = document.getElementById('end-panel');
+    const panelW = panel.offsetWidth;
+    const panelH = panel.offsetHeight;
+    canvas.width = panelW;
+    canvas.height = panelH;
+    const ctx = canvas.getContext('2d');
+
+    const colors = ['#6AC64C', '#9BE07A', '#FFFFFF', '#B5F09A', '#4CAF30', '#D4F5C0'];
+    const count = 60;
+    confettiParticles = [];
+
+    for (let i = 0; i < count; i++) {
+      confettiParticles.push({
+        x: Math.random() * panelW,
+        y: -10 - Math.random() * 40,
+        w: 5 + Math.random() * 6,
+        h: 4 + Math.random() * 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 2.5,
+        vy: 2 + Math.random() * 3.5,
+        rot: Math.random() * Math.PI * 2,
+        rotV: (Math.random() - 0.5) * 0.18,
+        alpha: 1,
+        decay: 0.008 + Math.random() * 0.006
+      });
+    }
+
+    const startTime = performance.now();
+    const duration = 3800; // ms - extended to fill the longer hold time
+
+    function draw(now) {
+      const elapsed = now - startTime;
+      ctx.clearRect(0, 0, panelW, panelH);
+
+      let alive = false;
+      for (const p of confettiParticles) {
+        if (p.alpha <= 0) continue;
+        alive = true;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.07; // gravity
+        p.rot += p.rotV;
+        // Start fading after 60% duration
+        if (elapsed > duration * 0.6) {
+          p.alpha -= p.decay;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+
+      if (alive && elapsed < duration + 800) {
+        confettiAnimId = requestAnimationFrame(draw);
+      } else {
+        ctx.clearRect(0, 0, panelW, panelH);
+      }
+    }
+
+    if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+    confettiAnimId = requestAnimationFrame(draw);
+  }
+
+  function stopConfetti() {
+    if (confettiAnimId) {
+      cancelAnimationFrame(confettiAnimId);
+      confettiAnimId = null;
+    }
+    const canvas = document.getElementById('confetti-canvas');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    confettiParticles = [];
+  }
+
+  // ---- Close dropdowns when tapping outside ----
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.duration-cta')) {
+      closeDuration();
+    }
+  });
+</script>
+
+</body>
+</html>

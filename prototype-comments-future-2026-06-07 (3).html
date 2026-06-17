@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=375, initial-scale=1.0">
+<title>Comments — Future State (AAPL)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #0d0d0d;
+    --surface: #1c1c1e;
+    --border: #2c2c2e;
+    --text-primary: #ffffff;
+    --text-secondary: #8a8a8e;
+    --text-tertiary: #3d3d3f;
+    --bull: #008932;
+    --bear: #ff453a;
+    --orange: #F5A623;
+  }
+
+  html, body {
+    background: #1a1a1a;
+    min-height: 100vh;
+    font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 0 48px;
+  }
+
+  /* Phone shell */
+  .phone {
+    width: 375px;
+    height: 812px;
+    background: var(--bg);
+    border-radius: 50px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+
+  /* Scrollable content area inside phone */
+  .phone-scroll {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    /* bottom leaves room for fixed tab bar */
+    bottom: 82px;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .phone-scroll::-webkit-scrollbar { display: none; }
+
+  /* ── Status bar ── */
+  .status-bar {
+    height: 44px;
+    background: #0d1016;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .status-time { font-size: 15px; font-weight: 510; color: white; letter-spacing: 0; }
+  .status-right { display: flex; align-items: center; gap: 6px; }
+
+  /* ── Top nav ── */
+  .top-nav {
+    background: #0d1016;
+    padding: 0 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 44px;
+    z-index: 20;
+  }
+
+  .nav-back-btn {
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; background: none;
+    border-radius: 50%; flex-shrink: 0;
+  }
+  .nav-back-btn img { width: 28px; height: 28px; }
+
+  .nav-center {
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column; gap: 2px;
+    height: 38px; justify-content: center; padding-left: 2px;
+  }
+  .nav-title-row { display: flex; align-items: center; justify-content: center; }
+  .nav-title { font-size: 16px; font-weight: 700; color: white; letter-spacing: -0.4px; line-height: 1; }
+  .nav-subtitle-row { display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .nav-subtitle-text { font-size: 12px; font-weight: 510; color: #949495; letter-spacing: 0; }
+  .nav-flag { width: 16px; height: 16px; }
+  .nav-chevron { width: 16px; height: 16px; }
+
+  .nav-trailing {
+    width: 82px; height: 44px;
+    display: flex; align-items: center; justify-content: flex-end;
+    flex-shrink: 0; background: none;
+  }
+  .nav-trailing-inner { display: flex; align-items: center; gap: 10px; padding: 8px; }
+
+  /* ── Price header ── */
+  .price-header { padding: 8px 16px 12px; background: var(--bg); }
+  .price-row-1 { display: flex; align-items: center; gap: 8px; }
+  .price-main { font-size: 28px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.4px; }
+  .price-change { font-size: 15px; font-weight: 510; color: var(--bull); letter-spacing: 0; }
+  .price-share { margin-left: auto; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .price-row-2 { display: flex; align-items: center; gap: 5px; margin-top: 4px; }
+  .price-time { font-size: 12px; color: var(--text-secondary); letter-spacing: 0; }
+
+  /* ── Section tabs ── */
+  .section-tabs {
+    display: flex; overflow-x: auto; scrollbar-width: none;
+    border-bottom: 0.5px solid var(--border);
+    background: #0d1016; padding: 0 8px;
+  }
+  .section-tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 10px 14px; font-size: 14px; font-weight: 500;
+    color: var(--text-secondary); white-space: nowrap; cursor: pointer;
+    position: relative; transition: color 0.15s; letter-spacing: -0.2px;
+  }
+  .tab.active { color: var(--text-primary); font-weight: 600; }
+  .tab.active::after {
+    content: ''; position: absolute; bottom: -0.5px;
+    left: 8px; right: 8px; height: 2px;
+    background: var(--text-primary); border-radius: 1px;
+  }
+
+  /* ── Controls row ── */
+  .filter-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px 10px; background: var(--bg); position: relative;
+  }
+
+  .filter-chip {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 20px; padding: 5px 10px; font-size: 12px;
+    color: var(--text-primary); font-weight: 510; cursor: pointer;
+    letter-spacing: 0; transition: border-color 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+  .filter-chip svg { flex-shrink: 0; }
+  .filter-chip .chip-icon { display: flex; align-items: center; opacity: 0.7; }
+
+  .sort-pill {
+    display: flex; align-items: center; gap: 5px;
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 20px; padding: 5px 10px; font-size: 12px;
+    color: var(--text-primary); font-weight: 510; cursor: pointer;
+    letter-spacing: 0; transition: background 0.15s;
+  }
+  .sort-pill:active { background: #2c2c2e; }
+  .sort-pill .sort-icon { display: flex; align-items: center; }
+
+  .sort-option {
+    display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+    font-size: 13px; font-weight: 510; color: var(--text-secondary);
+    letter-spacing: 0; cursor: pointer;
+    border-bottom: 0.5px solid rgba(255,255,255,0.06);
+    transition: background 0.15s;
+  }
+  .sort-option:last-child { border-bottom: none; }
+  .sort-option:active { background: rgba(255,255,255,0.06); }
+  .sort-option.active { color: var(--text-primary); }
+
+  /* ── Compose row ── */
+  .compose-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px 12px; background: var(--bg);
+  }
+  .compose-avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: #5e2d8c;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; letter-spacing: -0.3px;
+  }
+  .compose-input-wrap {
+    flex: 1; background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 20px; padding: 8px 14px;
+  }
+  .compose-input {
+    width: 100%; background: transparent; border: none; outline: none;
+    font-size: 14px; color: var(--text-primary); font-family: inherit; letter-spacing: -0.2px;
+  }
+  .compose-input::placeholder { color: var(--text-secondary); }
+  .compose-send {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--orange);
+    border: none; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; opacity: 0.35; transition: opacity 0.2s;
+  }
+  .compose-send.active { opacity: 1; }
+
+  /* ── Comments list ── */
+  .comments-list { background: var(--bg); padding-bottom: 100px; }
+
+  .comment { padding: 16px 16px 14px; }
+  .comment-inner { display: flex; gap: 10px; }
+
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; letter-spacing: -0.3px;
+  }
+  .comment-content { flex: 1; min-width: 0; }
+
+  .comment-header { display: flex; align-items: center; margin-bottom: 1px; }
+  .comment-author { font-size: 14px; font-weight: 700; color: var(--text-primary); letter-spacing: 0; line-height: 1; }
+  .comment-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
+  .comment-more { font-size: 16px; color: var(--text-tertiary); cursor: pointer; padding: 0 2px; line-height: 1; }
+
+  /* Action sheet */
+  .action-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 200; opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .action-overlay.open { opacity: 1; pointer-events: all; }
+  .action-sheet {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #1c1c1e; border-radius: 16px 16px 0 0;
+    z-index: 201; padding: 0 0 56px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .action-sheet.open { transform: translateY(0); }
+  .sheet-handle {
+    width: 36px; height: 4px; background: rgba(255,255,255,0.2);
+    border-radius: 2px; margin: 10px auto 16px;
+  }
+  .sheet-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 20px; font-size: 15px; color: var(--text-primary);
+    cursor: pointer; letter-spacing: -0.2px;
+  }
+  .sheet-item:active { background: rgba(255,255,255,0.06); }
+  .sheet-item svg { flex-shrink: 0; color: var(--text-primary); }
+  .sheet-item.destructive { color: #ff453a; }
+  .sheet-item.destructive svg { color: #ff453a; }
+  .sheet-divider { height: 0.5px; background: rgba(255,255,255,0.1); margin: 4px 0; }
+  .sheet-cancel {
+    margin: 8px 16px 0; padding: 16px; text-align: center;
+    font-size: 15px; font-weight: 600; color: var(--text-primary);
+    background: #2c2c2e; border-radius: 12px; cursor: pointer; letter-spacing: -0.2px;
+  }
+  .sheet-cancel:active { opacity: 0.7; }
+
+  .comment-subline {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--text-secondary); letter-spacing: 0;
+    margin-bottom: 5px; margin-top: 1px;
+  }
+  .comment-subline .subline-dot { opacity: 0.4; }
+  .comment-time { font-size: 12px; color: var(--text-secondary); letter-spacing: 0; }
+
+  .comment-body {
+    font-size: 15px; color: var(--text-primary); line-height: 1.4;
+    letter-spacing: 0; margin-bottom: 10px;
+  }
+
+  .comment-actions { display: flex; align-items: center; gap: 10px; }
+  .comment-actions .reply-action { margin-left: auto; }
+
+  .action-btn {
+    display: flex; align-items: center; gap: 4px; cursor: pointer;
+    padding: 4px 0; transition: opacity 0.15s; user-select: none;
+  }
+  .action-btn:active { opacity: 0.6; }
+  .action-icon { display: flex; align-items: center; color: var(--text-secondary); }
+  .action-icon svg { display: block; }
+  .action-count { font-size: 13px; color: var(--text-secondary); letter-spacing: 0; min-width: 12px; }
+  .action-btn.liked .action-icon { color: var(--bull); }
+  .action-btn.liked .action-count { color: var(--bull); }
+
+  .reply-action {
+    display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 0; transition: opacity 0.15s;
+  }
+  .reply-action:active { opacity: 0.5; }
+  .reply-text { font-size: 13px; color: var(--text-secondary); letter-spacing: 0; }
+
+  /* Threading — always visible inline */
+  .thread-replies { margin-top: 10px; margin-left: 46px; border-left: 1.5px solid var(--border); padding-left: 12px; }
+  .reply-row { display: flex; gap: 8px; padding: 8px 0; }
+  .see-all-replies {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--text-secondary); padding: 6px 0 4px;
+    cursor: pointer; transition: color 0.15s; letter-spacing: -0.1px;
+  }
+  .see-all-replies:active { color: var(--text-primary); }
+  .reply-avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: white; flex-shrink: 0; letter-spacing: -0.2px;
+  }
+  .reply-content { flex: 1; min-width: 0; }
+  .reply-header { display: flex; flex-direction: column; gap: 1px; margin-bottom: 3px; }
+  .reply-header-top { display: flex; align-items: center; gap: 4px; }
+  .reply-header-top .comment-more { margin-left: auto; }
+  .reply-author { font-size: 13px; font-weight: 510; color: var(--text-primary); letter-spacing: 0; }
+  .reply-time { font-size: 11px; color: var(--text-secondary); letter-spacing: -0.2px; }
+  .reply-body { font-size: 13px; color: #aeaeb2; line-height: 1.4; letter-spacing: 0; margin-bottom: 6px; }
+  .reply-actions { display: flex; align-items: center; gap: 10px; }
+  .reply-action-btn {
+    display: flex; align-items: center; gap: 4px; cursor: pointer;
+    font-size: 12px; font-weight: 510; color: var(--text-secondary); transition: opacity 0.15s;
+  }
+  .reply-action-btn:active { opacity: 0.5; }
+  .reply-cta { display: flex; align-items: center; gap: 4px; cursor: pointer; margin-left: auto; }
+  .reply-cta-text { font-size: 12px; color: var(--text-secondary); letter-spacing: 0; }
+
+  /* Inline reply compose (always shown at bottom of expanded thread) */
+  .inline-compose {
+    display: flex; align-items: flex-end; gap: 8px;
+    padding: 10px 0 4px; margin-top: 4px;
+    border-top: 0.5px solid rgba(255,255,255,0.05);
+  }
+  .inline-compose-avatar {
+    width: 22px; height: 22px; border-radius: 50%; background: #5e2d8c;
+    font-size: 9px; font-weight: 700; color: white; flex-shrink: 0; letter-spacing: -0.3px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .inline-compose-wrap {
+    flex: 1; min-width: 0; background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 16px; padding: 6px 12px;
+  }
+  .inline-compose-wrap:focus-within { border-color: rgba(255,255,255,0.2); }
+  .mention-pill {
+    display: inline-flex; align-items: center;
+    background: rgba(245,166,35,0.18); border: 0.5px solid rgba(245,166,35,0.4);
+    color: var(--orange); border-radius: 10px; padding: 1px 7px;
+    font-size: 12px; font-weight: 600; letter-spacing: -0.2px;
+    white-space: nowrap; user-select: none; vertical-align: middle;
+    margin-right: 2px;
+  }
+  .inline-compose-input {
+    display: block; width: 100%; outline: none;
+    font-size: 13px; color: var(--text-primary); font-family: inherit; letter-spacing: -0.2px;
+    line-height: 1.45; max-height: 80px; overflow-y: auto;
+    white-space: pre-wrap; word-break: break-word;
+    box-sizing: border-box;
+  }
+  .inline-compose-input:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-secondary); pointer-events: none;
+  }
+  .inline-compose-send {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--orange);
+    border: none; cursor: pointer; flex-shrink: 0; opacity: 0.35; transition: opacity 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .inline-compose-send.active { opacity: 1; }
+
+  /* Pro avatar ring + badge */
+  .avatar-wrap { position: relative; flex-shrink: 0; display: inline-flex; align-self: flex-start; }
+  .avatar-wrap .avatar, .avatar-wrap .reply-avatar { flex-shrink: 0; }
+  .avatar.pro-ring {
+    outline: 2px solid #F5A623;
+    outline-offset: 2px;
+  }
+  .reply-avatar.pro-ring {
+    outline: 1.5px solid #F5A623;
+    outline-offset: 1.5px;
+  }
+  .avatar-pro-badge {
+    position: absolute; bottom: -2px; right: -2px;
+    width: 13px; height: 15px; display: block;
+  }
+  .avatar-pro-badge-sm {
+    position: absolute; bottom: -2px; right: -3px;
+    width: 10px; height: 12px; display: block;
+  }
+
+  /* Sentiment pills */
+  .pill-sm {
+    display: inline-flex; align-items: center; gap: 3px;
+    border-radius: 20px; padding: 2px 7px; font-size: 11px; font-weight: 510; letter-spacing: 0;
+  }
+  .pill-sm.bullish { background: rgba(0,137,50,0.1); border: 0.5px solid rgba(0,137,50,0.25); color: #008932; }
+  .pill-sm.bearish { background: rgba(255,69,58,0.1); border: 0.5px solid rgba(255,69,58,0.25); color: #ff453a; }
+  .pill-sm svg { display: inline-block; vertical-align: middle; margin-right: 3px; flex-shrink: 0; }
+
+  /* ── Bottom tab bar (fixed) ── */
+  .bottom-tab-bar {
+    position: absolute; bottom: 0; left: 0;
+    width: 375px; height: 94px;
+    background: linear-gradient(to top, #0d1016 0%, rgba(13,16,22,0) 100%);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-end; padding: 0 16px 4px; gap: 4px; z-index: 30;
+  }
+  .tab-bar-buttons { position: relative; height: 62px; width: 100%; display: flex; align-items: center; }
+  .tab-bar-fill {
+    position: absolute; inset: 0 -4px; border-radius: 296px;
+    mix-blend-mode: multiply; opacity: 0.67;
+    box-shadow: 0 8px 40px 0 rgba(0,0,0,0.12);
+    background: linear-gradient(90deg, rgba(204,204,204,0.5), rgba(204,204,204,0.5)),
+                linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.06));
+  }
+  .tab-bar-glass {
+    position: absolute; inset: 0 -4px; border-radius: 100px;
+    background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  }
+  .tab-bar-tabs { position: relative; display: flex; flex: 1; align-items: center; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 6px 8px 7px; position: relative; cursor: pointer; }
+  .tab-item.active::before { content: ''; position: absolute; inset: 0 0.2px; border-radius: 100px; background: rgba(148,148,149,0.2); }
+  .tab-item img.tab-icon { width: 28px; height: 28px; position: relative; z-index: 1; }
+  .tab-label { font-size: 10px; font-weight: 700; text-align: center; color: #949495; letter-spacing: 0; line-height: 12px; position: relative; z-index: 1; }
+  .tab-item.active .tab-label { color: white; }
+  .home-indicator-bar { height: 20px; width: 100%; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; }
+  .home-bar { width: 144px; height: 5px; background: white; border-radius: 100px; }
+
+  /* ── Thread sheet ── */
+  .thread-sheet {
+    position: absolute; inset: 0; background: var(--bg);
+    transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+    z-index: 50; display: flex; flex-direction: column; border-radius: 50px 50px 0 0;
+    overflow: hidden;
+  }
+  .thread-sheet.open { transform: translateY(0); }
+
+  .thread-sheet-header {
+    background: var(--bg); padding: 16px 16px 10px;
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    position: sticky; top: 0; z-index: 5;
+  }
+  .thread-back-btn {
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .thread-title { font-size: 17px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.4px; }
+
+  .thread-scroll {
+    flex: 1; overflow-y: scroll; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    padding-bottom: 90px;
+  }
+  .thread-scroll::-webkit-scrollbar { display: none; }
+
+  /* Parent comment pinned at top of thread */
+  .thread-parent {
+    padding: 14px 16px; background: rgba(255,255,255,0.03);
+  }
+  .thread-parent .comment-inner { display: flex; gap: 10px; }
+  .thread-parent .comment-content { flex: 1; min-width: 0; }
+  .thread-parent .comment-header { display: flex; align-items: center; margin-bottom: 1px; }
+  .thread-parent .comment-subline { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; margin-top: 3px; }
+  .thread-parent .comment-body { font-size: 14px; color: var(--text-primary); line-height: 1.45; letter-spacing: 0; margin-bottom: 8px; }
+  .thread-parent .comment-actions { display: flex; align-items: center; gap: 10px; }
+
+  /* Replies section — vertical line from parent avatar */
+  .thread-replies-section { padding: 0 16px; }
+  .thread-reply-row {
+    display: flex; gap: 10px; padding: 12px 0;
+    position: relative;
+  }
+  /* Vertical connecting line */
+  .thread-replies-section::before {
+    content: ''; position: absolute; left: 32px;
+    width: 1.5px; background: var(--border);
+    top: 0; bottom: 0; pointer-events: none;
+  }
+  .thread-replies-wrapper {
+    position: relative; padding: 0 16px;
+  }
+  .thread-replies-wrapper::before {
+    content: ''; position: absolute;
+    left: 32px; top: 0; bottom: 12px;
+    width: 1.5px; background: var(--border);
+  }
+  .thread-reply-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    font-size: 11px; font-weight: 700; color: white;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .thread-reply-content { flex: 1; min-width: 0; }
+  .thread-reply-header { display: flex; align-items: center; margin-bottom: 1px; }
+  .thread-reply-author { font-size: 14px; font-weight: 700; color: var(--text-primary); letter-spacing: 0; }
+  .thread-reply-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
+  .thread-reply-subline { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; margin-top: 3px; }
+  .thread-reply-body { font-size: 14px; color: var(--text-primary); line-height: 1.45; letter-spacing: 0; margin-bottom: 8px; }
+  .thread-reply-actions { display: flex; align-items: center; gap: 10px; }
+
+  /* Thread compose bar */
+  .thread-compose {
+    position: absolute; bottom: 0; left: 0; width: 375px;
+    background: var(--bg); border-top: 0.5px solid var(--border);
+    padding: 10px 16px 28px; display: flex; align-items: center; gap: 10px;
+    z-index: 10;
+  }
+  .thread-compose-avatar {
+    width: 30px; height: 30px; border-radius: 50%; background: #5e2d8c;
+    font-size: 11px; font-weight: 700; color: white; letter-spacing: -0.3px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .thread-compose-wrap {
+    flex: 1; background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 20px; padding: 8px 14px;
+  }
+  .thread-compose-input {
+    width: 100%; background: transparent; border: none; outline: none;
+    font-size: 14px; color: var(--text-primary); font-family: inherit; letter-spacing: -0.2px;
+  }
+  .thread-compose-input::placeholder { color: var(--text-secondary); }
+  .thread-compose-send {
+    width: 30px; height: 30px; border-radius: 50%; background: #F5A623;
+    border: none; cursor: pointer; flex-shrink: 0; opacity: 0.35; transition: opacity 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .thread-compose-send.active { opacity: 1; }
+
+  /* Toast */
+  .toast {
+    position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(44,44,46,0.95); color: white; padding: 8px 16px;
+    border-radius: 20px; font-size: 13px; font-weight: 500; letter-spacing: 0;
+    opacity: 0; transition: opacity 0.2s, transform 0.2s; pointer-events: none; z-index: 200; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="phone">
+<div class="phone-scroll">
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <div class="status-time">9:41</div>
+    <div class="status-right">
+      <img src="https://www.figma.com/api/mcp/asset/87821541-3318-42f5-b1b9-9de12059544e" width="18" height="12" alt="" style="object-fit:contain;">
+      <img src="https://www.figma.com/api/mcp/asset/67efa52e-5f8c-44a3-a6cd-bab47b604787" width="21" height="15" alt="" style="object-fit:contain;">
+      <img src="https://www.figma.com/api/mcp/asset/955a9b75-2b51-4f70-8996-c7e5e54a3389" width="25" height="12" alt="" style="object-fit:contain;">
+    </div>
+  </div>
+
+  <!-- Top nav -->
+  <div class="top-nav">
+    <div class="nav-back-btn" onclick="showToast('Back')">
+      <svg width="12" height="20" viewBox="0 0 12 20" fill="none"><path d="M10 18L2 10L10 2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="nav-center">
+      <div class="nav-title-row"><span class="nav-title">Apple</span></div>
+      <div class="nav-subtitle-row">
+        <img src="https://www.figma.com/api/mcp/asset/dfb2a53b-9823-46a5-8133-e9e28f161c19" class="nav-flag" alt="US flag">
+        <span class="nav-subtitle-text">NASDAQ (AAPL)</span>
+        <img src="https://www.figma.com/api/mcp/asset/ddc4c97c-90fe-4781-8648-00c34be2d41e" class="nav-chevron" alt="">
+      </div>
+    </div>
+    <div class="nav-trailing">
+      <div class="nav-trailing-inner">
+        <!-- star: 21×21 centered in 28×28 -->
+        <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;" onclick="showToast('Watchlist')">
+          <svg width="21" height="21" viewBox="0 0 21 21" fill="none"><path d="M10.5 1.5L12.9 7.4L19.3 7.9L14.7 11.9L16.2 18.1L10.5 14.6L4.8 18.1L6.3 11.9L1.7 7.9L8.1 7.4L10.5 1.5Z" stroke="white" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        </div>
+        <!-- dots horizontal: 3 dots in 28×28 -->
+        <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;" onclick="showToast('More')">
+          <svg width="20" height="4" viewBox="0 0 20 4" fill="none"><circle cx="2" cy="2" r="2" fill="white"/><circle cx="10" cy="2" r="2" fill="white"/><circle cx="18" cy="2" r="2" fill="white"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Price header -->
+  <div class="price-header">
+    <div class="price-row-1">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 12V2M7 2L2 7M7 2L12 7" stroke="#008932" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="price-main">312.40</span>
+      <span class="price-change">+0.41 (+0.13%)</span>
+      <div class="price-share"><svg width="16" height="18" viewBox="0 0 16 18" fill="none"><path d="M12 1L15 4L12 7" stroke="#8a8a8e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 9V14C1 15.1 1.9 16 3 16H13C14.1 16 15 15.1 15 14V9" stroke="#8a8a8e" stroke-width="1.5" stroke-linecap="round"/><path d="M15 4H7C3.7 4 1 6.7 1 10" stroke="#8a8a8e" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+    </div>
+    <div class="price-row-2">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#8a8a8e" stroke-width="1"/><path d="M6 3.5V6L7.5 7.5" stroke="#8a8a8e" stroke-width="1" stroke-linecap="round"/></svg>
+      <span class="price-time">19:32:30 &middot; Real Time. Currency in USD</span>
+    </div>
+  </div>
+
+  <!-- Section tabs -->
+  <div class="section-tabs">
+    <div class="tab">Earnings</div>
+    <div class="tab">Dividends</div>
+    <div class="tab">Profile</div>
+    <div class="tab active">Comments</div>
+    <div class="tab">Chart</div>
+  </div>
+
+  <!-- Controls row -->
+  <div class="filter-row" style="position:relative;">
+    <button id="pro-btn-main" onclick="toggleProFilter(this)" style="width:30px;height:30px;border-radius:50%;background:#1c1c1e;border:0.5px solid #2c2c2e;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all 0.2s;">
+      <svg width="13" height="15" viewBox="0 0 14 16" fill="none"><path id="pro-shield-main" d="M7 0.5L0.5 3V8.5C0.5 12.09 3.36 15.45 7 16C10.64 15.45 13.5 12.09 13.5 8.5V3L7 0.5Z" fill="#8a8a8e"/><text x="7" y="11.5" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="7.5" font-weight="700" fill="white">P</text></svg>
+    </button>
+
+    <div id="edition-chip" class="filter-chip" onclick="toggleEditionDropdown()">
+      <span id="edition-globe-icon" class="chip-icon"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 1C7 1 5 3.5 5 7C5 10.5 7 13 7 13M7 1C7 1 9 3.5 9 7C9 10.5 7 13 7 13M1 7H13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+      <span id="edition-label">All editions</span>
+      <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <!-- Edition dropdown -->
+    <div id="edition-dropdown" style="display:none;position:absolute;top:44px;left:38px;background:#1c1c1e;border:0.5px solid #3a3a3c;border-radius:12px;overflow:hidden;z-index:100;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+      <div class="sort-option active" id="ed-all" onclick="selectEdition('all')">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/><path d="M7 1C7 1 5 3.5 5 7C5 10.5 7 13 7 13M7 1C7 1 9 3.5 9 7C9 10.5 7 13 7 13M1 7H13" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        All editions
+      </div>
+      <div class="sort-option" id="ed-us" onclick="selectEdition('us')">
+        🇺🇸 US
+      </div>
+    </div>
+
+    <!-- Sort pill -->
+    <div style="position:relative;margin-left:auto;">
+      <div id="sort-pill-btn" class="sort-pill" onclick="toggleSortDropdown()">
+        <span class="sort-icon" id="sort-icon-display"><svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M6 1C6 1 9.5 4.5 9.5 7.5C9.5 9.43 7.93 11 6 11C4.07 11 2.5 9.43 2.5 7.5C2.5 5.5 4 3.5 4 3.5C4 3.5 4.5 5 5.5 5.5C5.5 4 5.2 2.2 6 1Z" fill="#ff852b"/><circle cx="6" cy="7.5" r="1.5" fill="white" fill-opacity="0.6"/></svg></span>
+        <span id="sort-label">Top</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <!-- Sort dropdown -->
+      <div id="sort-dropdown" style="display:none;position:absolute;top:34px;right:0;background:#1c1c1e;border:0.5px solid #3a3a3c;border-radius:12px;overflow:hidden;z-index:100;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+        <div class="sort-option active" id="sort-top" onclick="selectSort('top')">
+          <svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M6 1C6 1 9.5 4.5 9.5 7.5C9.5 9.43 7.93 11 6 11C4.07 11 2.5 9.43 2.5 7.5C2.5 5.5 4 3.5 4 3.5C4 3.5 4.5 5 5.5 5.5C5.5 4 5.2 2.2 6 1Z" fill="#ff852b"/><circle cx="6" cy="7.5" r="1.5" fill="white" fill-opacity="0.6"/></svg>
+          Top
+        </div>
+        <div class="sort-option" id="sort-trending" onclick="selectSort('trending')">
+          <svg width="14" height="12" viewBox="0 0 14 12" fill="none"><path d="M1 10L4.5 6L7 8.5L10 4L13 1" stroke="#a855f7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 1H13V4" stroke="#a855f7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Trending
+        </div>
+        <div class="sort-option" id="sort-recent" onclick="selectSort('recent')">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#3b82f6" stroke-width="1.2"/><path d="M6.5 3.5V6.5L8.5 8" stroke="#3b82f6" stroke-width="1.2" stroke-linecap="round"/></svg>
+          Recent
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compose row -->
+  <div class="compose-row">
+    <div class="compose-avatar">ML</div>
+    <div class="compose-input-wrap">
+      <input class="compose-input" type="text" placeholder="Write your thoughts about Apple" oninput="this.closest('.compose-row').querySelector('.compose-send').classList.toggle('active', this.value.length > 0)" />
+    </div>
+    <button class="compose-send" onclick="showToast('Comment posted!')">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <!-- Comments list — data attrs: pro, edition, likes, replies, hours (999=days old) -->
+  <div class="comments-list" id="future-comments-list">
+
+    <!-- C1: FDL808 — Pro, US, Bullish, 2h, 47 likes, 8 replies -->
+    <div class="comment fc" id="comment-c1" data-pro="true" data-edition="us" data-likes="47" data-replies="8" data-hours="2">
+      <div class="comment-inner">
+        <div class="avatar-wrap">
+          <div class="avatar pro-ring" style="background:#2d6a4f;">FD</div>
+          <svg class="avatar-pro-badge" viewBox="0 0 14 16" fill="none"><path d="M7 0.5L0.5 3V8.5C0.5 12.09 3.36 15.45 7 16C10.64 15.45 13.5 12.09 13.5 8.5V3L7 0.5Z" fill="#F5A623"/><text x="7" y="11.5" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="7.5" font-weight="700" fill="white">P</text></svg>
+        </div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">FDL808</span>
+            <div class="comment-meta"><span class="pill-sm bullish"><svg width="13" height="10" viewBox="0 0 42.75 31.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.3838 30.6031C19.4575 30.5336 17.9907 30.2211 16.6829 29.4224C15.3751 28.6237 14.4915 27.5473 14.5622 25.9152C14.5975 25.186 14.8803 24.5435 15.3575 23.9879C15.5695 23.7449 15.5872 23.5539 15.4458 23.2587C14.4385 21.1578 13.4488 19.057 12.4592 16.9387C12.3355 16.6783 12.1941 16.5568 11.9113 16.7998C11.1514 17.477 10.2678 17.7721 9.24275 17.668C8.44748 17.5812 7.81127 17.1818 7.26342 16.6436C7.2104 16.5915 7.26342 16.3137 7.35178 16.2269C8.27076 15.2546 9.18973 14.2823 10.1617 13.3621C11.2574 12.3203 12.1057 11.1049 12.4061 9.64647C12.5652 8.86516 12.4945 8.01439 12.4768 7.19835C12.4592 6.52121 12.4061 6.48649 13.0777 6.36495C14.4562 6.10451 15.817 5.82671 17.1954 5.68781C18.8213 5.51419 20.4472 5.39265 22.0731 5.42737C24.6886 5.4621 27.3041 5.70517 29.849 6.36495C30.1671 6.45176 30.2908 6.55594 30.2555 6.92055C30.1848 7.63242 30.1671 8.34428 30.2024 9.05615C30.3085 10.6188 31.1037 11.8862 32.1641 12.9974C33.1891 14.0566 34.2141 15.1157 35.2745 16.1574C35.5396 16.4179 35.5749 16.5915 35.2568 16.8519C33.843 18.0152 32.2878 18.0326 30.8387 16.8519C30.5559 16.6262 30.3968 16.6089 30.2378 16.9561C29.3011 18.9528 28.3645 20.9669 27.3925 22.9462C27.1628 23.415 27.1274 23.7275 27.4809 24.1963C28.6826 25.7763 28.2761 27.5646 26.8093 28.8495C25.2895 30.1864 23.045 30.6552 21.3838 30.6031ZM17.9907 17.286H18.0614C17.9553 16.8693 17.8846 16.4526 17.7079 16.088C17.3015 15.2719 16.5062 15.1157 15.6756 15.1157C15.2691 15.1157 14.6682 15.0809 14.4738 15.3067C14.1911 15.6539 14.4385 16.1748 14.6682 16.5915C15.1984 17.5812 16.1351 17.9805 17.1777 18.1715C17.7786 18.2757 17.9377 18.102 17.973 17.4943C17.973 17.4249 17.973 17.3554 17.973 17.286H17.9907ZM27.5339 15.133C27.2865 15.133 27.1628 15.0983 27.0567 15.0983C25.8903 15.0636 25.1658 15.4456 24.8653 16.3658C24.7239 16.7825 24.777 17.2686 24.7593 17.7201C24.7593 18.0152 24.936 18.1888 25.2188 18.1541C25.5369 18.1368 25.855 18.0847 26.1554 17.9979C27.1274 17.7027 27.905 17.1645 28.1878 16.1574C28.5412 14.9247 28.2938 15.1851 27.5162 15.1157L27.5339 15.133ZM23.8403 26.3666C23.8403 26.9222 24.1938 27.3042 24.7416 27.3042C25.2718 27.3042 25.6606 26.8875 25.6606 26.3492C25.6606 25.8457 25.2718 25.4638 24.7416 25.4638C24.1761 25.4638 23.8403 25.7936 23.8403 26.3666ZM18.8743 26.3666C18.8743 25.811 18.5385 25.4638 17.9907 25.4638C17.4782 25.4638 17.0187 25.8631 17.001 26.3492C17.001 26.8528 17.4782 27.3042 17.9907 27.3042C18.5032 27.3042 18.8743 26.9048 18.8743 26.3666Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.1285 1.41378C36.881 1.54552 36.7719 1.70978 36.4663 2.4108C35.8316 3.86666 35.3195 4.60395 34.5746 5.13438C34.1678 5.42404 33.7921 5.61667 32.4701 6.21346C32.0618 6.39779 31.9434 6.8255 31.9723 8.01173C31.9919 8.81875 32.0264 9.06309 32.1964 9.59958C32.4298 10.3361 33.0332 11.5889 33.2516 11.7905C33.5072 12.0264 33.6522 11.9782 34.4486 11.3929C35.4478 10.6584 36.4629 9.62776 37.0841 8.71692C37.6639 7.86681 38.1685 6.68157 38.4041 5.61635C38.6637 4.44268 38.5896 2.11875 38.2796 1.71252C38.023 1.3762 37.4692 1.23251 37.1285 1.41378Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.71799 1.38014C5.96294 1.51648 6.06897 1.68277 6.36135 2.38939C6.9687 3.85688 7.46692 4.60364 8.20175 5.14794C8.60306 5.44516 8.97508 5.6448 10.2856 6.26626C10.6904 6.4582 10.8008 6.88806 10.7497 8.07354C10.715 8.88005 10.6759 9.1237 10.4958 9.65691C10.2487 10.3889 9.6219 11.6302 9.39973 11.8276C9.13976 12.0587 8.99568 12.0078 8.21046 11.4077C7.22513 10.6546 6.22954 9.60514 5.6255 8.68282C5.06173 7.82199 4.57944 6.6275 4.36383 5.55806C4.12627 4.37973 4.2439 2.0576 4.56152 1.65725C4.82437 1.32579 5.38072 1.19251 5.71799 1.38014Z" fill="currentColor"/></svg> Bullish</span><span class="comment-more">···</span></div>
+          </div>
+          <div class="comment-subline"><span>🇺🇸 EN</span><span class="subline-dot">·</span><span class="comment-time">2h ago</span></div>
+          <div class="comment-body">Strong quarter, holding long. The services revenue growth continues to surprise me.</div>
+          <div class="comment-actions">
+            <div class="action-btn liked"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count" style="color:var(--bull)">47</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">0</span></div>
+            <div class="reply-action" onclick="openCompose('c1')"><span class="reply-text">Reply (8)</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="thread-replies" id="tr-c1">
+        <div class="see-all-replies" onclick="showToast('Loading all replies…')">See all 8 replies <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="reply-row">
+          <div class="avatar-wrap">
+            <div class="reply-avatar pro-ring" style="background:#1a4a8a;">MW</div>
+            <svg class="avatar-pro-badge-sm" viewBox="0 0 14 16" fill="none"><path d="M7 0.5L0.5 3V8.5C0.5 12.09 3.36 15.45 7 16C10.64 15.45 13.5 12.09 13.5 8.5V3L7 0.5Z" fill="#F5A623"/><text x="7" y="11.5" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="7.5" font-weight="700" fill="white">P</text></svg>
+          </div>
+          <div class="reply-content">
+            <div class="reply-header"><div class="reply-header-top"><span class="reply-author">MarketWatcher</span><span class="comment-more" onclick="openMenu(this,event)">···</span></div><span class="reply-time">🇺🇸 EN · 1h ago</span></div>
+            <div class="reply-body">Agreed, services margin is the real story here.</div>
+            <div class="reply-actions">
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>12</span></div>
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>0</span></div>
+              <div class="reply-cta" onclick="setMention('c1','MarketWatcher')"><span class="reply-cta-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C2: TechBull99 — No Pro, US, Bullish, 5h, 31 likes, 3 replies -->
+    <div class="comment fc" id="comment-c2" data-pro="false" data-edition="us" data-likes="31" data-replies="3" data-hours="5">
+      <div class="comment-inner">
+        <div class="avatar" style="background:#1a5276;">TB</div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">TechBull99</span>
+            <div class="comment-meta"><span class="pill-sm bullish"><svg width="13" height="10" viewBox="0 0 42.75 31.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.3838 30.6031C19.4575 30.5336 17.9907 30.2211 16.6829 29.4224C15.3751 28.6237 14.4915 27.5473 14.5622 25.9152C14.5975 25.186 14.8803 24.5435 15.3575 23.9879C15.5695 23.7449 15.5872 23.5539 15.4458 23.2587C14.4385 21.1578 13.4488 19.057 12.4592 16.9387C12.3355 16.6783 12.1941 16.5568 11.9113 16.7998C11.1514 17.477 10.2678 17.7721 9.24275 17.668C8.44748 17.5812 7.81127 17.1818 7.26342 16.6436C7.2104 16.5915 7.26342 16.3137 7.35178 16.2269C8.27076 15.2546 9.18973 14.2823 10.1617 13.3621C11.2574 12.3203 12.1057 11.1049 12.4061 9.64647C12.5652 8.86516 12.4945 8.01439 12.4768 7.19835C12.4592 6.52121 12.4061 6.48649 13.0777 6.36495C14.4562 6.10451 15.817 5.82671 17.1954 5.68781C18.8213 5.51419 20.4472 5.39265 22.0731 5.42737C24.6886 5.4621 27.3041 5.70517 29.849 6.36495C30.1671 6.45176 30.2908 6.55594 30.2555 6.92055C30.1848 7.63242 30.1671 8.34428 30.2024 9.05615C30.3085 10.6188 31.1037 11.8862 32.1641 12.9974C33.1891 14.0566 34.2141 15.1157 35.2745 16.1574C35.5396 16.4179 35.5749 16.5915 35.2568 16.8519C33.843 18.0152 32.2878 18.0326 30.8387 16.8519C30.5559 16.6262 30.3968 16.6089 30.2378 16.9561C29.3011 18.9528 28.3645 20.9669 27.3925 22.9462C27.1628 23.415 27.1274 23.7275 27.4809 24.1963C28.6826 25.7763 28.2761 27.5646 26.8093 28.8495C25.2895 30.1864 23.045 30.6552 21.3838 30.6031ZM17.9907 17.286H18.0614C17.9553 16.8693 17.8846 16.4526 17.7079 16.088C17.3015 15.2719 16.5062 15.1157 15.6756 15.1157C15.2691 15.1157 14.6682 15.0809 14.4738 15.3067C14.1911 15.6539 14.4385 16.1748 14.6682 16.5915C15.1984 17.5812 16.1351 17.9805 17.1777 18.1715C17.7786 18.2757 17.9377 18.102 17.973 17.4943C17.973 17.4249 17.973 17.3554 17.973 17.286H17.9907ZM27.5339 15.133C27.2865 15.133 27.1628 15.0983 27.0567 15.0983C25.8903 15.0636 25.1658 15.4456 24.8653 16.3658C24.7239 16.7825 24.777 17.2686 24.7593 17.7201C24.7593 18.0152 24.936 18.1888 25.2188 18.1541C25.5369 18.1368 25.855 18.0847 26.1554 17.9979C27.1274 17.7027 27.905 17.1645 28.1878 16.1574C28.5412 14.9247 28.2938 15.1851 27.5162 15.1157L27.5339 15.133ZM23.8403 26.3666C23.8403 26.9222 24.1938 27.3042 24.7416 27.3042C25.2718 27.3042 25.6606 26.8875 25.6606 26.3492C25.6606 25.8457 25.2718 25.4638 24.7416 25.4638C24.1761 25.4638 23.8403 25.7936 23.8403 26.3666ZM18.8743 26.3666C18.8743 25.811 18.5385 25.4638 17.9907 25.4638C17.4782 25.4638 17.0187 25.8631 17.001 26.3492C17.001 26.8528 17.4782 27.3042 17.9907 27.3042C18.5032 27.3042 18.8743 26.9048 18.8743 26.3666Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.1285 1.41378C36.881 1.54552 36.7719 1.70978 36.4663 2.4108C35.8316 3.86666 35.3195 4.60395 34.5746 5.13438C34.1678 5.42404 33.7921 5.61667 32.4701 6.21346C32.0618 6.39779 31.9434 6.8255 31.9723 8.01173C31.9919 8.81875 32.0264 9.06309 32.1964 9.59958C32.4298 10.3361 33.0332 11.5889 33.2516 11.7905C33.5072 12.0264 33.6522 11.9782 34.4486 11.3929C35.4478 10.6584 36.4629 9.62776 37.0841 8.71692C37.6639 7.86681 38.1685 6.68157 38.4041 5.61635C38.6637 4.44268 38.5896 2.11875 38.2796 1.71252C38.023 1.3762 37.4692 1.23251 37.1285 1.41378Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.71799 1.38014C5.96294 1.51648 6.06897 1.68277 6.36135 2.38939C6.9687 3.85688 7.46692 4.60364 8.20175 5.14794C8.60306 5.44516 8.97508 5.6448 10.2856 6.26626C10.6904 6.4582 10.8008 6.88806 10.7497 8.07354C10.715 8.88005 10.6759 9.1237 10.4958 9.65691C10.2487 10.3889 9.6219 11.6302 9.39973 11.8276C9.13976 12.0587 8.99568 12.0078 8.21046 11.4077C7.22513 10.6546 6.22954 9.60514 5.6255 8.68282C5.06173 7.82199 4.57944 6.6275 4.36383 5.55806C4.12627 4.37973 4.2439 2.0576 4.56152 1.65725C4.82437 1.32579 5.38072 1.19251 5.71799 1.38014Z" fill="currentColor"/></svg> Bullish</span><span class="comment-more">···</span></div>
+          </div>
+          <div class="comment-subline"><span>🇺🇸 EN</span><span class="subline-dot">·</span><span class="comment-time">5h ago</span></div>
+          <div class="comment-body">Services + India growth = underrated combo. This stock should be at $350 by EOY.</div>
+          <div class="comment-actions">
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">31</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">2</span></div>
+            <div class="reply-action" onclick="openCompose('c2')"><span class="reply-text">Reply (3)</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="thread-replies" id="tr-c2">
+        <div class="reply-row">
+          <div class="avatar-wrap">
+            <div class="reply-avatar pro-ring" style="background:#2d6a4f;">FD</div>
+            <svg class="avatar-pro-badge-sm" viewBox="0 0 14 16" fill="none"><path d="M7 0.5L0.5 3V8.5C0.5 12.09 3.36 15.45 7 16C10.64 15.45 13.5 12.09 13.5 8.5V3L7 0.5Z" fill="#F5A623"/><text x="7" y="11.5" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="7.5" font-weight="700" fill="white">P</text></svg>
+          </div>
+          <div class="reply-content">
+            <div class="reply-header"><div class="reply-header-top"><span class="reply-author">FDL808</span><span class="comment-more" onclick="openMenu(this,event)">···</span></div><span class="reply-time">🇺🇸 EN · 4h ago</span></div>
+            <div class="reply-body">India services number was buried in the footnotes — totally underreported.</div>
+            <div class="reply-actions">
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>7</span></div>
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>0</span></div>
+              <div class="reply-cta" onclick="setMention('c2','FDL808')"><span class="reply-cta-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C3: EuroWatcher — No Pro, DE, Bearish, 4h, 22 likes, 6 replies -->
+    <div class="comment fc" id="comment-c3" data-pro="false" data-edition="de" data-likes="22" data-replies="6" data-hours="4">
+      <div class="comment-inner">
+        <div class="avatar" style="background:#7b3f00;">EW</div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">EuroWatcher</span>
+            <div class="comment-meta"><span class="pill-sm bearish"><svg width="11" height="10" viewBox="0 0 30.3563 27.01" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.9837 26.9911C14.7014 26.9911 14.2356 27.0335 13.784 26.9911C13.2052 26.9204 12.6407 26.8073 12.0761 26.6518C11.3986 26.4681 10.7352 26.2419 10.0859 25.9874C8.87201 25.5209 7.77106 24.8424 6.82537 23.9801C5.89379 23.1461 5.00456 22.2272 4.22825 21.2377C3.59309 20.4178 3.08495 19.4848 2.66151 18.5377C2.19572 17.5058 1.87108 16.4314 1.68759 15.3005C1.47587 14.0424 1.54644 12.7984 1.58879 11.5403C1.6029 10.9607 1.77228 10.3812 1.8852 9.81571C1.94166 9.56126 1.91343 9.33508 1.68759 9.15131C1.13711 8.68482 0.713671 8.10524 0.44549 7.45497C0.261998 7.03089 0.0926211 6.57853 0.0502767 6.12618C-0.0485267 5.2356 -0.0202972 4.35916 0.304343 3.49686C0.699556 2.45079 1.33472 1.61675 2.23807 0.980628C2.80266 0.584816 3.42371 0.259686 4.11533 0.174869C4.67992 0.104188 5.25863 0.00523522 5.80911 0.0617797C7.13589 0.203141 8.27919 0.796858 9.15431 1.81466C9.59187 2.32356 9.69067 2.35183 10.3399 2.16806C10.7352 2.05497 11.1586 1.97016 11.5679 1.94188C13.2194 1.8712 14.8708 1.78639 16.5222 1.77225C17.2985 1.77225 18.0748 1.85707 18.837 1.94188C19.3875 2.01257 19.938 2.13979 20.4744 2.25288C20.7143 2.30942 20.8837 2.22461 21.0107 2.04084C21.66 1.10785 22.5916 0.542408 23.6361 0.217277C24.4406 -0.0371732 25.2875 -0.0654454 26.1485 0.118324C27.5176 0.415183 28.5762 1.12199 29.3949 2.23874C29.8183 2.81832 30.143 3.44031 30.2277 4.16126C30.2841 4.62775 30.3688 5.09424 30.3547 5.5466C30.2982 6.88953 29.776 8.06283 28.788 8.98168C28.4492 9.30681 28.421 9.6178 28.5198 10.0136C28.8868 11.4838 28.9009 12.9963 28.7738 14.4948C28.7033 15.3005 28.5339 16.1204 28.2939 16.8838C27.7435 18.6367 26.9107 20.234 25.7533 21.6759C24.7088 22.9764 23.509 24.0791 22.1258 24.9838C21.1519 25.6199 20.0933 26.1005 18.9923 26.4539C17.7361 26.8639 16.4658 27.0618 14.9696 26.9628L14.9837 26.9911ZM21.4483 19.2869C21.5471 18.6508 21.293 17.9298 21.0107 17.2372C20.5308 16.0639 19.7969 15.0602 18.8229 14.2262C18.0043 13.5194 17.0727 13.0105 16.0141 12.855C14.7438 12.6712 13.5299 12.8974 12.4148 13.6183C10.4952 14.8623 9.3378 16.6152 8.92847 18.8628C8.73086 19.9654 9.02728 20.9267 9.60598 21.8314C10.2976 22.8916 11.2998 23.5136 12.4854 23.9236C13.5299 24.277 14.5885 24.4325 15.6753 24.3759C15.9435 24.3759 16.1976 24.277 16.4658 24.2487C17.4115 24.1497 18.2866 23.8529 19.1052 23.3723C20.5732 22.4817 21.4765 21.2377 21.4483 19.2869ZM8.82967 9.37749C8.58972 9.37749 8.33565 9.37749 8.0957 9.37749C7.89809 9.37749 7.77106 9.49058 7.77106 9.71675C7.77106 10.2398 7.94044 10.6921 8.25096 11.1021C8.80144 11.8089 9.57775 12.0775 10.4105 12.2471C10.7916 12.3178 11.0739 12.0775 11.0739 11.6817C11.0739 11.512 11.0739 11.3283 11.0739 11.1586C11.0457 10.5366 10.8057 10.0419 10.2553 9.68848C9.80359 9.39162 9.32369 9.34921 8.82967 9.39162V9.37749ZM19.3593 11.3707C19.3593 11.4838 19.3593 11.611 19.3593 11.7241C19.3734 12.0916 19.6698 12.3461 20.0086 12.2471C20.4885 12.1199 20.9684 11.9785 21.4059 11.7382C22.154 11.3283 22.6057 10.6921 22.6622 9.80157C22.6763 9.49058 22.5351 9.36335 22.2528 9.36335C21.8576 9.36335 21.4483 9.32094 21.0531 9.36335C20.7708 9.39162 20.5026 9.50471 20.2485 9.6178C19.5287 9.9712 19.3593 10.6215 19.3593 11.3565V11.3707Z" fill="currentColor"/><path d="M15.2519 16.2476C16.0865 16.2475 16.9739 16.4173 17.6091 17.0534C18.5689 17.9864 18.4277 19.4424 17.1715 20.2199C16.3952 20.7005 15.5201 20.8843 14.645 20.7429C13.7981 20.6016 12.9794 20.2764 12.4713 19.5131C11.9067 18.6649 12.0196 17.7461 12.8665 16.9827C13.5299 16.3749 14.0766 16.2477 15.2519 16.2476Z" fill="currentColor"/></svg> Bearish</span><span class="comment-more">···</span></div>
+          </div>
+          <div class="comment-subline"><span>🇩🇪 DE</span><span class="subline-dot">·</span><span class="comment-time">4h ago</span></div>
+          <div class="comment-body">Valuation stretched at these levels. Margin expansion story is already priced in — where does the next leg come from?</div>
+          <div class="comment-actions">
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">22</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">0</span></div>
+            <div class="reply-action" onclick="openCompose('c3')"><span class="reply-text">Reply (6)</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="thread-replies" id="tr-c3">
+        <div class="see-all-replies" onclick="showToast('Loading all replies…')">See all 6 replies <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="reply-row">
+          <div class="avatar-wrap">
+            <div class="reply-avatar pro-ring" style="background:#7c3aed;">MH</div>
+            <svg class="avatar-pro-badge-sm" viewBox="0 0 14 16" fill="none"><path d="M7 0.5L0.5 3V8.5C0.5 12.09 3.36 15.45 7 16C10.64 15.45 13.5 12.09 13.5 8.5V3L7 0.5Z" fill="#F5A623"/><text x="7" y="11.5" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="7.5" font-weight="700" fill="white">P</text></svg>
+          </div>
+          <div class="reply-content">
+            <div class="reply-header"><div class="reply-header-top"><span class="reply-author">MarketHawk</span><span class="comment-more" onclick="openMenu(this,event)">···</span></div><span class="reply-time">🇺🇸 EN · 3h ago</span></div>
+            <div class="reply-body">Exactly — fx drag alone could wipe 200bps from margins in H2.</div>
+            <div class="reply-actions">
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>9</span></div>
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>0</span></div>
+              <div class="reply-cta" onclick="setMention('c3','MarketHawk')"><span class="reply-cta-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C4: MarketHawk — Pro, US, Bearish, 12h, 19 likes, 14 replies -->
+    <div class="comment fc" id="comment-c4" data-pro="true" data-edition="us" data-likes="19" data-replies="14" data-hours="12">
+      <div class="comment-inner">
+        <div class="avatar-wrap">
+          <div class="avatar pro-ring" style="background:#7c3aed;">MH</div>
+          <svg class="avatar-pro-badge" viewBox="0 0 14 16" fill="none"><path d="M7 0.5L0.5 3V8.5C0.5 12.09 3.36 15.45 7 16C10.64 15.45 13.5 12.09 13.5 8.5V3L7 0.5Z" fill="#F5A623"/><text x="7" y="11.5" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="7.5" font-weight="700" fill="white">P</text></svg>
+        </div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">MarketHawk</span>
+            <div class="comment-meta"><span class="pill-sm bearish"><svg width="11" height="10" viewBox="0 0 30.3563 27.01" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.9837 26.9911C14.7014 26.9911 14.2356 27.0335 13.784 26.9911C13.2052 26.9204 12.6407 26.8073 12.0761 26.6518C11.3986 26.4681 10.7352 26.2419 10.0859 25.9874C8.87201 25.5209 7.77106 24.8424 6.82537 23.9801C5.89379 23.1461 5.00456 22.2272 4.22825 21.2377C3.59309 20.4178 3.08495 19.4848 2.66151 18.5377C2.19572 17.5058 1.87108 16.4314 1.68759 15.3005C1.47587 14.0424 1.54644 12.7984 1.58879 11.5403C1.6029 10.9607 1.77228 10.3812 1.8852 9.81571C1.94166 9.56126 1.91343 9.33508 1.68759 9.15131C1.13711 8.68482 0.713671 8.10524 0.44549 7.45497C0.261998 7.03089 0.0926211 6.57853 0.0502767 6.12618C-0.0485267 5.2356 -0.0202972 4.35916 0.304343 3.49686C0.699556 2.45079 1.33472 1.61675 2.23807 0.980628C2.80266 0.584816 3.42371 0.259686 4.11533 0.174869C4.67992 0.104188 5.25863 0.00523522 5.80911 0.0617797C7.13589 0.203141 8.27919 0.796858 9.15431 1.81466C9.59187 2.32356 9.69067 2.35183 10.3399 2.16806C10.7352 2.05497 11.1586 1.97016 11.5679 1.94188C13.2194 1.8712 14.8708 1.78639 16.5222 1.77225C17.2985 1.77225 18.0748 1.85707 18.837 1.94188C19.3875 2.01257 19.938 2.13979 20.4744 2.25288C20.7143 2.30942 20.8837 2.22461 21.0107 2.04084C21.66 1.10785 22.5916 0.542408 23.6361 0.217277C24.4406 -0.0371732 25.2875 -0.0654454 26.1485 0.118324C27.5176 0.415183 28.5762 1.12199 29.3949 2.23874C29.8183 2.81832 30.143 3.44031 30.2277 4.16126C30.2841 4.62775 30.3688 5.09424 30.3547 5.5466C30.2982 6.88953 29.776 8.06283 28.788 8.98168C28.4492 9.30681 28.421 9.6178 28.5198 10.0136C28.8868 11.4838 28.9009 12.9963 28.7738 14.4948C28.7033 15.3005 28.5339 16.1204 28.2939 16.8838C27.7435 18.6367 26.9107 20.234 25.7533 21.6759C24.7088 22.9764 23.509 24.0791 22.1258 24.9838C21.1519 25.6199 20.0933 26.1005 18.9923 26.4539C17.7361 26.8639 16.4658 27.0618 14.9696 26.9628L14.9837 26.9911ZM21.4483 19.2869C21.5471 18.6508 21.293 17.9298 21.0107 17.2372C20.5308 16.0639 19.7969 15.0602 18.8229 14.2262C18.0043 13.5194 17.0727 13.0105 16.0141 12.855C14.7438 12.6712 13.5299 12.8974 12.4148 13.6183C10.4952 14.8623 9.3378 16.6152 8.92847 18.8628C8.73086 19.9654 9.02728 20.9267 9.60598 21.8314C10.2976 22.8916 11.2998 23.5136 12.4854 23.9236C13.5299 24.277 14.5885 24.4325 15.6753 24.3759C15.9435 24.3759 16.1976 24.277 16.4658 24.2487C17.4115 24.1497 18.2866 23.8529 19.1052 23.3723C20.5732 22.4817 21.4765 21.2377 21.4483 19.2869ZM8.82967 9.37749C8.58972 9.37749 8.33565 9.37749 8.0957 9.37749C7.89809 9.37749 7.77106 9.49058 7.77106 9.71675C7.77106 10.2398 7.94044 10.6921 8.25096 11.1021C8.80144 11.8089 9.57775 12.0775 10.4105 12.2471C10.7916 12.3178 11.0739 12.0775 11.0739 11.6817C11.0739 11.512 11.0739 11.3283 11.0739 11.1586C11.0457 10.5366 10.8057 10.0419 10.2553 9.68848C9.80359 9.39162 9.32369 9.34921 8.82967 9.39162V9.37749ZM19.3593 11.3707C19.3593 11.4838 19.3593 11.611 19.3593 11.7241C19.3734 12.0916 19.6698 12.3461 20.0086 12.2471C20.4885 12.1199 20.9684 11.9785 21.4059 11.7382C22.154 11.3283 22.6057 10.6921 22.6622 9.80157C22.6763 9.49058 22.5351 9.36335 22.2528 9.36335C21.8576 9.36335 21.4483 9.32094 21.0531 9.36335C20.7708 9.39162 20.5026 9.50471 20.2485 9.6178C19.5287 9.9712 19.3593 10.6215 19.3593 11.3565V11.3707Z" fill="currentColor"/><path d="M15.2519 16.2476C16.0865 16.2475 16.9739 16.4173 17.6091 17.0534C18.5689 17.9864 18.4277 19.4424 17.1715 20.2199C16.3952 20.7005 15.5201 20.8843 14.645 20.7429C13.7981 20.6016 12.9794 20.2764 12.4713 19.5131C11.9067 18.6649 12.0196 17.7461 12.8665 16.9827C13.5299 16.3749 14.0766 16.2477 15.2519 16.2476Z" fill="currentColor"/></svg> Bearish</span><span class="comment-more">···</span></div>
+          </div>
+          <div class="comment-subline"><span>🇺🇸 EN</span><span class="subline-dot">·</span><span class="comment-time">12h ago</span></div>
+          <div class="comment-body">Watch the fx headwinds in Q3. Dollar strength is being completely ignored in the bull thesis right now.</div>
+          <div class="comment-actions">
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">19</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">1</span></div>
+            <div class="reply-action" onclick="openCompose('c4')"><span class="reply-text">Reply (14)</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+      <div class="thread-replies" id="tr-c4">
+        <div class="see-all-replies" onclick="showToast('Loading all replies…')">See all 14 replies <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="reply-row">
+          <div class="reply-avatar" style="background:#1a5276;">TB</div>
+          <div class="reply-content">
+            <div class="reply-header"><div class="reply-header-top"><span class="reply-author">TechBull99</span><span class="comment-more" onclick="openMenu(this,event)">···</span></div><span class="reply-time">🇺🇸 EN · 11h ago</span></div>
+            <div class="reply-body">The dollar is topping out though. DXY broke below 104 this week.</div>
+            <div class="reply-actions">
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>5</span></div>
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>0</span></div>
+              <div class="reply-cta" onclick="setMention('c4','TechBull99')"><span class="reply-cta-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+        </div>
+        <div class="reply-row">
+          <div class="reply-avatar" style="background:#7b3f00;">EW</div>
+          <div class="reply-content">
+            <div class="reply-header"><div class="reply-header-top"><span class="reply-author">EuroWatcher</span><span class="comment-more" onclick="openMenu(this,event)">···</span></div><span class="reply-time">🇩🇪 DE · 10h ago</span></div>
+            <div class="reply-body">EUR/USD move alone hits ~1.5% of revenue. Not trivial at this scale.</div>
+            <div class="reply-actions">
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>8</span></div>
+              <div class="reply-action-btn"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>0</span></div>
+              <div class="reply-cta" onclick="setMention('c4','EuroWatcher')"><span class="reply-cta-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C5: Parash — No Pro, IN, no sentiment, 3h, 2 likes, 1 reply -->
+    <div class="comment fc" data-pro="false" data-edition="in" data-likes="2" data-replies="1" data-hours="3">
+      <div class="comment-inner">
+        <div class="avatar" style="background:#6b21a8;">PS</div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">Parash shahi Thakuree</span>
+            <div class="comment-meta"><span class="comment-more">···</span></div>
+          </div>
+          <div class="comment-subline"><span>🇮🇳 IN</span><span class="subline-dot">·</span><span class="comment-time">3h ago</span></div>
+          <div class="comment-body">Long from 295, very happy with this quarter.</div>
+          <div class="comment-actions">
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">2</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">0</span></div>
+            <div class="reply-action"><span class="reply-text">Reply (1)</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C6: Kwaku — No Pro, DE, Bearish, days old (999h), 8 likes, 0 replies -->
+    <div class="comment fc" data-pro="false" data-edition="de" data-likes="8" data-replies="0" data-hours="999">
+      <div class="comment-inner">
+        <div class="avatar" style="background:#7b3f00;">KA</div>
+        <div class="comment-content">
+          <div class="comment-header">
+            <span class="comment-author">Kwaku Acquah</span>
+            <div class="comment-meta"><span class="pill-sm bearish"><svg width="11" height="10" viewBox="0 0 30.3563 27.01" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.9837 26.9911C14.7014 26.9911 14.2356 27.0335 13.784 26.9911C13.2052 26.9204 12.6407 26.8073 12.0761 26.6518C11.3986 26.4681 10.7352 26.2419 10.0859 25.9874C8.87201 25.5209 7.77106 24.8424 6.82537 23.9801C5.89379 23.1461 5.00456 22.2272 4.22825 21.2377C3.59309 20.4178 3.08495 19.4848 2.66151 18.5377C2.19572 17.5058 1.87108 16.4314 1.68759 15.3005C1.47587 14.0424 1.54644 12.7984 1.58879 11.5403C1.6029 10.9607 1.77228 10.3812 1.8852 9.81571C1.94166 9.56126 1.91343 9.33508 1.68759 9.15131C1.13711 8.68482 0.713671 8.10524 0.44549 7.45497C0.261998 7.03089 0.0926211 6.57853 0.0502767 6.12618C-0.0485267 5.2356 -0.0202972 4.35916 0.304343 3.49686C0.699556 2.45079 1.33472 1.61675 2.23807 0.980628C2.80266 0.584816 3.42371 0.259686 4.11533 0.174869C4.67992 0.104188 5.25863 0.00523522 5.80911 0.0617797C7.13589 0.203141 8.27919 0.796858 9.15431 1.81466C9.59187 2.32356 9.69067 2.35183 10.3399 2.16806C10.7352 2.05497 11.1586 1.97016 11.5679 1.94188C13.2194 1.8712 14.8708 1.78639 16.5222 1.77225C17.2985 1.77225 18.0748 1.85707 18.837 1.94188C19.3875 2.01257 19.938 2.13979 20.4744 2.25288C20.7143 2.30942 20.8837 2.22461 21.0107 2.04084C21.66 1.10785 22.5916 0.542408 23.6361 0.217277C24.4406 -0.0371732 25.2875 -0.0654454 26.1485 0.118324C27.5176 0.415183 28.5762 1.12199 29.3949 2.23874C29.8183 2.81832 30.143 3.44031 30.2277 4.16126C30.2841 4.62775 30.3688 5.09424 30.3547 5.5466C30.2982 6.88953 29.776 8.06283 28.788 8.98168C28.4492 9.30681 28.421 9.6178 28.5198 10.0136C28.8868 11.4838 28.9009 12.9963 28.7738 14.4948C28.7033 15.3005 28.5339 16.1204 28.2939 16.8838C27.7435 18.6367 26.9107 20.234 25.7533 21.6759C24.7088 22.9764 23.509 24.0791 22.1258 24.9838C21.1519 25.6199 20.0933 26.1005 18.9923 26.4539C17.7361 26.8639 16.4658 27.0618 14.9696 26.9628L14.9837 26.9911ZM21.4483 19.2869C21.5471 18.6508 21.293 17.9298 21.0107 17.2372C20.5308 16.0639 19.7969 15.0602 18.8229 14.2262C18.0043 13.5194 17.0727 13.0105 16.0141 12.855C14.7438 12.6712 13.5299 12.8974 12.4148 13.6183C10.4952 14.8623 9.3378 16.6152 8.92847 18.8628C8.73086 19.9654 9.02728 20.9267 9.60598 21.8314C10.2976 22.8916 11.2998 23.5136 12.4854 23.9236C13.5299 24.277 14.5885 24.4325 15.6753 24.3759C15.9435 24.3759 16.1976 24.277 16.4658 24.2487C17.4115 24.1497 18.2866 23.8529 19.1052 23.3723C20.5732 22.4817 21.4765 21.2377 21.4483 19.2869ZM8.82967 9.37749C8.58972 9.37749 8.33565 9.37749 8.0957 9.37749C7.89809 9.37749 7.77106 9.49058 7.77106 9.71675C7.77106 10.2398 7.94044 10.6921 8.25096 11.1021C8.80144 11.8089 9.57775 12.0775 10.4105 12.2471C10.7916 12.3178 11.0739 12.0775 11.0739 11.6817C11.0739 11.512 11.0739 11.3283 11.0739 11.1586C11.0457 10.5366 10.8057 10.0419 10.2553 9.68848C9.80359 9.39162 9.32369 9.34921 8.82967 9.39162V9.37749ZM19.3593 11.3707C19.3593 11.4838 19.3593 11.611 19.3593 11.7241C19.3734 12.0916 19.6698 12.3461 20.0086 12.2471C20.4885 12.1199 20.9684 11.9785 21.4059 11.7382C22.154 11.3283 22.6057 10.6921 22.6622 9.80157C22.6763 9.49058 22.5351 9.36335 22.2528 9.36335C21.8576 9.36335 21.4483 9.32094 21.0531 9.36335C20.7708 9.39162 20.5026 9.50471 20.2485 9.6178C19.5287 9.9712 19.3593 10.6215 19.3593 11.3565V11.3707Z" fill="currentColor"/><path d="M15.2519 16.2476C16.0865 16.2475 16.9739 16.4173 17.6091 17.0534C18.5689 17.9864 18.4277 19.4424 17.1715 20.2199C16.3952 20.7005 15.5201 20.8843 14.645 20.7429C13.7981 20.6016 12.9794 20.2764 12.4713 19.5131C11.9067 18.6649 12.0196 17.7461 12.8665 16.9827C13.5299 16.3749 14.0766 16.2477 15.2519 16.2476Z" fill="currentColor"/></svg> Bearish</span><span class="comment-more">···</span></div>
+          </div>
+          <div class="comment-subline"><span>🇩🇪 DE</span><span class="subline-dot">·</span><span class="comment-time">May 01</span></div>
+          <div class="comment-body">The best continuous follow-up</div>
+          <div class="comment-actions">
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">8</span></div>
+            <div class="action-btn"><span class="action-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="action-count">0</span></div>
+            <div class="reply-action"><span class="reply-text">Reply</span><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+</div><!-- /phone-scroll -->
+
+  <!-- Action sheet -->
+  <div class="action-overlay" id="action-overlay" onclick="closeMenu()"></div>
+  <div class="action-sheet" id="action-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-item" onclick="showToast('Comment saved'); closeMenu()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 3h14a2 2 0 012 2v16l-7-3-7 3V5a2 2 0 012-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      Save comment
+    </div>
+    <div class="sheet-item" onclick="showToast('Link copied'); closeMenu()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8.59 13.51a4.5 4.5 0 006.36 0l3-3a4.5 4.5 0 00-6.36-6.36l-1.5 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M15.41 10.49a4.5 4.5 0 00-6.36 0l-3 3a4.5 4.5 0 006.36 6.36l1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Share comment
+    </div>
+    <div class="sheet-item" onclick="showToast('Reported as spam'); closeMenu()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="4" y1="22" x2="4" y2="15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Report as spam
+    </div>
+    <div class="sheet-item" onclick="showToast('User blocked'); closeMenu()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Block user
+    </div>
+    <div class="sheet-divider"></div>
+    <div class="sheet-item destructive" onclick="deleteComment()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6l-1 14H6L5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9 6V4h6v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Delete comment
+    </div>
+    <div class="sheet-cancel" onclick="closeMenu()">Cancel</div>
+  </div>
+
+  <!-- Bottom tab bar -->
+  <div class="bottom-tab-bar">
+    <div class="tab-bar-buttons">
+      <div class="tab-bar-fill"></div>
+      <div class="tab-bar-glass"></div>
+      <div class="tab-bar-tabs">
+        <div class="tab-item active" onclick="showToast('Markets')">
+          <img class="tab-icon" src="https://www.figma.com/api/mcp/asset/78ebaec0-97a9-4754-8f1b-12548a2c3de1" alt="Markets">
+          <span class="tab-label">Markets</span>
+        </div>
+        <div class="tab-item" onclick="showToast('News')">
+          <img class="tab-icon" src="https://www.figma.com/api/mcp/asset/fa25c0a2-a88a-4fa4-bc4f-016f2e6e31b9" alt="News">
+          <span class="tab-label">News</span>
+        </div>
+        <div class="tab-item" onclick="showToast('Ideas')">
+          <img class="tab-icon" src="https://www.figma.com/api/mcp/asset/42881952-46cb-47b4-969c-cc4dc71e49b2" alt="Ideas">
+          <span class="tab-label">Ideas</span>
+        </div>
+        <div class="tab-item" onclick="showToast('Watchlist')">
+          <img class="tab-icon" src="https://www.figma.com/api/mcp/asset/fb4dba5c-8eb7-4c78-9dc8-9a2f1dcbc28d" alt="Watchlist">
+          <span class="tab-label">Watchlist</span>
+        </div>
+        <div class="tab-item" onclick="showToast('More')">
+          <img class="tab-icon" src="https://www.figma.com/api/mcp/asset/a0184353-8ce1-491a-b865-c9923aafc227" alt="More">
+          <span class="tab-label">More</span>
+        </div>
+      </div>
+    </div>
+    <div class="home-indicator-bar"><div class="home-bar"></div></div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+  const filterState = { pro: false, edition: 'all', sort: 'top' };
+
+  function toggleProFilter(btn) {
+    filterState.pro = !filterState.pro;
+    btn.style.background = filterState.pro ? '#ff852b' : '#1c1c1e';
+    btn.style.borderColor = filterState.pro ? '#ff852b' : '#2c2c2e';
+    const path = document.getElementById('pro-shield-main');
+    if (path) path.setAttribute('fill', filterState.pro ? 'white' : '#8a8a8e');
+    applyFilters();
+  }
+
+  function toggleSortDropdown() {
+    const dd = document.getElementById('sort-dropdown');
+    document.getElementById('edition-dropdown').style.display = 'none';
+    dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function toggleEditionDropdown() {
+    const dd = document.getElementById('edition-dropdown');
+    document.getElementById('sort-dropdown').style.display = 'none';
+    dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function selectSort(val) {
+    filterState.sort = val;
+    document.getElementById('sort-dropdown').style.display = 'none';
+    const icons = {
+      top: '<svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M6 1C6 1 9.5 4.5 9.5 7.5C9.5 9.43 7.93 11 6 11C4.07 11 2.5 9.43 2.5 7.5C2.5 5.5 4 3.5 4 3.5C4 3.5 4.5 5 5.5 5.5C5.5 4 5.2 2.2 6 1Z" fill="#ff852b"/><circle cx="6" cy="7.5" r="1.5" fill="white" fill-opacity="0.6"/></svg>',
+      trending: '<svg width="14" height="12" viewBox="0 0 14 12" fill="none"><path d="M1 10L4.5 6L7 8.5L10 4L13 1" stroke="#a855f7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 1H13V4" stroke="#a855f7" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      recent: '<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#3b82f6" stroke-width="1.2"/><path d="M6.5 3.5V6.5L8.5 8" stroke="#3b82f6" stroke-width="1.2" stroke-linecap="round"/></svg>'
+    };
+    const labels = { top: 'Top', trending: 'Trending', recent: 'Recent' };
+    document.getElementById('sort-icon-display').innerHTML = icons[val];
+    document.getElementById('sort-label').textContent = labels[val];
+    ['top','trending','recent'].forEach(v => {
+      document.getElementById('sort-' + v).classList.toggle('active', v === val);
+    });
+    applyFilters();
+  }
+
+  function selectEdition(val) {
+    filterState.edition = val;
+    document.getElementById('edition-dropdown').style.display = 'none';
+    // Globe icon: show on 'all', hide on 'us'
+    const globe = document.getElementById('edition-globe-icon');
+    globe.style.display = val === 'all' ? 'flex' : 'none';
+    document.getElementById('edition-label').textContent = val === 'all' ? 'All editions' : '🇺🇸 US';
+    ['all','us'].forEach(v => document.getElementById('ed-' + v).classList.toggle('active', v === val));
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const list = document.getElementById('future-comments-list');
+    const comments = [...list.querySelectorAll('.fc')];
+
+    comments.forEach(c => {
+      const isPro = c.dataset.pro === 'true';
+      const edition = c.dataset.edition;
+      const likes = parseInt(c.dataset.likes);
+      const replies = parseInt(c.dataset.replies);
+      const hours = parseInt(c.dataset.hours);
+
+      let show = true;
+      if (filterState.pro && !isPro) show = false;
+      if (filterState.edition === 'us' && edition !== 'us') show = false;
+      if (filterState.sort === 'top' && (hours > 72 || likes < 10)) show = false;
+      if (filterState.sort === 'trending' && replies < 3) show = false;
+      if (filterState.sort === 'recent' && hours > 72) show = false;
+
+      c.style.display = show ? '' : 'none';
+    });
+
+    const visible = comments.filter(c => c.style.display !== 'none');
+    const sortFns = {
+      top: (a, b) => parseInt(b.dataset.likes) - parseInt(a.dataset.likes),
+      trending: (a, b) => parseInt(b.dataset.replies) - parseInt(a.dataset.replies),
+      recent: (a, b) => parseInt(a.dataset.hours) - parseInt(b.dataset.hours)
+    };
+    visible.sort(sortFns[filterState.sort]).forEach(c => list.appendChild(c));
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('#sort-pill-btn') && !e.target.closest('#sort-dropdown'))
+      document.getElementById('sort-dropdown').style.display = 'none';
+    if (!e.target.closest('#edition-chip') && !e.target.closest('#edition-dropdown'))
+      document.getElementById('edition-dropdown').style.display = 'none';
+  });
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  // ── Inline reply expand ──
+  const PRO_SVG_SM = `<span class="pro-badge"><svg width="12" height="14" viewBox="0 0 14 16" fill="none"><path d="M7 0.5L0.5 3V8.5C0.5 12.09 3.36 15.45 7 16C10.64 15.45 13.5 12.09 13.5 8.5V3L7 0.5Z" fill="#F5A623"/><text x="7" y="11.5" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="7.5" font-weight="700" fill="white">P</text></svg></span>`;
+  const ARROW_SVG = `<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5H9M9 5L5.5 1.5M9 5L5.5 8.5" stroke="#8a8a8e" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const LIKE_SVG = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M5 14V7M2 8.5V13C2 13.55 2.45 14 3 14H11.5C12.25 14 12.9 13.48 13.05 12.74L13.96 8.24C14.16 7.27 13.42 6.37 12.41 6.37H9.5V3C9.5 2.17 8.83 1.5 8 1.5L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const DISLIKE_SVG = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M11 2V9M14 7.5V3C14 2.45 13.55 2 13 2H4.5C3.75 2 3.1 2.52 2.95 3.26L2.04 7.76C1.84 8.73 2.58 9.63 3.59 9.63H6.5V13C6.5 13.83 7.17 14.5 8 14.5L11 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+  // Action sheet
+  let activeMenuTarget = null;
+  function openMenu(el, evt) {
+    if (evt) evt.stopPropagation();
+    activeMenuTarget = el.closest('.reply-row') || el.closest('.comment');
+    document.getElementById('action-sheet').classList.add('open');
+    document.getElementById('action-overlay').classList.add('open');
+  }
+  function closeMenu() {
+    document.getElementById('action-sheet').classList.remove('open');
+    document.getElementById('action-overlay').classList.remove('open');
+  }
+  function deleteComment() {
+    if (!activeMenuTarget) return;
+    const body = activeMenuTarget.querySelector('.comment-body, .reply-body');
+    if (body) body.innerHTML = '<em style="color:var(--text-secondary);font-style:italic">This comment was deleted.</em>';
+    closeMenu();
+  }
+
+  const openComposes = new Set();
+
+  function openCompose(commentId) {
+    const container = document.getElementById('tr-' + commentId);
+    // Toggle off if already open
+    if (openComposes.has(commentId)) {
+      openComposes.delete(commentId);
+      const existing = container.querySelector('.inline-compose');
+      if (existing) existing.remove();
+      return;
+    }
+    openComposes.add(commentId);
+    const sendId = 'is-' + commentId;
+    const inputId = 'ii-' + commentId;
+    const composeHtml = `
+      <div class="inline-compose">
+        <div class="inline-compose-avatar">ML</div>
+        <div class="inline-compose-wrap">
+          <div class="inline-compose-input" id="${inputId}" contenteditable="true"
+            data-placeholder="Reply to thread…"
+            oninput="updateSendBtn('${commentId}')"
+            onkeydown="handleComposeKey(event, '${commentId}')"></div>
+        </div>
+        <button class="inline-compose-send" id="${sendId}" onclick="showToast('Reply posted!')">
+          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M1 7H13M13 7L7 1M13 7L7 13" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>`;
+    container.insertAdjacentHTML('beforeend', composeHtml);
+    setTimeout(() => {
+      document.getElementById(inputId).focus();
+      container.querySelector('.inline-compose').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 50);
+  }
+
+  function setMention(commentId, author) {
+    if (!openComposes.has(commentId)) openCompose(commentId);
+    setTimeout(() => {
+      const input = document.getElementById('ii-' + commentId);
+      if (!input) return;
+      input.innerHTML = '';
+      const pill = document.createElement('span');
+      pill.className = 'mention-pill';
+      pill.contentEditable = 'false';
+      pill.textContent = '@' + author;
+      input.appendChild(pill);
+      const space = document.createTextNode(' ');
+      input.appendChild(space);
+      const range = document.createRange();
+      range.setStartAfter(space);
+      range.collapse(true);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      input.focus();
+      updateSendBtn(commentId);
+      input.closest('.inline-compose').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 60);
+  }
+
+  function updateSendBtn(commentId) {
+    const input = document.getElementById('ii-' + commentId);
+    const btn = document.getElementById('is-' + commentId);
+    if (!btn || !input) return;
+    const hasPill = !!input.querySelector('.mention-pill');
+    const hasText = input.textContent.replace(/ /g, '').trim().length > 0;
+    btn.classList.toggle('active', hasPill || hasText);
+  }
+
+  function handleComposeKey(e, commentId) {
+    if (e.key === 'Backspace') {
+      const input = document.getElementById('ii-' + commentId);
+      if (!input) return;
+      const pill = input.querySelector('.mention-pill');
+      if (!pill) return;
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      const range = sel.getRangeAt(0);
+      const textAfterPill = input.textContent.replace(pill.textContent, '').replace(/ /g, '').trim();
+      if (range.collapsed && textAfterPill.length === 0) {
+        pill.remove();
+        input.innerHTML = input.innerHTML.replace(/&nbsp;| /g, '');
+        e.preventDefault();
+        updateSendBtn(commentId);
+      }
+    }
+  }
+
+  // ── Thread data ──
+  const THREADS = {
+    c1: {
+      parent: {
+        avatar: '#2d6a4f', initials: 'FD',
+        author: 'FDL808', pro: true, flag: '🇺🇸 EN', time: '2h ago',
+        pill: '<span class="pill-sm bullish"><svg width="13" height="10" viewBox="0 0 42.75 31.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.3838 30.6031C19.4575 30.5336 17.9907 30.2211 16.6829 29.4224C15.3751 28.6237 14.4915 27.5473 14.5622 25.9152C14.5975 25.186 14.8803 24.5435 15.3575 23.9879C15.5695 23.7449 15.5872 23.5539 15.4458 23.2587C14.4385 21.1578 13.4488 19.057 12.4592 16.9387C12.3355 16.6783 12.1941 16.5568 11.9113 16.7998C11.1514 17.477 10.2678 17.7721 9.24275 17.668C8.44748 17.5812 7.81127 17.1818 7.26342 16.6436C7.2104 16.5915 7.26342 16.3137 7.35178 16.2269C8.27076 15.2546 9.18973 14.2823 10.1617 13.3621C11.2574 12.3203 12.1057 11.1049 12.4061 9.64647C12.5652 8.86516 12.4945 8.01439 12.4768 7.19835C12.4592 6.52121 12.4061 6.48649 13.0777 6.36495C14.4562 6.10451 15.817 5.82671 17.1954 5.68781C18.8213 5.51419 20.4472 5.39265 22.0731 5.42737C24.6886 5.4621 27.3041 5.70517 29.849 6.36495C30.1671 6.45176 30.2908 6.55594 30.2555 6.92055C30.1848 7.63242 30.1671 8.34428 30.2024 9.05615C30.3085 10.6188 31.1037 11.8862 32.1641 12.9974C33.1891 14.0566 34.2141 15.1157 35.2745 16.1574C35.5396 16.4179 35.5749 16.5915 35.2568 16.8519C33.843 18.0152 32.2878 18.0326 30.8387 16.8519C30.5559 16.6262 30.3968 16.6089 30.2378 16.9561C29.3011 18.9528 28.3645 20.9669 27.3925 22.9462C27.1628 23.415 27.1274 23.7275 27.4809 24.1963C28.6826 25.7763 28.2761 27.5646 26.8093 28.8495C25.2895 30.1864 23.045 30.6552 21.3838 30.6031ZM17.9907 17.286H18.0614C17.9553 16.8693 17.8846 16.4526 17.7079 16.088C17.3015 15.2719 16.5062 15.1157 15.6756 15.1157C15.2691 15.1157 14.6682 15.0809 14.4738 15.3067C14.1911 15.6539 14.4385 16.1748 14.6682 16.5915C15.1984 17.5812 16.1351 17.9805 17.1777 18.1715C17.7786 18.2757 17.9377 18.102 17.973 17.4943C17.973 17.4249 17.973 17.3554 17.973 17.286H17.9907ZM27.5339 15.133C27.2865 15.133 27.1628 15.0983 27.0567 15.0983C25.8903 15.0636 25.1658 15.4456 24.8653 16.3658C24.7239 16.7825 24.777 17.2686 24.7593 17.7201C24.7593 18.0152 24.936 18.1888 25.2188 18.1541C25.5369 18.1368 25.855 18.0847 26.1554 17.9979C27.1274 17.7027 27.905 17.1645 28.1878 16.1574C28.5412 14.9247 28.2938 15.1851 27.5162 15.1157L27.5339 15.133ZM23.8403 26.3666C23.8403 26.9222 24.1938 27.3042 24.7416 27.3042C25.2718 27.3042 25.6606 26.8875 25.6606 26.3492C25.6606 25.8457 25.2718 25.4638 24.7416 25.4638C24.1761 25.4638 23.8403 25.7936 23.8403 26.3666ZM18.8743 26.3666C18.8743 25.811 18.5385 25.4638 17.9907 25.4638C17.4782 25.4638 17.0187 25.8631 17.001 26.3492C17.001 26.8528 17.4782 27.3042 17.9907 27.3042C18.5032 27.3042 18.8743 26.9048 18.8743 26.3666Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.1285 1.41378C36.881 1.54552 36.7719 1.70978 36.4663 2.4108C35.8316 3.86666 35.3195 4.60395 34.5746 5.13438C34.1678 5.42404 33.7921 5.61667 32.4701 6.21346C32.0618 6.39779 31.9434 6.8255 31.9723 8.01173C31.9919 8.81875 32.0264 9.06309 32.1964 9.59958C32.4298 10.3361 33.0332 11.5889 33.2516 11.7905C33.5072 12.0264 33.6522 11.9782 34.4486 11.3929C35.4478 10.6584 36.4629 9.62776 37.0841 8.71692C37.6639 7.86681 38.1685 6.68157 38.4041 5.61635C38.6637 4.44268 38.5896 2.11875 38.2796 1.71252C38.023 1.3762 37.4692 1.23251 37.1285 1.41378Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.71799 1.38014C5.96294 1.51648 6.06897 1.68277 6.36135 2.38939C6.9687 3.85688 7.46692 4.60364 8.20175 5.14794C8.60306 5.44516 8.97508 5.6448 10.2856 6.26626C10.6904 6.4582 10.8008 6.88806 10.7497 8.07354C10.715 8.88005 10.6759 9.1237 10.4958 9.65691C10.2487 10.3889 9.6219 11.6302 9.39973 11.8276C9.13976 12.0587 8.99568 12.0078 8.21046 11.4077C7.22513 10.6546 6.22954 9.60514 5.6255 8.68282C5.06173 7.82199 4.57944 6.6275 4.36383 5.55806C4.12627 4.37973 4.2439 2.0576 4.56152 1.65725C4.82437 1.32579 5.38072 1.19251 5.71799 1.38014Z" fill="currentColor"/></svg> Bullish</span>',
+        body: 'Strong quarter, holding long. The services revenue growth continues to surprise me.',
+        likes: 47, dislikes: 0
+      },
+      replies: [
+        { avatar: '#1a4a8a', initials: 'MW', author: 'MarketWatcher', pro: true, flag: '🇺🇸 EN', time: '1h ago', body: 'Agreed, services margin is the real story here.', likes: 12, dislikes: 0 },
+        { avatar: '#1d4ed8', initials: 'TB', author: 'TechBull99', pro: false, flag: '🇺🇸 EN', time: '45m ago', body: 'Services margins expanding 3 years in a row. The flywheel is real.', likes: 8, dislikes: 0 },
+        { avatar: '#b45309', initials: 'MH', author: 'MarketHawk', pro: true, flag: '🇺🇸 EN', time: '30m ago', body: 'What\'s your PT? I\'m at $340 12-month.', likes: 3, dislikes: 0 },
+      ]
+    },
+    c2: {
+      parent: {
+        avatar: '#1d4ed8', initials: 'TB',
+        author: 'TechBull99', pro: false, flag: '🇺🇸 EN', time: '5h ago',
+        pill: '<span class="pill-sm bullish"><svg width="13" height="10" viewBox="0 0 42.75 31.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.3838 30.6031C19.4575 30.5336 17.9907 30.2211 16.6829 29.4224C15.3751 28.6237 14.4915 27.5473 14.5622 25.9152C14.5975 25.186 14.8803 24.5435 15.3575 23.9879C15.5695 23.7449 15.5872 23.5539 15.4458 23.2587C14.4385 21.1578 13.4488 19.057 12.4592 16.9387C12.3355 16.6783 12.1941 16.5568 11.9113 16.7998C11.1514 17.477 10.2678 17.7721 9.24275 17.668C8.44748 17.5812 7.81127 17.1818 7.26342 16.6436C7.2104 16.5915 7.26342 16.3137 7.35178 16.2269C8.27076 15.2546 9.18973 14.2823 10.1617 13.3621C11.2574 12.3203 12.1057 11.1049 12.4061 9.64647C12.5652 8.86516 12.4945 8.01439 12.4768 7.19835C12.4592 6.52121 12.4061 6.48649 13.0777 6.36495C14.4562 6.10451 15.817 5.82671 17.1954 5.68781C18.8213 5.51419 20.4472 5.39265 22.0731 5.42737C24.6886 5.4621 27.3041 5.70517 29.849 6.36495C30.1671 6.45176 30.2908 6.55594 30.2555 6.92055C30.1848 7.63242 30.1671 8.34428 30.2024 9.05615C30.3085 10.6188 31.1037 11.8862 32.1641 12.9974C33.1891 14.0566 34.2141 15.1157 35.2745 16.1574C35.5396 16.4179 35.5749 16.5915 35.2568 16.8519C33.843 18.0152 32.2878 18.0326 30.8387 16.8519C30.5559 16.6262 30.3968 16.6089 30.2378 16.9561C29.3011 18.9528 28.3645 20.9669 27.3925 22.9462C27.1628 23.415 27.1274 23.7275 27.4809 24.1963C28.6826 25.7763 28.2761 27.5646 26.8093 28.8495C25.2895 30.1864 23.045 30.6552 21.3838 30.6031ZM17.9907 17.286H18.0614C17.9553 16.8693 17.8846 16.4526 17.7079 16.088C17.3015 15.2719 16.5062 15.1157 15.6756 15.1157C15.2691 15.1157 14.6682 15.0809 14.4738 15.3067C14.1911 15.6539 14.4385 16.1748 14.6682 16.5915C15.1984 17.5812 16.1351 17.9805 17.1777 18.1715C17.7786 18.2757 17.9377 18.102 17.973 17.4943C17.973 17.4249 17.973 17.3554 17.973 17.286H17.9907ZM27.5339 15.133C27.2865 15.133 27.1628 15.0983 27.0567 15.0983C25.8903 15.0636 25.1658 15.4456 24.8653 16.3658C24.7239 16.7825 24.777 17.2686 24.7593 17.7201C24.7593 18.0152 24.936 18.1888 25.2188 18.1541C25.5369 18.1368 25.855 18.0847 26.1554 17.9979C27.1274 17.7027 27.905 17.1645 28.1878 16.1574C28.5412 14.9247 28.2938 15.1851 27.5162 15.1157L27.5339 15.133ZM23.8403 26.3666C23.8403 26.9222 24.1938 27.3042 24.7416 27.3042C25.2718 27.3042 25.6606 26.8875 25.6606 26.3492C25.6606 25.8457 25.2718 25.4638 24.7416 25.4638C24.1761 25.4638 23.8403 25.7936 23.8403 26.3666ZM18.8743 26.3666C18.8743 25.811 18.5385 25.4638 17.9907 25.4638C17.4782 25.4638 17.0187 25.8631 17.001 26.3492C17.001 26.8528 17.4782 27.3042 17.9907 27.3042C18.5032 27.3042 18.8743 26.9048 18.8743 26.3666Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.1285 1.41378C36.881 1.54552 36.7719 1.70978 36.4663 2.4108C35.8316 3.86666 35.3195 4.60395 34.5746 5.13438C34.1678 5.42404 33.7921 5.61667 32.4701 6.21346C32.0618 6.39779 31.9434 6.8255 31.9723 8.01173C31.9919 8.81875 32.0264 9.06309 32.1964 9.59958C32.4298 10.3361 33.0332 11.5889 33.2516 11.7905C33.5072 12.0264 33.6522 11.9782 34.4486 11.3929C35.4478 10.6584 36.4629 9.62776 37.0841 8.71692C37.6639 7.86681 38.1685 6.68157 38.4041 5.61635C38.6637 4.44268 38.5896 2.11875 38.2796 1.71252C38.023 1.3762 37.4692 1.23251 37.1285 1.41378Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.71799 1.38014C5.96294 1.51648 6.06897 1.68277 6.36135 2.38939C6.9687 3.85688 7.46692 4.60364 8.20175 5.14794C8.60306 5.44516 8.97508 5.6448 10.2856 6.26626C10.6904 6.4582 10.8008 6.88806 10.7497 8.07354C10.715 8.88005 10.6759 9.1237 10.4958 9.65691C10.2487 10.3889 9.6219 11.6302 9.39973 11.8276C9.13976 12.0587 8.99568 12.0078 8.21046 11.4077C7.22513 10.6546 6.22954 9.60514 5.6255 8.68282C5.06173 7.82199 4.57944 6.6275 4.36383 5.55806C4.12627 4.37973 4.2439 2.0576 4.56152 1.65725C4.82437 1.32579 5.38072 1.19251 5.71799 1.38014Z" fill="currentColor"/></svg> Bullish</span>',
+        body: 'Services + India growth = underrated combo. This stock should be at $350 by EOY.',
+        likes: 31, dislikes: 2
+      },
+      replies: [
+        { avatar: '#2d6a4f', initials: 'FD', author: 'FDL808', pro: true, flag: '🇺🇸 EN', time: '4h ago', body: 'India services number was buried in the footnotes — totally underreported.', likes: 7, dislikes: 0 },
+        { avatar: '#7c3aed', initials: 'EW', author: 'EuroWatcher', pro: false, flag: '🇩🇪 DE', time: '3h ago', body: '$350 feels rich. Show me the DCF.', likes: 4, dislikes: 1 },
+      ]
+    },
+    c3: {
+      parent: {
+        avatar: '#7c3aed', initials: 'EW',
+        author: 'EuroWatcher', pro: false, flag: '🇩🇪 DE', time: '4h ago',
+        pill: '<span class="pill-sm bearish"><svg width="11" height="10" viewBox="0 0 30.3563 27.01" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.9837 26.9911C14.7014 26.9911 14.2356 27.0335 13.784 26.9911C13.2052 26.9204 12.6407 26.8073 12.0761 26.6518C11.3986 26.4681 10.7352 26.2419 10.0859 25.9874C8.87201 25.5209 7.77106 24.8424 6.82537 23.9801C5.89379 23.1461 5.00456 22.2272 4.22825 21.2377C3.59309 20.4178 3.08495 19.4848 2.66151 18.5377C2.19572 17.5058 1.87108 16.4314 1.68759 15.3005C1.47587 14.0424 1.54644 12.7984 1.58879 11.5403C1.6029 10.9607 1.77228 10.3812 1.8852 9.81571C1.94166 9.56126 1.91343 9.33508 1.68759 9.15131C1.13711 8.68482 0.713671 8.10524 0.44549 7.45497C0.261998 7.03089 0.0926211 6.57853 0.0502767 6.12618C-0.0485267 5.2356 -0.0202972 4.35916 0.304343 3.49686C0.699556 2.45079 1.33472 1.61675 2.23807 0.980628C2.80266 0.584816 3.42371 0.259686 4.11533 0.174869C4.67992 0.104188 5.25863 0.00523522 5.80911 0.0617797C7.13589 0.203141 8.27919 0.796858 9.15431 1.81466C9.59187 2.32356 9.69067 2.35183 10.3399 2.16806C10.7352 2.05497 11.1586 1.97016 11.5679 1.94188C13.2194 1.8712 14.8708 1.78639 16.5222 1.77225C17.2985 1.77225 18.0748 1.85707 18.837 1.94188C19.3875 2.01257 19.938 2.13979 20.4744 2.25288C20.7143 2.30942 20.8837 2.22461 21.0107 2.04084C21.66 1.10785 22.5916 0.542408 23.6361 0.217277C24.4406 -0.0371732 25.2875 -0.0654454 26.1485 0.118324C27.5176 0.415183 28.5762 1.12199 29.3949 2.23874C29.8183 2.81832 30.143 3.44031 30.2277 4.16126C30.2841 4.62775 30.3688 5.09424 30.3547 5.5466C30.2982 6.88953 29.776 8.06283 28.788 8.98168C28.4492 9.30681 28.421 9.6178 28.5198 10.0136C28.8868 11.4838 28.9009 12.9963 28.7738 14.4948C28.7033 15.3005 28.5339 16.1204 28.2939 16.8838C27.7435 18.6367 26.9107 20.234 25.7533 21.6759C24.7088 22.9764 23.509 24.0791 22.1258 24.9838C21.1519 25.6199 20.0933 26.1005 18.9923 26.4539C17.7361 26.8639 16.4658 27.0618 14.9696 26.9628L14.9837 26.9911ZM21.4483 19.2869C21.5471 18.6508 21.293 17.9298 21.0107 17.2372C20.5308 16.0639 19.7969 15.0602 18.8229 14.2262C18.0043 13.5194 17.0727 13.0105 16.0141 12.855C14.7438 12.6712 13.5299 12.8974 12.4148 13.6183C10.4952 14.8623 9.3378 16.6152 8.92847 18.8628C8.73086 19.9654 9.02728 20.9267 9.60598 21.8314C10.2976 22.8916 11.2998 23.5136 12.4854 23.9236C13.5299 24.277 14.5885 24.4325 15.6753 24.3759C15.9435 24.3759 16.1976 24.277 16.4658 24.2487C17.4115 24.1497 18.2866 23.8529 19.1052 23.3723C20.5732 22.4817 21.4765 21.2377 21.4483 19.2869ZM8.82967 9.37749C8.58972 9.37749 8.33565 9.37749 8.0957 9.37749C7.89809 9.37749 7.77106 9.49058 7.77106 9.71675C7.77106 10.2398 7.94044 10.6921 8.25096 11.1021C8.80144 11.8089 9.57775 12.0775 10.4105 12.2471C10.7916 12.3178 11.0739 12.0775 11.0739 11.6817C11.0739 11.512 11.0739 11.3283 11.0739 11.1586C11.0457 10.5366 10.8057 10.0419 10.2553 9.68848C9.80359 9.39162 9.32369 9.34921 8.82967 9.39162V9.37749ZM19.3593 11.3707C19.3593 11.4838 19.3593 11.611 19.3593 11.7241C19.3734 12.0916 19.6698 12.3461 20.0086 12.2471C20.4885 12.1199 20.9684 11.9785 21.4059 11.7382C22.154 11.3283 22.6057 10.6921 22.6622 9.80157C22.6763 9.49058 22.5351 9.36335 22.2528 9.36335C21.8576 9.36335 21.4483 9.32094 21.0531 9.36335C20.7708 9.39162 20.5026 9.50471 20.2485 9.6178C19.5287 9.9712 19.3593 10.6215 19.3593 11.3565V11.3707Z" fill="currentColor"/><path d="M15.2519 16.2476C16.0865 16.2475 16.9739 16.4173 17.6091 17.0534C18.5689 17.9864 18.4277 19.4424 17.1715 20.2199C16.3952 20.7005 15.5201 20.8843 14.645 20.7429C13.7981 20.6016 12.9794 20.2764 12.4713 19.5131C11.9067 18.6649 12.0196 17.7461 12.8665 16.9827C13.5299 16.3749 14.0766 16.2477 15.2519 16.2476Z" fill="currentColor"/></svg> Bearish</span>',
+        body: 'Valuation stretched at these levels. Margin expansion story is already priced in — where does the upside come from?',
+        likes: 22, dislikes: 0
+      },
+      replies: [
+        { avatar: '#b45309', initials: 'MH', author: 'MarketHawk', pro: true, flag: '🇺🇸 EN', time: '3h ago', body: 'AI integration cycle hasn\'t even started yet. That\'s the next leg.', likes: 9, dislikes: 0 },
+        { avatar: '#2d6a4f', initials: 'FD', author: 'FDL808', pro: true, flag: '🇺🇸 EN', time: '2h ago', body: 'Vision Pro ecosystem is still a wildcard too. Early days.', likes: 5, dislikes: 0 },
+        { avatar: '#1d4ed8', initials: 'TB', author: 'TechBull99', pro: false, flag: '🇺🇸 EN', time: '1h ago', body: 'Agree on valuation but the buyback floor is real. Hard to stay short.', likes: 8, dislikes: 1 },
+      ]
+    },
+    c4: {
+      parent: {
+        avatar: '#b45309', initials: 'MH',
+        author: 'MarketHawk', pro: true, flag: '🇺🇸 EN', time: '12h ago',
+        pill: '<span class="pill-sm bearish"><svg width="11" height="10" viewBox="0 0 30.3563 27.01" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.9837 26.9911C14.7014 26.9911 14.2356 27.0335 13.784 26.9911C13.2052 26.9204 12.6407 26.8073 12.0761 26.6518C11.3986 26.4681 10.7352 26.2419 10.0859 25.9874C8.87201 25.5209 7.77106 24.8424 6.82537 23.9801C5.89379 23.1461 5.00456 22.2272 4.22825 21.2377C3.59309 20.4178 3.08495 19.4848 2.66151 18.5377C2.19572 17.5058 1.87108 16.4314 1.68759 15.3005C1.47587 14.0424 1.54644 12.7984 1.58879 11.5403C1.6029 10.9607 1.77228 10.3812 1.8852 9.81571C1.94166 9.56126 1.91343 9.33508 1.68759 9.15131C1.13711 8.68482 0.713671 8.10524 0.44549 7.45497C0.261998 7.03089 0.0926211 6.57853 0.0502767 6.12618C-0.0485267 5.2356 -0.0202972 4.35916 0.304343 3.49686C0.699556 2.45079 1.33472 1.61675 2.23807 0.980628C2.80266 0.584816 3.42371 0.259686 4.11533 0.174869C4.67992 0.104188 5.25863 0.00523522 5.80911 0.0617797C7.13589 0.203141 8.27919 0.796858 9.15431 1.81466C9.59187 2.32356 9.69067 2.35183 10.3399 2.16806C10.7352 2.05497 11.1586 1.97016 11.5679 1.94188C13.2194 1.8712 14.8708 1.78639 16.5222 1.77225C17.2985 1.77225 18.0748 1.85707 18.837 1.94188C19.3875 2.01257 19.938 2.13979 20.4744 2.25288C20.7143 2.30942 20.8837 2.22461 21.0107 2.04084C21.66 1.10785 22.5916 0.542408 23.6361 0.217277C24.4406 -0.0371732 25.2875 -0.0654454 26.1485 0.118324C27.5176 0.415183 28.5762 1.12199 29.3949 2.23874C29.8183 2.81832 30.143 3.44031 30.2277 4.16126C30.2841 4.62775 30.3688 5.09424 30.3547 5.5466C30.2982 6.88953 29.776 8.06283 28.788 8.98168C28.4492 9.30681 28.421 9.6178 28.5198 10.0136C28.8868 11.4838 28.9009 12.9963 28.7738 14.4948C28.7033 15.3005 28.5339 16.1204 28.2939 16.8838C27.7435 18.6367 26.9107 20.234 25.7533 21.6759C24.7088 22.9764 23.509 24.0791 22.1258 24.9838C21.1519 25.6199 20.0933 26.1005 18.9923 26.4539C17.7361 26.8639 16.4658 27.0618 14.9696 26.9628L14.9837 26.9911ZM21.4483 19.2869C21.5471 18.6508 21.293 17.9298 21.0107 17.2372C20.5308 16.0639 19.7969 15.0602 18.8229 14.2262C18.0043 13.5194 17.0727 13.0105 16.0141 12.855C14.7438 12.6712 13.5299 12.8974 12.4148 13.6183C10.4952 14.8623 9.3378 16.6152 8.92847 18.8628C8.73086 19.9654 9.02728 20.9267 9.60598 21.8314C10.2976 22.8916 11.2998 23.5136 12.4854 23.9236C13.5299 24.277 14.5885 24.4325 15.6753 24.3759C15.9435 24.3759 16.1976 24.277 16.4658 24.2487C17.4115 24.1497 18.2866 23.8529 19.1052 23.3723C20.5732 22.4817 21.4765 21.2377 21.4483 19.2869ZM8.82967 9.37749C8.58972 9.37749 8.33565 9.37749 8.0957 9.37749C7.89809 9.37749 7.77106 9.49058 7.77106 9.71675C7.77106 10.2398 7.94044 10.6921 8.25096 11.1021C8.80144 11.8089 9.57775 12.0775 10.4105 12.2471C10.7916 12.3178 11.0739 12.0775 11.0739 11.6817C11.0739 11.512 11.0739 11.3283 11.0739 11.1586C11.0457 10.5366 10.8057 10.0419 10.2553 9.68848C9.80359 9.39162 9.32369 9.34921 8.82967 9.39162V9.37749ZM19.3593 11.3707C19.3593 11.4838 19.3593 11.611 19.3593 11.7241C19.3734 12.0916 19.6698 12.3461 20.0086 12.2471C20.4885 12.1199 20.9684 11.9785 21.4059 11.7382C22.154 11.3283 22.6057 10.6921 22.6622 9.80157C22.6763 9.49058 22.5351 9.36335 22.2528 9.36335C21.8576 9.36335 21.4483 9.32094 21.0531 9.36335C20.7708 9.39162 20.5026 9.50471 20.2485 9.6178C19.5287 9.9712 19.3593 10.6215 19.3593 11.3565V11.3707Z" fill="currentColor"/><path d="M15.2519 16.2476C16.0865 16.2475 16.9739 16.4173 17.6091 17.0534C18.5689 17.9864 18.4277 19.4424 17.1715 20.2199C16.3952 20.7005 15.5201 20.8843 14.645 20.7429C13.7981 20.6016 12.9794 20.2764 12.4713 19.5131C11.9067 18.6649 12.0196 17.7461 12.8665 16.9827C13.5299 16.3749 14.0766 16.2477 15.2519 16.2476Z" fill="currentColor"/></svg> Bearish</span>',
+        body: 'The China risk is being completely ignored. $15B revenue exposure, and geopolitical tensions are only rising.',
+        likes: 19, dislikes: 3
+      },
+      replies: [
+        { avatar: '#2d6a4f', initials: 'FD', author: 'FDL808', pro: true, flag: '🇺🇸 EN', time: '11h ago', body: 'Supply chain already diversified significantly to India and Vietnam.', likes: 5, dislikes: 0 },
+        { avatar: '#1a4a8a', initials: 'MW', author: 'MarketWatcher', pro: true, flag: '🇺🇸 EN', time: '10h ago', body: 'The premium segment in China is sticky though. Wealthier consumers aren\'t switching.', likes: 8, dislikes: 0 },
+      ]
+    }
+  };
+
+  // Deep-link handler: ?target=c1 scrolls to that comment and opens inline reply compose
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const target = params.get('target');
+    if (!target) return;
+
+    window.addEventListener('load', function() {
+      const el = document.getElementById('comment-' + target);
+      if (!el) return;
+
+      setTimeout(function() {
+        // Scroll the phone's inner scroll container to the comment
+        const scroller = document.querySelector('.phone-scroll');
+        if (scroller) {
+          // Find offsetTop of el relative to scroller
+          let offsetTop = 0;
+          let node = el;
+          while (node && node !== scroller) {
+            offsetTop += node.offsetTop;
+            node = node.offsetParent;
+          }
+          scroller.scrollTo({ top: offsetTop - 80, behavior: 'smooth' });
+        }
+
+        // Flash highlight
+        el.style.transition = 'background 0.3s';
+        el.style.background = 'rgba(255,255,255,0.05)';
+        setTimeout(function() { el.style.background = ''; }, 1200);
+
+        // Open the inline compose (reuse the existing openCompose function)
+        setTimeout(function() {
+          if (typeof openCompose === 'function') openCompose(target);
+        }, 350);
+      }, 300);
+    });
+  })();
+
+</script>
+
+</body>
+</html>
