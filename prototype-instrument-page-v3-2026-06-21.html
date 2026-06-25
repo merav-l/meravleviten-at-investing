@@ -1,0 +1,3686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investing.com - Instrument Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --font: 'Roboto', system-ui, sans-serif;
+    --bg-primary: #0B0F14;
+    --bg-surface: #1A1E24;
+    --bg-card: #1F242A;
+    --bg-card2: #16191D;
+    --text-primary: #FFFFFF;
+    --text-secondary: #C7CACD;
+    --text-muted: #848C97;
+    --divider: rgba(255,255,255,0.08);
+    --green: #6AC64C;
+    --red: #E7544D;
+    --blue: #2278FF;
+    --orange: #FFA500;
+    --nav-height: 56px;
+    --tab-height: 56px;
+    --status-height: 44px;
+  }
+
+  body {
+    background: #0d1117;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: var(--font);
+  }
+
+  /* Phone shell */
+  .phone-shell {
+    width: 393px;
+    height: 852px;
+    background: var(--bg-primary);
+    border-radius: 54px;
+    box-shadow:
+      0 0 0 10px #111417,
+      0 0 0 12px #222629,
+      0 40px 120px rgba(0,0,0,0.9);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Dynamic island */
+  .dynamic-island {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 36px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 100;
+  }
+
+  /* Status bar */
+  .status-bar {
+    height: var(--status-height);
+    padding: 14px 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 50;
+    background: var(--bg-primary);
+  }
+
+  .status-time {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+
+  .status-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Nav bar */
+  .nav-bar {
+    height: var(--nav-height);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 40;
+  }
+
+  /* Nav pill button (back, right actions) */
+  .nav-pill-btn {
+    height: 44px;
+    border-radius: 1000px;
+    background: rgba(45,48,54,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.28);
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .nav-pill-back {
+    width: 44px;
+  }
+  .nav-pill-actions {
+    width: 82px;
+    gap: 0;
+  }
+  .nav-pill-icons {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px;
+  }
+
+  /* Nav center title block */
+  .nav-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+    padding: 0 8px;
+  }
+  .nav-title-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -0.4px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .nav-subtitle-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .nav-subtitle-text {
+    font-size: 12px;
+    font-weight: 510;
+    color: #949495;
+    white-space: nowrap;
+    line-height: 1;
+  }
+  .nav-subtitle-chevron {
+    display: flex;
+    align-items: center;
+    color: #949495;
+  }
+
+  /* Scrollable content */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--bg-primary);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* ==================
+     INSTRUMENT HEADER
+     ================== */
+  .instrument-header {
+    padding: 8px 16px 0;
+    background: var(--bg-primary);
+  }
+
+  .instrument-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .instrument-ticker {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+    line-height: 1.2;
+  }
+
+  .instrument-exchange-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 1px;
+  }
+
+  .flag-icon {
+    width: 16px;
+    height: 12px;
+    border-radius: 2px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .exchange-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .dropdown-chevron {
+    display: flex;
+    align-items: center;
+    margin-left: 2px;
+  }
+
+  .share-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  /* Price block */
+  .price-block {
+    margin-top: 8px;
+  }
+
+  .price-main-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .price-main {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0;
+    line-height: 25px;
+  }
+
+  .price-change {
+    font-size: 17px;
+    font-weight: 510;
+    color: var(--green);
+    letter-spacing: -0.4px;
+  }
+
+  .price-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+  }
+
+  .price-meta-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  .price-meta-text {
+    font-size: 11px;
+    color: #C7CACD;
+    font-weight: 400;
+  }
+
+  /* Pre-market row */
+  .pre-market-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 6px 0;
+    border-top: 0.5px solid var(--divider);
+  }
+
+  .pre-market-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-primary);
+    font-weight: 510;
+  }
+
+  .pre-market-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .pre-market-price {
+    font-size: 12px;
+    font-weight: 510;
+    color: var(--text-primary);
+    margin-left: 4px;
+  }
+
+  .pre-market-change {
+    font-size: 12px;
+    font-weight: 510;
+    color: var(--red);
+  }
+
+  .pre-market-time {
+    font-size: 11px;
+    color: #C7CACD;
+    font-weight: 400;
+    margin-left: auto;
+  }
+
+  /* Fair Value banner */
+  .fair-value-banner {
+    margin: 10px 16px 0;
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .fv-left {}
+
+  .fv-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-bottom: 1px;
+  }
+
+  .fv-value-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .fv-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .fv-pro-badge {
+    width: 10px;
+    height: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .fv-pro-badge img,
+  .pro-badge-img {
+    display: block;
+  }
+
+  .fv-upside {
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 500;
+    margin-top: 1px;
+  }
+
+  .fv-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fv-bar-thumb {
+    /* mini health bar visual */
+    width: 60px;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #E7544D 0%, #FF7800 30%, #FFD700 55%, #6AC64C 100%);
+    position: relative;
+  }
+
+  .fv-close-btn {
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px;
+  }
+
+  /* Section tabs (Overview / News / Health / Technical) */
+  .section-tabs-bar {
+    display: flex;
+    border-bottom: 0.5px solid var(--divider);
+    margin-top: 10px;
+    padding: 0 16px;
+    background: var(--bg-primary);
+    gap: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .section-tabs-bar::-webkit-scrollbar { display: none; }
+
+  .section-tab {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 10px 0 9px;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+
+  .section-tab.active {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  .section-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 1px;
+  }
+
+  /* ==================
+     CHART AREA
+     ================== */
+  .chart-section {
+    background: var(--bg-primary);
+    padding: 0;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px 0;
+  }
+
+  .chart-expand-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .analyze-chart-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(34,120,255,0.15);
+    border: 0.5px solid rgba(34,120,255,0.4);
+    border-radius: 20px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+
+  .analyze-chart-icon {
+    width: 14px;
+    height: 14px;
+    background: var(--blue);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .analyze-chart-label {
+    font-size: 12px;
+    color: var(--blue);
+    font-weight: 500;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 200px;
+    margin: 4px 0 0;
+    overflow: hidden;
+  }
+
+  .chart-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .chart-price-axis {
+    position: absolute;
+    right: 8px;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px 0;
+    pointer-events: none;
+  }
+
+  .chart-price-tick {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+    text-align: right;
+  }
+
+  .chart-current-label {
+    background: var(--blue);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    position: absolute;
+    right: 0;
+    pointer-events: none;
+  }
+
+  /* Timeframe bar */
+  .timeframe-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    margin: 4px 0 8px;
+  }
+
+  .tf-group {
+    display: flex;
+    gap: 2px;
+  }
+
+  .tf-tab {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 5px 9px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+  }
+
+  .tf-tab.active {
+    color: var(--text-primary);
+    background: #2C3037;
+    border-radius: 20px;
+  }
+
+  .chart-type-btn {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 8px;
+    background: var(--bg-card);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  /* Section divider */
+  .section-divider {
+    height: 8px;
+    background: #0D1016;
+  }
+
+  /* ==================
+     KEY STATISTICS
+     ================== */
+  .stats-section {
+    background: var(--bg-primary);
+    padding: 16px 16px 8px;
+  }
+
+  .stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .stats-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .stats-title {
+  font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    line-height: 1.25;
+  }
+
+  .info-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 700;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .edit-link {
+    font-size: 14px;
+    color: var(--blue);
+    font-weight: 400;
+    cursor: pointer;
+  }
+
+  .stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6.5px 0;
+    border-top: 0.5px solid var(--divider);
+    min-height: 36px;
+  }
+
+  .stat-row:first-child {
+    border-top: none;
+    padding-top: 0;
+    min-height: 28px;
+  }
+
+  .stat-label {
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    line-height: 17px;
+  }
+
+  .stat-value-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-value {
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 400;
+    text-align: right;
+    line-height: 17px;
+  }
+
+  .stat-chevron {
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .show-more-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 0 4px;
+    cursor: pointer;
+  }
+
+  .show-more-text {
+    font-size: 17px;
+    color: var(--text-primary);
+    font-weight: 400;
+    line-height: 17px;
+  }
+
+  .show-more-chevron {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ==================
+     PROTIPS
+     ================== */
+  .protips-section {
+    background: var(--bg-primary);
+    padding: 16px 16px 8px;
+  }
+
+  .protips-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .protips-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .protips-title {
+  font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    line-height: 1.25;
+  }
+
+  .pro-badge-orange {
+    width: 10px;
+    height: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .protips-view-all {
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 0 4px;
+  }
+
+  .protip-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 10px;
+    gap: 12px;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+
+  .protip-row.bullish { background: rgba(106,198,76,0.08); }
+  .protip-row.bearish { background: rgba(231,84,77,0.08); }
+
+  .protip-bull-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .protip-bull-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .protip-bull-icon.bullish { background: rgba(106,198,76,0.2); }
+  .protip-bull-icon.bearish { background: rgba(231,84,77,0.2); }
+
+  .protip-text {
+    flex: 1;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 400;
+    line-height: 20px;
+  }
+
+  .protip-chevron {
+    color: var(--text-muted);
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* ==================
+     NEWS & ANALYSIS
+     ================== */
+  .news-section {
+    background: var(--bg-primary);
+    padding: 16px 0 8px;
+  }
+
+  .news-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    margin-bottom: 14px;
+  }
+
+  .news-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    line-height: 1.25;
+  }
+
+  .news-read-more {
+    font-size: 13px;
+    color: var(--blue);
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  /* News carousel - two-column horizontal scroll */
+  .news-carousel {
+    overflow-x: auto;
+    overflow-y: hidden;
+    display: flex;
+    gap: 16px;
+    padding: 0 16px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .news-carousel::-webkit-scrollbar { display: none; }
+
+  /* Each column is 310px wide, contains 3 stacked article cards */
+  .news-col {
+    width: 310px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Individual article card */
+  .article-card {
+    padding: 10px 0;
+    cursor: pointer;
+    border-bottom: 0.5px solid var(--divider);
+    min-height: 97px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .article-card:last-child {
+    border-bottom: none;
+  }
+
+  /* Headline row: optional pro badge + headline text */
+  .article-headline-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    margin-bottom: 6px;
+  }
+
+  .article-pro-badge {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .article-headline {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 20px;
+    letter-spacing: -0.2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Meta row: source · time ... comment count */
+  .article-meta-row {
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+  }
+
+  .article-source-time {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+    flex: 1;
+  }
+
+  .article-comments {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .article-comment-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* "More news" link at bottom of section */
+  .news-more-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 0 4px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  /* ==================
+     FAIR VALUE / IS UNDERVALUED
+     ================== */
+  .fairvalue-section {
+    background: var(--bg-primary);
+    padding: 16px 16px 12px;
+  }
+
+  .section-question {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    line-height: 1.25;
+    margin-bottom: 14px;
+  }
+
+  .fv-card {
+    /* no card bg — flat on bg-primary */
+  }
+
+  .fv-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .fv-section-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .fv-section-title {
+  font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    line-height: 1.25;
+  }
+
+  .fv-view-details {
+    font-size: 13px;
+    color: var(--blue);
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .fv-stats-row {
+    display: flex;
+    gap: 0;
+    margin-bottom: 14px;
+  }
+
+  .fv-stat-box {
+    flex: 1;
+    background: var(--bg-card);
+    border-radius: 0;
+    padding: 10px 12px;
+  }
+
+  .fv-stat-box:first-child { border-radius: 8px 0 0 8px; }
+  .fv-stat-box:last-child { border-radius: 0 8px 8px 0; }
+
+  .fv-stat-label-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .fv-stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .fv-stat-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  .fv-stat-value.white { color: var(--text-primary); }
+
+  /* Range slider */
+  .range-slider-section {
+    margin-bottom: 14px;
+  }
+
+  .range-slider-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .range-slider-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 400;
+  }
+
+  .range-slider-right {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .range-track-container {
+    position: relative;
+    height: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #444 0%, #444 100%);
+    position: relative;
+  }
+
+  .range-thumb-label {
+    position: absolute;
+    top: -22px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    border-radius: 4px;
+    padding: 2px 5px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .range-thumb-triangle {
+    position: absolute;
+    top: 0;
+    width: 8px;
+    height: 8px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid var(--text-primary);
+    transform: translateX(-50%);
+  }
+
+  .range-min-max {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+
+  .range-bound {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .view-models-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 0 4px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  /* ==================
+     FINANCIAL HEALTH
+     ================== */
+  .health-section {
+    background: var(--bg-primary);
+    padding: 16px 16px 12px;
+  }
+
+  .health-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .health-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .health-title-text {
+    line-height: 27px;
+  }
+
+  .health-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    line-height: 1.25;
+  }
+
+  .health-details-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 0 4px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .health-view-details {
+    font-size: 13px;
+    color: var(--blue);
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  /* Gradient health bar */
+  .health-bar-container {
+    position: relative;
+    margin-bottom: 4px;
+  }
+
+  .health-bar-track {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #E7544D 0%, #FF7800 25%, #FFD700 50%, #9DC846 75%, #6AC64C 100%);
+    position: relative;
+  }
+
+  .health-bar-indicator {
+    position: absolute;
+    top: -22px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: #3A4040;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    padding: 2px 7px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .health-bar-triangle {
+    position: absolute;
+    top: 6px;
+    width: 8px;
+    height: 6px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid #3A4040;
+    transform: translateX(-50%);
+  }
+
+  .health-scale-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    margin-bottom: 12px;
+  }
+
+  .health-scale-weak {
+    font-size: 12px;
+    color: var(--red);
+  }
+
+  .health-scale-excellent {
+    font-size: 12px;
+    color: var(--green);
+  }
+
+  .health-cards-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .health-card {
+    flex: 1;
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  .health-card-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .health-card-rating {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green);
+    margin-bottom: 2px;
+  }
+
+  .health-card-rating.excellent { color: #00D4A0; }
+
+  .health-card-chevron {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .health-card-title {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+    line-height: 14px;
+  }
+
+  /* ==================
+     TECHNICAL (How strong momentum)
+     ================== */
+  .technical-section {
+    background: var(--bg-primary);
+    padding: 16px 16px 12px;
+  }
+
+  .technical-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .technical-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .technical-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.4px;
+    line-height: 1.25;
+  }
+
+  .technical-view-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 0 4px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .technical-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 6px;
+  }
+
+  .tech-cell {
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+  }
+
+  .tech-cell-period {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .tech-cell-signal {
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 0 8px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    line-height: 1.2;
+  }
+
+  .tech-cell-signal.strong-buy {
+    background: rgba(106,198,76,0.2);
+    color: var(--green);
+  }
+
+  .tech-cell-signal.buy {
+    background: rgba(106,198,76,0.2);
+    color: var(--green);
+  }
+
+  .tech-cell-signal.strong-sell {
+    background: rgba(231,84,77,0.2);
+    color: var(--red);
+  }
+
+  .tech-cell-signal.sell {
+    background: rgba(231,84,77,0.2);
+    color: var(--red);
+  }
+
+  .tech-cell-signal.neutral {
+    background: rgba(148,148,149,0.15);
+    color: var(--text-muted);
+  }
+
+  .tech-cell-arrow {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  /* ==================
+     BOTTOM TAB BAR
+     ================== */
+  .bottom-tab-bar {
+    position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 94px;
+    background: linear-gradient(to top, #0d1016 0%, rgba(13,16,22,0) 100%);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: flex-end; padding: 0 8px 4px; gap: 4px; z-index: 30;
+  }
+  .tab-bar-buttons { position: relative; height: 62px; width: 100%; display: flex; align-items: center; }
+  .tab-bar-fill {
+    position: absolute; inset: 0; border-radius: 100px;
+    background: rgba(13,16,22,0.6);
+  }
+  .tab-bar-glass {
+    position: absolute; inset: 0 -4px; border-radius: 100px;
+    background: rgba(0,0,0,0.2); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  }
+  .tab-bar-tabs { position: relative; display: flex; flex: 1; align-items: center; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: 6px 8px 7px; position: relative; cursor: pointer; }
+  .tab-item.active::before { content: ''; position: absolute; inset: 0 0.2px; border-radius: 100px; background: rgba(148,148,149,0.2); }
+  .tab-item .tab-icon { width: 24px; height: 24px; position: relative; z-index: 1; flex-shrink: 0; color: var(--text-secondary); }
+  .tab-item.active .tab-icon { color: var(--text-primary); }
+  .tab-label { font-size: 10px; font-weight: 510; color: var(--text-secondary); letter-spacing: 0; position: relative; z-index: 1; }
+  .tab-item.active .tab-label { color: var(--text-primary); }
+  .home-indicator-bar { height: 20px; width: 100%; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; }
+  .home-bar { width: 134px; height: 5px; background: rgba(255,255,255,0.3); border-radius: 100px; }
+
+  /* ───── WARREN SPEED DIAL ───── */
+  .wai-speed-dial {
+    position: absolute;
+    bottom: 182px;
+    right: 12px;
+    width: 220px;
+    scrollbar-width: none;
+    z-index: 65;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    pointer-events: none;
+    padding: 16px 0;
+  }
+  .wai-speed-dial::-webkit-scrollbar { display: none; }
+  .wai-speed-dial.open { pointer-events: all; }
+
+  .wai-dial-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+    transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .wai-speed-dial.open .wai-dial-item:nth-child(5) { opacity: 1; transform: none; transition-delay: 0.00s; }
+  .wai-speed-dial.open .wai-dial-item:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.05s; }
+  .wai-speed-dial.open .wai-dial-item:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.10s; }
+  .wai-speed-dial.open .wai-dial-item:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.15s; }
+  .wai-speed-dial.open .wai-dial-item:nth-child(1) { opacity: 1; transform: none; transition-delay: 0.20s; }
+
+  .wai-dial-label {
+    background: #F0F2F5;
+    color: #1A1A2E;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 13px;
+    border-radius: 20px;
+    white-space: nowrap;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+    flex-shrink: 0;
+    letter-spacing: -0.01em;
+  }
+  .wai-dial-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+    transition: transform 0.12s ease;
+  }
+  .wai-dial-btn:active { transform: scale(0.9); }
+  .wai-dial-btn svg { width: 19px; height: 19px; }
+
+  .wai-dial-btn.dial-summarise { background: #F0F2F5; color: #1A1A2E; }
+  .wai-dial-btn.dial-templates  { background: #F0F2F5; color: #1A1A2E; }
+  .wai-dial-btn.dial-updates    { background: #F0F2F5; color: #1A1A2E; }
+  .wai-dial-btn.dial-ask        { background: linear-gradient(135deg, #f97316, #ec4899, #a855f7); color: white; }
+
+  .wai-dial-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 64;
+    background: transparent;
+    display: none;
+  }
+  .wai-dial-scrim.open { display: block; }
+
+  .fab-icon-default,
+  .fab-icon-close {
+    position: absolute;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  .fab-icon-close { opacity: 0; transform: rotate(-45deg) scale(0.7); }
+  .fab-wrapper.dial-open .fab-icon-default { opacity: 0; transform: rotate(45deg) scale(0.7); }
+  .fab-wrapper.dial-open .fab-icon-close   { opacity: 1; transform: rotate(0deg) scale(1); }
+
+  /* ───── WARREN AI FAB ───── */
+  .fab-wrapper {
+    position: absolute;
+    bottom: 110px;
+    right: 12px;
+    width: 60px;
+    height: 60px;
+    z-index: 50;
+    cursor: pointer;
+  }
+  .fab-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    padding: 0;
+    background: transparent;
+    border: 2px solid rgba(249,115,22,0.8);
+  }
+  .fab-ring-inner {
+    width: 100%; height: 100%;
+    background: #161b26;
+    box-shadow: inset 0 -14px 20px rgba(249,115,22,0.36), inset 0 -4px 8px rgba(249,115,22,0.16);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .fab-icon { width: 30px; height: 30px; flex-shrink: 0; margin-top: 3px; }
+  .fab-badge {
+    position: absolute; top: -4px; right: -4px; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transform: scale(0.5);
+    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+  }
+  .fab-badge.visible { opacity: 1; transform: scale(1); }
+  .badge-response {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #ec4899; border: 2px solid #0B0F14;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff;
+  }
+  .badge-proactive {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #a855f7;
+    border: 2px solid #0B0F14;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pulse-ring {
+    position: absolute; inset: -4px; border-radius: 50%;
+    opacity: 0; pointer-events: none;
+  }
+  .pulse-ring::before, .pulse-ring::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid currentColor; opacity: 0;
+  }
+  .pulse-response { color: #ec4899; }
+  .pulse-response.active::before { animation: wai-pulse 1.8s ease-out infinite; }
+  .pulse-response.active::after  { animation: wai-pulse 1.8s ease-out 0.6s infinite; }
+  .pulse-proactive { color: #a855f7; }
+  .pulse-proactive.active::before { animation: wai-pulse 1.4s ease-out infinite; }
+  .pulse-proactive.active::after  { animation: wai-pulse 1.4s ease-out 0.4s infinite; }
+  @keyframes wai-pulse {
+    0%   { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  .fab-wrapper:active .fab-ring { transform: scale(0.92); }
+
+  /* Drag-to-dismiss target */
+  .fab-dismiss-target {
+    position: absolute;
+    bottom: 90px; left: 50%; transform: translateX(-50%);
+    z-index: 60;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .fab-dismiss-target.visible { opacity: 1; pointer-events: none; }
+  .fab-dismiss-zone {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: rgba(239,68,68,0.55);
+    border: 1.5px solid rgba(239,68,68,0.8);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .fab-dismiss-zone.hot {
+    transform: scale(1.25);
+    background: rgba(239,68,68,0.8);
+    border-color: rgba(239,68,68,1);
+    box-shadow: 0 0 18px rgba(239,68,68,0.5);
+  }
+
+  /* Dismissed toast — matches iOS design system */
+  .fab-dismissed-toast {
+    position: absolute;
+    bottom: 92px; left: 16px; right: 16px;
+    transform: translateY(12px);
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 0;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 55;
+  }
+  .fab-dismissed-toast.visible {
+    opacity: 1; transform: translateY(0); pointer-events: auto;
+  }
+  .fab-toast-msg {
+    flex: 1;
+    font-size: 15px; font-weight: 400;
+    color: #fff; line-height: 1.4;
+    font-family: var(--font);
+  }
+  .fab-toast-link {
+    color: #2278FF;
+    font-weight: 600;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  /* FAB response-ready: pink flash + jiggle */
+  @keyframes fab-response-flash {
+    0%   { box-shadow: 0 0 0 0 rgba(236,72,153,0); border-color: rgba(249,115,22,0.8); }
+    25%  { box-shadow: 0 0 0 10px rgba(236,72,153,0.35); border-color: rgba(236,72,153,0.9); }
+    55%  { box-shadow: 0 0 0 18px rgba(236,72,153,0); border-color: rgba(236,72,153,0.6); }
+    100% { box-shadow: 0 0 0 0 rgba(236,72,153,0); border-color: rgba(249,115,22,0.8); }
+  }
+  @keyframes fab-jiggle {
+    0%   { transform: rotate(0deg) scale(1); }
+    15%  { transform: rotate(-8deg) scale(1.08); }
+    30%  { transform: rotate(7deg) scale(1.06); }
+    45%  { transform: rotate(-5deg) scale(1.04); }
+    60%  { transform: rotate(4deg) scale(1.02); }
+    75%  { transform: rotate(-2deg) scale(1.01); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+  .fab-wrapper.response-ready { animation: fab-jiggle 0.55s cubic-bezier(0.36,0.07,0.19,0.97) forwards; }
+  .fab-wrapper.response-ready .fab-ring { animation: fab-response-flash 0.7s ease-out forwards; }
+
+  @keyframes fab-proactive-flash {
+    0%   { box-shadow: 0 0 0 0 rgba(168,85,247,0); border-color: rgba(249,115,22,0.8); }
+    25%  { box-shadow: 0 0 0 10px rgba(168,85,247,0.35); border-color: rgba(168,85,247,0.9); }
+    55%  { box-shadow: 0 0 0 18px rgba(168,85,247,0); border-color: rgba(168,85,247,0.6); }
+    100% { box-shadow: 0 0 0 0 rgba(168,85,247,0); border-color: rgba(249,115,22,0.8); }
+  }
+  .fab-wrapper.proactive-ready { animation: fab-jiggle 0.55s cubic-bezier(0.36,0.07,0.19,0.97) forwards; }
+  .fab-wrapper.proactive-ready .fab-ring { animation: fab-proactive-flash 0.7s ease-out forwards; }
+
+  /* ───── WARREN AI CHAT SHEET ───── */
+  .wai-scrim {
+    position: absolute; inset: 0; z-index: 60;
+    background: rgba(0,0,0,0.6);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease-out;
+  }
+  .wai-scrim.open { opacity: 1; pointer-events: all; }
+
+  .wai-sheet {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 85%;
+    max-height: calc(100% - 56px);
+    background: #1C2128;
+    border-radius: 24px 24px 0 0;
+    z-index: 70;
+    display: flex; flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.42s cubic-bezier(0.32, 0.72, 0, 1);
+    overflow: hidden;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
+  }
+  .wai-sheet.open { transform: translateY(0); }
+
+  .wai-handle-area {
+    display: flex; justify-content: center;
+    padding: 10px 0 4px; flex-shrink: 0;
+    cursor: grab;
+  }
+  .wai-handle {
+    width: 36px; height: 4px;
+    background: #30363D; border-radius: 100px;
+  }
+
+  .wai-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; height: 52px; flex-shrink: 0;
+  }
+  .wai-header-left { display: flex; align-items: center; gap: 8px; }
+  .wai-header-link {
+    display: flex; align-items: center; gap: 2px;
+    background: none; border: none; padding: 4px 6px 4px 0;
+    cursor: pointer; border-radius: 8px;
+    transition: opacity 0.15s;
+  }
+  .wai-header-link:active { opacity: 0.7; }
+  .wai-header-chevron { flex-shrink: 0; margin-top: 1px; }
+  .wai-avatar-sm {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #21262D;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .wai-header-title {
+    font-size: 18px; font-weight: 700; color: #fff;
+    letter-spacing: -0.3px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .wai-ai-badge {
+    display: inline-flex;
+    align-items: flex-start;
+    margin-left: 2px;
+    line-height: 0;
+  }
+  .wai-open-btn {
+    display: inline-flex; align-items: center;
+    padding: 5px 10px; border-radius: 20px;
+    border: 1px solid #30363D;
+    background: transparent;
+    color: #8B949E; font-size: 12px; font-weight: 500;
+    cursor: pointer; font-family: var(--font);
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .wai-open-btn:hover { background: rgba(255,255,255,0.06); color: #e6edf3; border-color: #484f58; }
+  .wai-open-footer {
+    width: 100%; justify-content: center;
+    margin-bottom: 10px; padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .wai-close-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #8B949E;
+    transition: background 0.15s;
+  }
+  .wai-close-btn:hover { background: rgba(255,255,255,0.06); }
+
+  .wai-gradient-rule {
+    height: 1px; flex-shrink: 0;
+    background: #21262D;
+  }
+
+  .wai-messages {
+    flex: 1; overflow-y: auto; padding: 16px 16px 32px;
+    display: flex; flex-direction: column; gap: 12px;
+    scrollbar-width: none;
+    background: #13181F;
+  }
+  .wai-messages::-webkit-scrollbar { display: none; }
+
+  /* Fade edges on messages area */
+  .wai-messages-wrap {
+    position: relative; flex: 1; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .wai-messages-wrap::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 48px;
+    background: linear-gradient(to bottom, transparent, #13181F);
+    pointer-events: none; z-index: 2;
+  }
+  .wai-messages-wrap::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 24px;
+    background: linear-gradient(to top, transparent, #13181F);
+    pointer-events: none; z-index: 2;
+  }
+
+  .wai-scroll-hint {
+    position: absolute; bottom: 140px; left: 50%; transform: translateX(-50%);
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #1C2128; border: 1.5px solid #2278FF;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 5;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .wai-scroll-hint.visible { opacity: 1; pointer-events: auto; }
+
+  .wai-msg-row {
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .wai-msg-warren { justify-content: flex-start; }
+  .wai-msg-user   { justify-content: flex-end; }
+
+  .wai-msg-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, #f97316, #ec4899, #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+
+  /* Warren: no bubble, plain text flowing full width */
+  .wai-bubble-warren {
+    flex: 1; font-size: 14px; line-height: 1.6; color: #e6edf3;
+    padding: 0;
+  }
+
+  /* User: grey pill bubble, right-aligned */
+  .wai-bubble-user {
+    max-width: 75%; padding: 10px 14px;
+    font-size: 14px; line-height: 1.5; color: #fff;
+    background: #30363D;
+    border-radius: 18px 18px 4px 18px;
+  }
+
+  /* Suggested queries */
+  .wai-suggestions {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-top: 4px;
+  }
+  .wai-suggestion-pill {
+    display: inline-flex; align-items: center;
+    padding: 9px 14px; border-radius: 20px;
+    border: 1px solid #30363D;
+    background: transparent;
+    color: #e6edf3; font-size: 13.5px; line-height: 1.4;
+    cursor: pointer; text-align: left;
+    transition: background 0.15s, border-color 0.15s;
+    font-family: var(--font);
+  }
+  .wai-suggestion-pill:hover { background: rgba(255,255,255,0.05); border-color: #484f58; }
+  .wai-suggestion-pill:active { background: rgba(255,255,255,0.08); }
+
+  /* Typing indicator */
+  .wai-typing { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
+  .wai-typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #8B949E; display: block;
+    animation: wai-bounce 1.2s ease-in-out infinite;
+  }
+  .wai-typing span:nth-child(2) { animation-delay: 0.15s; }
+  .wai-typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes wai-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  .wai-input-area {
+    flex-shrink: 0; padding: 8px 16px 16px;
+    background: #13181F;
+  }
+  .wai-credits {
+    text-align: center; font-size: 12px; color: #8B949E;
+    margin-bottom: 8px;
+  }
+  .wai-credits span { color: #2278FF; font-weight: 600; }
+  /* Gradient border wrapper */
+  .wai-input-wrap {
+    position: relative; border-radius: 24px;
+    background: linear-gradient(90deg, #f97316, #ec4899, #a855f7);
+    padding: 1.5px;
+  }
+  .wai-input-inner {
+    display: flex; align-items: center; gap: 8px;
+    background: #0D1117; border-radius: 23px;
+    padding: 0 6px 0 16px; height: 50px;
+  }
+  .wai-input {
+    flex: 1; height: 100%; background: transparent; border: none;
+    color: #fff; font-size: 15px;
+    outline: none; font-family: var(--font);
+  }
+  .wai-input::placeholder { color: #8B949E; }
+  .wai-send-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: none;
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    opacity: 0.3;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .wai-send-btn:not(:disabled) { opacity: 1; }
+  .wai-send-btn:not(:disabled):active { transform: scale(0.92); }
+  .wai-send-btn.waiting {
+    opacity: 1; cursor: default;
+  }
+  .wai-disclaimer {
+    text-align: center; font-size: 11px; color: #8B949E;
+    margin-top: 8px; line-height: 1.5;
+  }
+  .wai-disclaimer a { color: #8B949E; text-decoration: underline; }
+
+  /* Minimize banner */
+  .wai-minimize-banner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; padding: 0 14px;
+    background: rgba(236,72,153,0.08);
+    border-top: 1px solid rgba(236,72,153,0.18);
+    border-bottom: 1px solid rgba(236,72,153,0.18);
+    max-height: 0; overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.25s ease, opacity 0.25s ease, padding 0.25s ease;
+  }
+  .wai-minimize-banner.visible {
+    max-height: 60px;
+    padding: 10px 14px;
+    opacity: 1;
+  }
+  .wai-minimize-banner-inner {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 12px; line-height: 1.5; color: #c9d1d9;
+    flex: 1;
+  }
+  .wai-minimize-banner-dismiss {
+    background: none; border: none; cursor: pointer; padding: 2px;
+    color: #8B949E; flex-shrink: 0; display: flex; align-items: center;
+  }
+
+  /* Proactive placeholder */
+  .wai-proactive-placeholder {
+    display: none;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+    background: #13181F;
+  }
+  .wai-proactive-placeholder.visible {
+    display: flex;
+  }
+  .wai-proactive-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+  .wai-proactive-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(168,85,247,0.12);
+    border: 1px solid rgba(168,85,247,0.25);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+  }
+  .wai-proactive-label {
+    font-size: 16px; font-weight: 600; color: #e6edf3;
+    letter-spacing: -0.01em;
+  }
+  .wai-proactive-desc {
+    font-size: 13px; line-height: 1.6; color: #8B949E;
+    max-width: 280px;
+  }
+  .wai-proactive-tag {
+    font-size: 11px; color: rgba(168,85,247,0.7);
+    font-weight: 500; letter-spacing: 0.02em;
+    padding: 4px 10px; border-radius: 12px;
+    background: rgba(168,85,247,0.1);
+    border: 1px solid rgba(168,85,247,0.2);
+    margin-top: 4px;
+  }
+
+  /* Glow pulse on sheet open */
+  @keyframes wai-glow-pulse {
+    0%   { opacity: 0; }
+    40%  { opacity: 0.35; }
+    100% { opacity: 0; }
+  }
+  .wai-sheet::before {
+    content: ''; pointer-events: none;
+    position: absolute; top: 0; left: 0; right: 0; height: 60px;
+    background: linear-gradient(180deg, rgba(249,115,22,0.18) 0%, transparent 100%);
+    border-radius: 24px 24px 0 0;
+    opacity: 0;
+  }
+  /* Mock keyboard */
+  .mock-keyboard {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: #D1D5DB;
+    z-index: 200;
+    padding: 8px 4px 20px;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mock-keyboard.visible { transform: translateY(0); }
+  .mock-kb-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+  .mock-kb-key {
+    background: #fff;
+    border-radius: 5px;
+    height: 42px;
+    min-width: 32px;
+    flex: 1;
+    max-width: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #000;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.35);
+    cursor: default;
+    user-select: none;
+  }
+  .mock-kb-wide { min-width: 42px; max-width: 44px; font-size: 13px; background: #ADB5BD; color: #000; }
+  .mock-kb-special { min-width: 64px; max-width: 70px; font-size: 14px; background: #ADB5BD; }
+  .mock-kb-space { flex: 1; max-width: 180px; font-size: 15px; }
+  .mock-kb-bottom { gap: 8px; }
+
+  .wai-sheet.glow-pulse::before {
+    animation: wai-glow-pulse 0.6s ease-out forwards;
+  }
+</style>
+</head>
+<body>
+<!-- FAB state toggle -->
+<div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;font-family:system-ui,sans-serif;">
+  <span style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.08em;margin-right:4px;">FAB state</span>
+  <button onclick="setFabState('default')" id="toggleDefault" style="padding:6px 14px;border-radius:20px;border:1px solid #444;background:#222;color:#aaa;font-size:12px;cursor:pointer;font-family:inherit;">Default</button>
+  <button onclick="setFabState('response')" id="toggleResponse" style="padding:6px 14px;border-radius:20px;border:1px solid #444;background:#222;color:#aaa;font-size:12px;cursor:pointer;font-family:inherit;">Response</button>
+  <button onclick="setFabState('proactive')" id="toggleProactive" style="padding:6px 14px;border-radius:20px;border:1px solid #444;background:#222;color:#aaa;font-size:12px;cursor:pointer;font-family:inherit;">Proactive</button>
+</div>
+
+<div class="phone-shell">
+  <!-- Dynamic Island -->
+  <div class="dynamic-island"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="status-time">15:18</span>
+    <div class="status-right">
+      <!-- Signal dots (4 bars implied) -->
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="none">
+        <rect x="0" y="9" width="2.5" height="3" rx="0.5" fill="white" fill-opacity="0.3"/>
+        <rect x="4" y="6" width="2.5" height="6" rx="0.5" fill="white" fill-opacity="0.3"/>
+        <rect x="8" y="3" width="2.5" height="9" rx="0.5" fill="white" fill-opacity="0.3"/>
+        <rect x="12" y="0" width="2.5" height="12" rx="0.5" fill="white" fill-opacity="0.3"/>
+      </svg>
+      <!-- WiFi -->
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+        <path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="white"/>
+        <path d="M3.5 6.5C4.9 5.1 6.35 4.4 8 4.4s3.1.7 4.5 2.1" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        <path d="M1 4C3 2 5.4 1 8 1s5 1 7 3" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+      </svg>
+      <!-- Battery -->
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+        <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/>
+        <rect x="22" y="3.5" width="2.5" height="5" rx="1.5" fill="white" fill-opacity="0.4"/>
+        <rect x="2" y="2" width="16" height="8" rx="2" fill="white"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Nav Bar -->
+  <div class="nav-bar">
+    <!-- Back pill button -->
+    <div class="nav-pill-btn nav-pill-back">
+      <svg width="10" height="17" viewBox="0 0 10 17" fill="none" style="position:relative;z-index:1;">
+        <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- Center: two-line title block -->
+    <div class="nav-center">
+      <div class="nav-title-text">Apple</div>
+      <div class="nav-subtitle-row">
+        <span style="font-size:14px;line-height:1;">🇺🇸</span>
+        <span class="nav-subtitle-text">NASDAQ (AAPL)</span>
+        <!-- Dropdown chevron -->
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0;">
+          <path d="M2.5 4.5L6 8L9.5 4.5" stroke="#949495" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Right pill button with bell + star -->
+    <div class="nav-pill-btn nav-pill-actions">
+      <div class="nav-pill-icons">
+        <!-- Bell with plus (alert) icon -->
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="position:relative;z-index:1;flex-shrink:0;">
+          <path d="M9 17.5c.3.87 1.08 1.5 2 1.5s1.7-.63 2-1.5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M11 3.5V2M11 3.5C8.24 3.5 6 5.74 6 8.5v5l-1.5 2h13L16 13.5V8.5c0-2.76-2.24-5-5-5z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path d="M14.5 5.5V9M12.5 7H16.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <!-- Star/bookmark icon -->
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style="position:relative;z-index:1;flex-shrink:0;">
+          <path d="M11 2l2.4 4.87 5.37.78-3.88 3.78.92 5.34L11 14.27l-4.81 2.5.92-5.34-3.88-3.78 5.37-.78L11 2z" stroke="white" stroke-width="1.5" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scrollable Page Content -->
+  <div class="scroll-content">
+
+    <!-- Instrument Header -->
+    <div class="instrument-header">
+      <!-- Price -->
+      <div class="price-block">
+        <div class="price-main-row">
+          <!-- green up arrow -->
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-bottom:-2px; flex-shrink:0;">
+            <path d="M8 2L8 14M3 7L8 2L13 7" stroke="#6AC64C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="price-main">185.81</span>
+          <span class="price-change">+0.87 (+0.47%)</span>
+        </div>
+        <div class="price-meta-row">
+          <svg class="price-meta-icon" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="6" stroke="#848C97" stroke-width="1.2"/>
+            <path d="M7 4v3l2 2" stroke="#848C97" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <span class="price-meta-text">1/13 | Real Time. Currency in USD</span>
+        </div>
+      </div>
+
+      <!-- Pre-market row -->
+      <div class="pre-market-row">
+        <div class="pre-market-label">
+          <img class="pre-market-icon" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAAWhJREFUeAGlUj1MwkAYfS1ggaAEWYENJ8GRARbWGpw1cfZn0Y3o6NhNEhN1N7pjxBFjNDoaVzeYIcGqhQLF+w6prYVGwht6vd73vu+91xMikcgAM0DEjJjYYCPTwU6+jX83CAcGiC/2zYNUrI9E9HefTfbcG8grOu4PVSwEDL5XKgEoN0FTzcXWh3lmhWANMRXroaWJONn8RO5n4umdhPOqxN9rDY97A0J5T0VuyS5XuZW4GrK5zKzJaZ1bXCvNDy1ss7DK+yrizDORa00RhVKIrYKtUThocCu7+Q7qzaF7Lz3qDRGVVx/emXxOPg6xAg+fIKe7OKv6efF6RucqWpqAy6e58RbCLCjKgVJ/fPOa34uyhgO5ze1cPUtmHo57QGQqvmaWiqtfDjJlYQ3ToWBUTNNJxQNb6Y+MyH8hjiNTcYH5Vyp+V7JNQSJq4OWo5SjOJrtMjQ+TYLOQYFe51vRgGtgsTEsmfAMkt5trufRkiwAAAABJRU5ErkJggg==" alt="Pre Market" />
+          <span>Pre Market</span>
+        </div>
+        <span style="width:1px; height:12px; background:rgba(255,255,255,0.15); display:inline-block; margin: 0 2px;"></span>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="flex-shrink:0;">
+          <path d="M5 9L5 1M9 5L5 9L1 5" stroke="#E7544D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="pre-market-price">184.73</span>
+        <span class="pre-market-change">-1.08 (-0.58%)</span>
+        <span class="pre-market-time">15:18:52</span>
+      </div>
+    </div>
+
+    <!-- Fair Value Banner -->
+    <div class="fair-value-banner">
+      <div class="fv-left">
+        <div class="fv-label">Fair Value</div>
+        <div class="fv-value-row">
+          <span class="fv-value">197.82</span>
+          <span class="fv-pro-badge"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgdmlld0JveD0iMCAwIDEwIDExLjE1NDciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJHcm91cCA1ODEiPgo8cGF0aCBpZD0iU3VidHJhY3QiIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNS4wMDAwMiAwQzQuNTA2OTkgMCAzLjY4Mzc3IDAuMTg1MTY3IDIuOTA4MTUgMC4zOTA0MTNDMi4yMTYzNCAwLjU3NjE2MiAxLjUyOTAzIDAuNzc4MjQyIDAuODQ2NzcyIDAuOTk2NDgzQzAuNjUxOTg4IDEuMDU3ODMgMC40Nzg1NiAxLjE3MzA4IDAuMzQ2NTYgMS4zMjg5QzAuMjE0NTYxIDEuNDg0NzIgMC4xMjkzODcgMS42NzQ3NCAwLjEwMDg5NyAxLjg3Njk2Qy0wLjMyNTIxMSA0Ljk5ODAzIDAuNjYyMzQ4IDcuMzEwNzYgMS44NjE4NSA4Ljg0MTE4QzIuMDQ3MTUgOS4wNzk2NiAyLjI0NTA2IDkuMzA3NTcgMi40NTQ2MSA5LjUyMzk4VjIuNTQ1NUg1LjA1NzI3QzUuNDI5MDggMi41NDU1IDUuNzg2MzEgMi41ODE3NiA2LjEyODk2IDIuNjU0M0M2LjQ3ODkgMi43MjY4NCA2Ljc4NTEgMi44NTAxNSA3LjA0NzU1IDMuMDI0MjRDNy4zMTAwMSAzLjE5MTA4IDcuNTE3NzggMy40MTk1NyA3LjY3MDg4IDMuNzA5NzJDNy44MzEyNyAzLjk5MjYyIDcuOTExNDYgNC4zNDgwNSA3LjkxMTQ2IDQuNzc2MDJDNy45MTE0NiA1LjI2MjAyIDcuODI3NjIgNS42NTM3MiA3LjY1OTk0IDUuOTUxMTJDNy40OTIyNyA2LjI0ODUzIDcuMjY2MjYgNi40ODA2NSA2Ljk4MTk0IDYuNjQ3NDhDNi42OTc2MSA2LjgwNzA2IDYuMzY1OSA2LjkxNTg3IDUuOTg2OCA2Ljk3MzlDNS42MTQ5OSA3LjAzMTkzIDUuMjI0OTUgNy4wNjA5NCA0LjgxNjY5IDcuMDYwOTRIMy44MzI0OVYxMC42Njc5QzQuMDE3MjcgMTAuNzg2NSA0LjIwOTUyIDEwLjg5MzIgNC40MDgwOCAxMC45ODczQzQuNjA4ODcgMTEuMDc5NSA0LjgyMzA0IDExLjE1NDcgNS4wMDAwMiAxMS4xNTQ3QzUuMTc3MDEgMTEuMTU0NyA1LjM5MTE4IDExLjA3OTUgNS41OTE5NiAxMC45ODczQzUuODUzMzUgMTAuODYzMyA2LjEwMzg1IDEwLjcxNzUgNi4zNDA4MSAxMC41NTE2QzcuMDIyMzEgMTAuMDc0NSA3LjYyODQyIDkuNDk3OTcgOC4xMzg5NCA4Ljg0MTE4QzkuMzM2OTUgNy4zMTA3NiAxMC4zMjUzIDQuOTk4MDMgOS44OTkxNSAxLjg3Njk2QzkuODQxODkgMS40NTk3NyA5LjU0NTkyIDEuMTIxNDEgOS4xNTMyNyAwLjk5NjQ4M0M4LjQ3MTAyIDAuNzc4MjM2IDcuNzgzNyAwLjU3NjE1NiA3LjA5MTg5IDAuMzkwNDEzQzYuMzE2MjcgMC4xODUxNjcgNS40OTIzMSAwIDUuMDAwMDIgMFpNNS4yNzU5OSA1Ljg2NDA4QzUuMDY0NTcgNS44Nzg1OSA0Ljg2MDQ0IDUuODg1ODQgNC42NjM1OSA1Ljg4NTg0SDMuODMyNDlWMy43MjA2SDQuODE2NjlDNC45OTg5NSAzLjcyMDYgNS4xODg1IDMuNzMxNDggNS4zODUzNCAzLjc1MzI0QzUuNTgyMTggMy43NzUgNS43NjA4IDMuODI1NzggNS45MjExOSAzLjkwNTU3QzYuMDgxNTcgMy45NzgxMSA2LjIxMjggNC4wODY5MSA2LjMxNDg3IDQuMjMxOTlDNi40MTY5MyA0LjM2OTgxIDYuNDY3OTcgNC41NTg0MSA2LjQ2Nzk3IDQuNzk3NzhDNi40Njc5NyA1LjA1ODkxIDYuNDA5NjQgNS4yNjIwMiA2LjI5MyA1LjQwNzA5QzYuMTgzNjQgNS41NTIxNyA2LjAzNzgzIDUuNjYwOTcgNS44NTU1NyA1LjczMzUxQzUuNjgwNiA1LjgwNjA1IDUuNDg3NDEgNS44NDk1NyA1LjI3NTk5IDUuODY0MDhaIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMF81OSkiLz4KPC9nPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzBfNTkiIHgxPSItNy40MTgwMWUtMDkiIHkxPSIyLjEwNjk5IiB4Mj0iOC45MjM3MyIgeTI9IjguNTUxOSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjRkY2QjAwIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZGQTUwMCIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=" width="10" height="10" alt="Pro" style="display:block;"></span>
+        </div>
+        <div class="fv-upside">Fair with 6.46% Upside</div>
+      </div>
+      <div class="fv-right">
+        <div class="fv-bar-thumb"></div>
+        <div class="fv-close-btn">&#x2715;</div>
+      </div>
+    </div>
+
+    <!-- Section tabs -->
+    <div class="section-tabs-bar">
+      <div class="section-tab active">Overview</div>
+      <div class="section-tab">News</div>
+      <div class="section-tab" style="display:flex; align-items:flex-start; gap:4px;">
+        Health
+        <span class="pro-badge-orange" style="width:14px; height:14px;"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgdmlld0JveD0iMCAwIDEwIDExLjE1NDciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJHcm91cCA1ODEiPgo8cGF0aCBpZD0iU3VidHJhY3QiIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNS4wMDAwMiAwQzQuNTA2OTkgMCAzLjY4Mzc3IDAuMTg1MTY3IDIuOTA4MTUgMC4zOTA0MTNDMi4yMTYzNCAwLjU3NjE2MiAxLjUyOTAzIDAuNzc4MjQyIDAuODQ2NzcyIDAuOTk2NDgzQzAuNjUxOTg4IDEuMDU3ODMgMC40Nzg1NiAxLjE3MzA4IDAuMzQ2NTYgMS4zMjg5QzAuMjE0NTYxIDEuNDg0NzIgMC4xMjkzODcgMS42NzQ3NCAwLjEwMDg5NyAxLjg3Njk2Qy0wLjMyNTIxMSA0Ljk5ODAzIDAuNjYyMzQ4IDcuMzEwNzYgMS44NjE4NSA4Ljg0MTE4QzIuMDQ3MTUgOS4wNzk2NiAyLjI0NTA2IDkuMzA3NTcgMi40NTQ2MSA5LjUyMzk4VjIuNTQ1NUg1LjA1NzI3QzUuNDI5MDggMi41NDU1IDUuNzg2MzEgMi41ODE3NiA2LjEyODk2IDIuNjU0M0M2LjQ3ODkgMi43MjY4NCA2Ljc4NTEgMi44NTAxNSA3LjA0NzU1IDMuMDI0MjRDNy4zMTAwMSAzLjE5MTA4IDcuNTE3NzggMy40MTk1NyA3LjY3MDg4IDMuNzA5NzJDNy44MzEyNyAzLjk5MjYyIDcuOTExNDYgNC4zNDgwNSA3LjkxMTQ2IDQuNzc2MDJDNy45MTE0NiA1LjI2MjAyIDcuODI3NjIgNS42NTM3MiA3LjY1OTk0IDUuOTUxMTJDNy40OTIyNyA2LjI0ODUzIDcuMjY2MjYgNi40ODA2NSA2Ljk4MTk0IDYuNjQ3NDhDNi42OTc2MSA2LjgwNzA2IDYuMzY1OSA2LjkxNTg3IDUuOTg2OCA2Ljk3MzlDNS42MTQ5OSA3LjAzMTkzIDUuMjI0OTUgNy4wNjA5NCA0LjgxNjY5IDcuMDYwOTRIMy44MzI0OVYxMC42Njc5QzQuMDE3MjcgMTAuNzg2NSA0LjIwOTUyIDEwLjg5MzIgNC40MDgwOCAxMC45ODczQzQuNjA4ODcgMTEuMDc5NSA0LjgyMzA0IDExLjE1NDcgNS4wMDAwMiAxMS4xNTQ3QzUuMTc3MDEgMTEuMTU0NyA1LjM5MTE4IDExLjA3OTUgNS41OTE5NiAxMC45ODczQzUuODUzMzUgMTAuODYzMyA2LjEwMzg1IDEwLjcxNzUgNi4zNDA4MSAxMC41NTE2QzcuMDIyMzEgMTAuMDc0NSA3LjYyODQyIDkuNDk3OTcgOC4xMzg5NCA4Ljg0MTE4QzkuMzM2OTUgNy4zMTA3NiAxMC4zMjUzIDQuOTk4MDMgOS44OTkxNSAxLjg3Njk2QzkuODQxODkgMS40NTk3NyA5LjU0NTkyIDEuMTIxNDEgOS4xNTMyNyAwLjk5NjQ4M0M4LjQ3MTAyIDAuNzc4MjM2IDcuNzgzNyAwLjU3NjE1NiA3LjA5MTg5IDAuMzkwNDEzQzYuMzE2MjcgMC4xODUxNjcgNS40OTIzMSAwIDUuMDAwMDIgMFpNNS4yNzU5OSA1Ljg2NDA4QzUuMDY0NTcgNS44Nzg1OSA0Ljg2MDQ0IDUuODg1ODQgNC42NjM1OSA1Ljg4NTg0SDMuODMyNDlWMy43MjA2SDQuODE2NjlDNC45OTg5NSAzLjcyMDYgNS4xODg1IDMuNzMxNDggNS4zODUzNCAzLjc1MzI0QzUuNTgyMTggMy43NzUgNS43NjA4IDMuODI1NzggNS45MjExOSAzLjkwNTU3QzYuMDgxNTcgMy45NzgxMSA2LjIxMjggNC4wODY5MSA2LjMxNDg3IDQuMjMxOTlDNi40MTY5MyA0LjM2OTgxIDYuNDY3OTcgNC41NTg0MSA2LjQ2Nzk3IDQuNzk3NzhDNi40Njc5NyA1LjA1ODkxIDYuNDA5NjQgNS4yNjIwMiA2LjI5MyA1LjQwNzA5QzYuMTgzNjQgNS41NTIxNyA2LjAzNzgzIDUuNjYwOTcgNS44NTU1NyA1LjczMzUxQzUuNjgwNiA1LjgwNjA1IDUuNDg3NDEgNS44NDk1NyA1LjI3NTk5IDUuODY0MDhaIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMF81OSkiLz4KPC9nPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzBfNTkiIHgxPSItNy40MTgwMWUtMDkiIHkxPSIyLjEwNjk5IiB4Mj0iOC45MjM3MyIgeTI9IjguNTUxOSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjRkY2QjAwIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZGQTUwMCIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=" width="10" height="10" alt="Pro" style="display:block;"></span>
+      </div>
+      <div class="section-tab">Technical</div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-section" data-section="chart">
+      <div class="chart-header">
+        <div class="chart-expand-btn">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M2 2l5 5M2 2H7M2 2V7" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M18 18l-5-5M18 18H13M18 18V13" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="analyze-chart-btn">
+          <div class="analyze-chart-icon">W</div>
+          <span class="analyze-chart-label">Analyze Chart</span>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <svg class="chart-svg" viewBox="0 0 393 200" preserveAspectRatio="none" fill="none">
+          <!-- Price axis lines -->
+          <line x1="0" y1="30" x2="360" y2="30" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+          <line x1="0" y1="70" x2="360" y2="70" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+          <line x1="0" y1="110" x2="360" y2="110" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+          <line x1="0" y1="150" x2="360" y2="150" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+
+          <!-- Chart: mountainous volatility pattern (blue line, matches Figma) -->
+          <path d="
+            M0 155
+            C8 153 15 150 22 148
+            C30 145 35 143 42 138
+            C50 130 55 118 62 105
+            C70 90 75 75 82 68
+            C90 60 95 55 100 58
+            C108 62 113 72 120 80
+            C128 88 133 95 140 105
+            C148 116 153 130 160 140
+            C168 150 173 155 180 152
+            C188 148 193 140 200 130
+            C208 118 213 108 220 100
+            C228 92 233 88 240 86
+            C248 84 253 83 260 85
+            C268 87 273 90 280 92
+            C285 93 288 94 292 93
+            C296 92 298 90 302 89
+            C306 88 308 89 312 90
+            C316 91 319 92 323 91
+            C327 89 330 87 334 88
+            C338 89 341 92 345 93
+            C350 94 355 93 358 92
+            L393 92
+          " stroke="#2278FF" stroke-width="1.5" fill="none"/>
+
+          <!-- Dashed horizontal line at current price level ~92 -->
+          <line x1="0" y1="92" x2="345" y2="92" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" stroke-dasharray="4 3"/>
+
+          <!-- Current price label bubble -->
+          <rect x="344" y="80" width="49" height="18" rx="4" fill="#2278FF"/>
+          <text x="368.5" y="92.5" font-family="Roboto,sans-serif" font-size="11" font-weight="600" fill="white" text-anchor="middle" dominant-baseline="middle">185.81</text>
+
+          <!-- Time axis tick labels -->
+          <text x="20" y="195" font-family="Roboto,sans-serif" font-size="10" fill="#848C97" text-anchor="middle">16:30</text>
+          <text x="110" y="195" font-family="Roboto,sans-serif" font-size="10" fill="#848C97" text-anchor="middle">18:15</text>
+          <text x="210" y="195" font-family="Roboto,sans-serif" font-size="10" fill="#848C97" text-anchor="middle">19:45</text>
+          <text x="305" y="195" font-family="Roboto,sans-serif" font-size="10" fill="#848C97" text-anchor="middle">21:15</text>
+        </svg>
+
+        <!-- Price axis labels (right side) -->
+        <div class="chart-price-axis">
+          <span class="chart-price-tick">187.89</span>
+          <span class="chart-price-tick">186.96</span>
+          <span class="chart-price-tick" style="color:transparent;">·</span>
+          <span class="chart-price-tick">185.11</span>
+          <span class="chart-price-tick">184.18</span>
+          <span class="chart-price-tick">183.25</span>
+        </div>
+      </div>
+
+      <!-- Timeframe bar -->
+      <div class="timeframe-bar">
+        <div class="tf-group">
+          <div class="tf-tab active">1D</div>
+          <div class="tf-tab">1W</div>
+          <div class="tf-tab">1M</div>
+          <div class="tf-tab">1Y</div>
+          <div class="tf-tab">5Y</div>
+          <div class="tf-tab">Max</div>
+        </div>
+        <!-- Candlestick icon -->
+        <div class="chart-type-btn">
+          <svg width="18" height="14" viewBox="0 0 18 14" fill="none">
+            <rect x="1" y="3" width="3" height="8" rx="0.5" fill="#6AC64C"/>
+            <line x1="2.5" y1="1" x2="2.5" y2="3" stroke="#6AC64C" stroke-width="1.2"/>
+            <line x1="2.5" y1="11" x2="2.5" y2="13" stroke="#6AC64C" stroke-width="1.2"/>
+            <rect x="7" y="5" width="3" height="6" rx="0.5" fill="#E7544D"/>
+            <line x1="8.5" y1="2" x2="8.5" y2="5" stroke="#E7544D" stroke-width="1.2"/>
+            <line x1="8.5" y1="11" x2="8.5" y2="13" stroke="#E7544D" stroke-width="1.2"/>
+            <rect x="13" y="4" width="3" height="6" rx="0.5" fill="#6AC64C"/>
+            <line x1="14.5" y1="1" x2="14.5" y2="4" stroke="#6AC64C" stroke-width="1.2"/>
+            <line x1="14.5" y1="10" x2="14.5" y2="13" stroke="#6AC64C" stroke-width="1.2"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Key Statistics -->
+    <div class="stats-section" data-section="key-stats">
+      <div class="stats-header">
+        <div class="stats-title-row">
+          <span class="stats-title">Key Statistics</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="edit-link"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L5.11 13.556 2 14l.444-3.111L11.333 2Z" stroke="#949495" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <div class="info-icon">?</div>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <span class="stat-label">Day's Range</span>
+        <div class="stat-value-row">
+          <span class="stat-value">183.40 - 188.11</span>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">52wk Range</span>
+        <div class="stat-value-row">
+          <span class="stat-value">86.62 - 212.19</span>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Market Cap</span>
+        <div class="stat-value-row">
+          <span class="stat-value">4.51T</span>
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Fair Value</span>
+        <div class="stat-value-row">
+          <span class="stat-value">197.82</span>
+          <span class="pro-badge-orange" style="width:14px;height:14px;"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgdmlld0JveD0iMCAwIDEwIDExLjE1NDciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJHcm91cCA1ODEiPgo8cGF0aCBpZD0iU3VidHJhY3QiIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNS4wMDAwMiAwQzQuNTA2OTkgMCAzLjY4Mzc3IDAuMTg1MTY3IDIuOTA4MTUgMC4zOTA0MTNDMi4yMTYzNCAwLjU3NjE2MiAxLjUyOTAzIDAuNzc4MjQyIDAuODQ2NzcyIDAuOTk2NDgzQzAuNjUxOTg4IDEuMDU3ODMgMC40Nzg1NiAxLjE3MzA4IDAuMzQ2NTYgMS4zMjg5QzAuMjE0NTYxIDEuNDg0NzIgMC4xMjkzODcgMS42NzQ3NCAwLjEwMDg5NyAxLjg3Njk2Qy0wLjMyNTIxMSA0Ljk5ODAzIDAuNjYyMzQ4IDcuMzEwNzYgMS44NjE4NSA4Ljg0MTE4QzIuMDQ3MTUgOS4wNzk2NiAyLjI0NTA2IDkuMzA3NTcgMi40NTQ2MSA5LjUyMzk4VjIuNTQ1NUg1LjA1NzI3QzUuNDI5MDggMi41NDU1IDUuNzg2MzEgMi41ODE3NiA2LjEyODk2IDIuNjU0M0M2LjQ3ODkgMi43MjY4NCA2Ljc4NTEgMi44NTAxNSA3LjA0NzU1IDMuMDI0MjRDNy4zMTAwMSAzLjE5MTA4IDcuNTE3NzggMy40MTk1NyA3LjY3MDg4IDMuNzA5NzJDNy44MzEyNyAzLjk5MjYyIDcuOTExNDYgNC4zNDgwNSA3LjkxMTQ2IDQuNzc2MDJDNy45MTE0NiA1LjI2MjAyIDcuODI3NjIgNS42NTM3MiA3LjY1OTk0IDUuOTUxMTJDNy40OTIyNyA2LjI0ODUzIDcuMjY2MjYgNi40ODA2NSA2Ljk4MTk0IDYuNjQ3NDhDNi42OTc2MSA2LjgwNzA2IDYuMzY1OSA2LjkxNTg3IDUuOTg2OCA2Ljk3MzlDNS42MTQ5OSA3LjAzMTkzIDUuMjI0OTUgNy4wNjA5NCA0LjgxNjY5IDcuMDYwOTRIMy44MzI0OVYxMC42Njc5QzQuMDE3MjcgMTAuNzg2NSA0LjIwOTUyIDEwLjg5MzIgNC40MDgwOCAxMC45ODczQzQuNjA4ODcgMTEuMDc5NSA0LjgyMzA0IDExLjE1NDcgNS4wMDAwMiAxMS4xNTQ3QzUuMTc3MDEgMTEuMTU0NyA1LjM5MTE4IDExLjA3OTUgNS41OTE5NiAxMC45ODczQzUuODUzMzUgMTAuODYzMyA2LjEwMzg1IDEwLjcxNzUgNi4zNDA4MSAxMC41NTE2QzcuMDIyMzEgMTAuMDc0NSA3LjYyODQyIDkuNDk3OTcgOC4xMzg5NCA4Ljg0MTE4QzkuMzM2OTUgNy4zMTA3NiAxMC4zMjUzIDQuOTk4MDMgOS44OTkxNSAxLjg3Njk2QzkuODQxODkgMS40NTk3NyA5LjU0NTkyIDEuMTIxNDEgOS4xNTMyNyAwLjk5NjQ4M0M4LjQ3MTAyIDAuNzc4MjM2IDcuNzgzNyAwLjU3NjE1NiA3LjA5MTg5IDAuMzkwNDEzQzYuMzE2MjcgMC4xODUxNjcgNS40OTIzMSAwIDUuMDAwMDIgMFpNNS4yNzU5OSA1Ljg2NDA4QzUuMDY0NTcgNS44Nzg1OSA0Ljg2MDQ0IDUuODg1ODQgNC42NjM1OSA1Ljg4NTg0SDMuODMyNDlWMy43MjA2SDQuODE2NjlDNC45OTg5NSAzLjcyMDYgNS4xODg1IDMuNzMxNDggNS4zODUzNCAzLjc1MzI0QzUuNTgyMTggMy43NzUgNS43NjA4IDMuODI1NzggNS45MjExOSAzLjkwNTU3QzYuMDgxNTcgMy45NzgxMSA2LjIxMjggNC4wODY5MSA2LjMxNDg3IDQuMjMxOTlDNi40MTY5MyA0LjM2OTgxIDYuNDY3OTcgNC41NTg0MSA2LjQ2Nzk3IDQuNzk3NzhDNi40Njc5NyA1LjA1ODkxIDYuNDA5NjQgNS4yNjIwMiA2LjI5MyA1LjQwNzA5QzYuMTgzNjQgNS41NTIxNyA2LjAzNzgzIDUuNjYwOTcgNS44NTU1NyA1LjczMzUxQzUuNjgwNiA1LjgwNjA1IDUuNDg3NDEgNS44NDk1NyA1LjI3NTk5IDUuODY0MDhaIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMF81OSkiLz4KPC9nPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzBfNTkiIHgxPSItNy40MTgwMWUtMDkiIHkxPSIyLjEwNjk5IiB4Mj0iOC45MjM3MyIgeTI9IjguNTUxOSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjRkY2QjAwIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZGQTUwMCIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=" width="10" height="10" alt="Pro" style="display:block;"></span>
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Volume</span>
+        <div class="stat-value-row">
+          <span class="stat-value">1.64M</span>
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Average Vol. (3m)</span>
+        <div class="stat-value-row">
+          <span class="stat-value">183.8M</span>
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Previous Close</span>
+        <div class="stat-value-row">
+          <span class="stat-value">185.81</span>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Open</span>
+        <div class="stat-value-row">
+          <span class="stat-value">185</span>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">P/E Ratio</span>
+        <div class="stat-value-row">
+          <span class="stat-value">45.7x</span>
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">EV / EBITDA</span>
+        <div class="stat-value-row">
+          <span class="stat-value">39.6x</span>
+          <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <div class="show-more-row">
+        <span class="show-more-text">Show more</span>
+        <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+          <path d="M1 1L6 6L11 1" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- ProTips -->
+    <div class="protips-section" data-section="protips">
+      <div class="protips-header">
+        <div class="protips-title-row">
+          <span class="protips-title">ProTips</span>
+          <span class="pro-badge-orange"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgdmlld0JveD0iMCAwIDEwIDExLjE1NDciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJHcm91cCA1ODEiPgo8cGF0aCBpZD0iU3VidHJhY3QiIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNS4wMDAwMiAwQzQuNTA2OTkgMCAzLjY4Mzc3IDAuMTg1MTY3IDIuOTA4MTUgMC4zOTA0MTNDMi4yMTYzNCAwLjU3NjE2MiAxLjUyOTAzIDAuNzc4MjQyIDAuODQ2NzcyIDAuOTk2NDgzQzAuNjUxOTg4IDEuMDU3ODMgMC40Nzg1NiAxLjE3MzA4IDAuMzQ2NTYgMS4zMjg5QzAuMjE0NTYxIDEuNDg0NzIgMC4xMjkzODcgMS42NzQ3NCAwLjEwMDg5NyAxLjg3Njk2Qy0wLjMyNTIxMSA0Ljk5ODAzIDAuNjYyMzQ4IDcuMzEwNzYgMS44NjE4NSA4Ljg0MTE4QzIuMDQ3MTUgOS4wNzk2NiAyLjI0NTA2IDkuMzA3NTcgMi40NTQ2MSA5LjUyMzk4VjIuNTQ1NUg1LjA1NzI3QzUuNDI5MDggMi41NDU1IDUuNzg2MzEgMi41ODE3NiA2LjEyODk2IDIuNjU0M0M2LjQ3ODkgMi43MjY4NCA2Ljc4NTEgMi44NTAxNSA3LjA0NzU1IDMuMDI0MjRDNy4zMTAwMSAzLjE5MTA4IDcuNTE3NzggMy40MTk1NyA3LjY3MDg4IDMuNzA5NzJDNy44MzEyNyAzLjk5MjYyIDcuOTExNDYgNC4zNDgwNSA3LjkxMTQ2IDQuNzc2MDJDNy45MTE0NiA1LjI2MjAyIDcuODI3NjIgNS42NTM3MiA3LjY1OTk0IDUuOTUxMTJDNy40OTIyNyA2LjI0ODUzIDcuMjY2MjYgNi40ODA2NSA2Ljk4MTk0IDYuNjQ3NDhDNi42OTc2MSA2LjgwNzA2IDYuMzY1OSA2LjkxNTg3IDUuOTg2OCA2Ljk3MzlDNS42MTQ5OSA3LjAzMTkzIDUuMjI0OTUgNy4wNjA5NCA0LjgxNjY5IDcuMDYwOTRIMy44MzI0OVYxMC42Njc5QzQuMDE3MjcgMTAuNzg2NSA0LjIwOTUyIDEwLjg5MzIgNC40MDgwOCAxMC45ODczQzQuNjA4ODcgMTEuMDc5NSA0LjgyMzA0IDExLjE1NDcgNS4wMDAwMiAxMS4xNTQ3QzUuMTc3MDEgMTEuMTU0NyA1LjM5MTE4IDExLjA3OTUgNS41OTE5NiAxMC45ODczQzUuODUzMzUgMTAuODYzMyA2LjEwMzg1IDEwLjcxNzUgNi4zNDA4MSAxMC41NTE2QzcuMDIyMzEgMTAuMDc0NSA3LjYyODQyIDkuNDk3OTcgOC4xMzg5NCA4Ljg0MTE4QzkuMzM2OTUgNy4zMTA3NiAxMC4zMjUzIDQuOTk4MDMgOS44OTkxNSAxLjg3Njk2QzkuODQxODkgMS40NTk3NyA5LjU0NTkyIDEuMTIxNDEgOS4xNTMyNyAwLjk5NjQ4M0M4LjQ3MTAyIDAuNzc4MjM2IDcuNzgzNyAwLjU3NjE1NiA3LjA5MTg5IDAuMzkwNDEzQzYuMzE2MjcgMC4xODUxNjcgNS40OTIzMSAwIDUuMDAwMDIgMFpNNS4yNzU5OSA1Ljg2NDA4QzUuMDY0NTcgNS44Nzg1OSA0Ljg2MDQ0IDUuODg1ODQgNC42NjM1OSA1Ljg4NTg0SDMuODMyNDlWMy43MjA2SDQuODE2NjlDNC45OTg5NSAzLjcyMDYgNS4xODg1IDMuNzMxNDggNS4zODUzNCAzLjc1MzI0QzUuNTgyMTggMy43NzUgNS43NjA4IDMuODI1NzggNS45MjExOSAzLjkwNTU3QzYuMDgxNTcgMy45NzgxMSA2LjIxMjggNC4wODY5MSA2LjMxNDg3IDQuMjMxOTlDNi40MTY5MyA0LjM2OTgxIDYuNDY3OTcgNC41NTg0MSA2LjQ2Nzk3IDQuNzk3NzhDNi40Njc5NyA1LjA1ODkxIDYuNDA5NjQgNS4yNjIwMiA2LjI5MyA1LjQwNzA5QzYuMTgzNjQgNS41NTIxNyA2LjAzNzgzIDUuNjYwOTcgNS44NTU1NyA1LjczMzUxQzUuNjgwNiA1LjgwNjA1IDUuNDg3NDEgNS44NDk1NyA1LjI3NTk5IDUuODY0MDhaIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMF81OSkiLz4KPC9nPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzBfNTkiIHgxPSItNy40MTgwMWUtMDkiIHkxPSIyLjEwNjk5IiB4Mj0iOC45MjM3MyIgeTI9IjguNTUxOSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjRkY2QjAwIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZGQTUwMCIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=" width="10" height="10" alt="Pro" style="display:block;"></span>
+        </div>
+        <div class="info-icon">?</div>
+      </div>
+
+      <div class="protip-row bullish">
+        <div class="protip-bull-icon bullish"><svg viewBox="0 0 42.75 31.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.3838 30.6031C19.4575 30.5336 17.9907 30.2211 16.6829 29.4224C15.3751 28.6237 14.4915 27.5473 14.5622 25.9152C14.5975 25.186 14.8803 24.5435 15.3575 23.9879C15.5695 23.7449 15.5872 23.5539 15.4458 23.2587C14.4385 21.1578 13.4488 19.057 12.4592 16.9387C12.3355 16.6783 12.1941 16.5568 11.9113 16.7998C11.1514 17.477 10.2678 17.7721 9.24275 17.668C8.44748 17.5812 7.81127 17.1818 7.26342 16.6436C7.2104 16.5915 7.26342 16.3137 7.35178 16.2269C8.27076 15.2546 9.18973 14.2823 10.1617 13.3621C11.2574 12.3203 12.1057 11.1049 12.4061 9.64647C12.5652 8.86516 12.4945 8.01439 12.4768 7.19835C12.4592 6.52121 12.4061 6.48649 13.0777 6.36495C14.4562 6.10451 15.817 5.82671 17.1954 5.68781C18.8213 5.51419 20.4472 5.39265 22.0731 5.42737C24.6886 5.4621 27.3041 5.70517 29.849 6.36495C30.1671 6.45176 30.2908 6.55594 30.2555 6.92055C30.1848 7.63242 30.1671 8.34428 30.2024 9.05615C30.3085 10.6188 31.1037 11.8862 32.1641 12.9974C33.1891 14.0566 34.2141 15.1157 35.2745 16.1574C35.5396 16.4179 35.5749 16.5915 35.2568 16.8519C33.843 18.0152 32.2878 18.0326 30.8387 16.8519C30.5559 16.6262 30.3968 16.6089 30.2378 16.9561C29.3011 18.9528 28.3645 20.9669 27.3925 22.9462C27.1628 23.415 27.1274 23.7275 27.4809 24.1963C28.6826 25.7763 28.2761 27.5646 26.8093 28.8495C25.2895 30.1864 23.045 30.6552 21.3838 30.6031ZM17.9907 17.286H18.0614C17.9553 16.8693 17.8846 16.4526 17.7079 16.088C17.3015 15.2719 16.5062 15.1157 15.6756 15.1157C15.2691 15.1157 14.6682 15.0809 14.4738 15.3067C14.1911 15.6539 14.4385 16.1748 14.6682 16.5915C15.1984 17.5812 16.1351 17.9805 17.1777 18.1715C17.7786 18.2757 17.9377 18.102 17.973 17.4943C17.973 17.4249 17.973 17.3554 17.973 17.286H17.9907ZM27.5339 15.133C27.2865 15.133 27.1628 15.0983 27.0567 15.0983C25.8903 15.0636 25.1658 15.4456 24.8653 16.3658C24.7239 16.7825 24.777 17.2686 24.7593 17.7201C24.7593 18.0152 24.936 18.1888 25.2188 18.1541C25.5369 18.1368 25.855 18.0847 26.1554 17.9979C27.1274 17.7027 27.905 17.1645 28.1878 16.1574C28.5412 14.9247 28.2938 15.1851 27.5162 15.1157L27.5339 15.133ZM23.8403 26.3666C23.8403 26.9222 24.1938 27.3042 24.7416 27.3042C25.2718 27.3042 25.6606 26.8875 25.6606 26.3492C25.6606 25.8457 25.2718 25.4638 24.7416 25.4638C24.1761 25.4638 23.8403 25.7936 23.8403 26.3666ZM18.8743 26.3666C18.8743 25.811 18.5385 25.4638 17.9907 25.4638C17.4782 25.4638 17.0187 25.8631 17.001 26.3492C17.001 26.8528 17.4782 27.3042 17.9907 27.3042C18.5032 27.3042 18.8743 26.9048 18.8743 26.3666Z" fill="#6AC64C"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.1285 1.41378C36.881 1.54552 36.7719 1.70978 36.4663 2.4108C35.8316 3.86666 35.3195 4.60395 34.5746 5.13438C34.1678 5.42404 33.7921 5.61667 32.4701 6.21346C32.0618 6.39779 31.9434 6.8255 31.9723 8.01173C31.9919 8.81875 32.0264 9.06309 32.1964 9.59958C32.4298 10.3361 33.0332 11.5889 33.2516 11.7905C33.5072 12.0264 33.6522 11.9782 34.4486 11.3929C35.4478 10.6584 36.4629 9.62776 37.0841 8.71692C37.6639 7.86681 38.1685 6.68157 38.4041 5.61635C38.6637 4.44268 38.5896 2.11875 38.2796 1.71252C38.023 1.3762 37.4692 1.23251 37.1285 1.41378Z" fill="#6AC64C"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.71799 1.38014C5.96294 1.51648 6.06897 1.68277 6.36135 2.38939C6.9687 3.85688 7.46692 4.60364 8.20175 5.14794C8.60306 5.44516 8.97508 5.6448 10.2856 6.26626C10.6904 6.4582 10.8008 6.88806 10.7497 8.07354C10.715 8.88005 10.6759 9.1237 10.4958 9.65691C10.2487 10.3889 9.6219 11.6302 9.39973 11.8276C9.13976 12.0587 8.99568 12.0078 8.21046 11.4077C7.22513 10.6546 6.22954 9.60514 5.6255 8.68282C5.06173 7.82199 4.57944 6.6275 4.36383 5.55806C4.12627 4.37973 4.2439 2.0576 4.56152 1.65725C4.82437 1.32579 5.38072 1.19251 5.71799 1.38014Z" fill="#6AC64C"/></svg></div>
+        <span class="protip-text">Strong return over the last five years</span>
+        <svg class="protip-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="protip-row bullish">
+        <div class="protip-bull-icon bullish"><svg viewBox="0 0 42.75 31.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.3838 30.6031C19.4575 30.5336 17.9907 30.2211 16.6829 29.4224C15.3751 28.6237 14.4915 27.5473 14.5622 25.9152C14.5975 25.186 14.8803 24.5435 15.3575 23.9879C15.5695 23.7449 15.5872 23.5539 15.4458 23.2587C14.4385 21.1578 13.4488 19.057 12.4592 16.9387C12.3355 16.6783 12.1941 16.5568 11.9113 16.7998C11.1514 17.477 10.2678 17.7721 9.24275 17.668C8.44748 17.5812 7.81127 17.1818 7.26342 16.6436C7.2104 16.5915 7.26342 16.3137 7.35178 16.2269C8.27076 15.2546 9.18973 14.2823 10.1617 13.3621C11.2574 12.3203 12.1057 11.1049 12.4061 9.64647C12.5652 8.86516 12.4945 8.01439 12.4768 7.19835C12.4592 6.52121 12.4061 6.48649 13.0777 6.36495C14.4562 6.10451 15.817 5.82671 17.1954 5.68781C18.8213 5.51419 20.4472 5.39265 22.0731 5.42737C24.6886 5.4621 27.3041 5.70517 29.849 6.36495C30.1671 6.45176 30.2908 6.55594 30.2555 6.92055C30.1848 7.63242 30.1671 8.34428 30.2024 9.05615C30.3085 10.6188 31.1037 11.8862 32.1641 12.9974C33.1891 14.0566 34.2141 15.1157 35.2745 16.1574C35.5396 16.4179 35.5749 16.5915 35.2568 16.8519C33.843 18.0152 32.2878 18.0326 30.8387 16.8519C30.5559 16.6262 30.3968 16.6089 30.2378 16.9561C29.3011 18.9528 28.3645 20.9669 27.3925 22.9462C27.1628 23.415 27.1274 23.7275 27.4809 24.1963C28.6826 25.7763 28.2761 27.5646 26.8093 28.8495C25.2895 30.1864 23.045 30.6552 21.3838 30.6031ZM17.9907 17.286H18.0614C17.9553 16.8693 17.8846 16.4526 17.7079 16.088C17.3015 15.2719 16.5062 15.1157 15.6756 15.1157C15.2691 15.1157 14.6682 15.0809 14.4738 15.3067C14.1911 15.6539 14.4385 16.1748 14.6682 16.5915C15.1984 17.5812 16.1351 17.9805 17.1777 18.1715C17.7786 18.2757 17.9377 18.102 17.973 17.4943C17.973 17.4249 17.973 17.3554 17.973 17.286H17.9907ZM27.5339 15.133C27.2865 15.133 27.1628 15.0983 27.0567 15.0983C25.8903 15.0636 25.1658 15.4456 24.8653 16.3658C24.7239 16.7825 24.777 17.2686 24.7593 17.7201C24.7593 18.0152 24.936 18.1888 25.2188 18.1541C25.5369 18.1368 25.855 18.0847 26.1554 17.9979C27.1274 17.7027 27.905 17.1645 28.1878 16.1574C28.5412 14.9247 28.2938 15.1851 27.5162 15.1157L27.5339 15.133ZM23.8403 26.3666C23.8403 26.9222 24.1938 27.3042 24.7416 27.3042C25.2718 27.3042 25.6606 26.8875 25.6606 26.3492C25.6606 25.8457 25.2718 25.4638 24.7416 25.4638C24.1761 25.4638 23.8403 25.7936 23.8403 26.3666ZM18.8743 26.3666C18.8743 25.811 18.5385 25.4638 17.9907 25.4638C17.4782 25.4638 17.0187 25.8631 17.001 26.3492C17.001 26.8528 17.4782 27.3042 17.9907 27.3042C18.5032 27.3042 18.8743 26.9048 18.8743 26.3666Z" fill="#6AC64C"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.1285 1.41378C36.881 1.54552 36.7719 1.70978 36.4663 2.4108C35.8316 3.86666 35.3195 4.60395 34.5746 5.13438C34.1678 5.42404 33.7921 5.61667 32.4701 6.21346C32.0618 6.39779 31.9434 6.8255 31.9723 8.01173C31.9919 8.81875 32.0264 9.06309 32.1964 9.59958C32.4298 10.3361 33.0332 11.5889 33.2516 11.7905C33.5072 12.0264 33.6522 11.9782 34.4486 11.3929C35.4478 10.6584 36.4629 9.62776 37.0841 8.71692C37.6639 7.86681 38.1685 6.68157 38.4041 5.61635C38.6637 4.44268 38.5896 2.11875 38.2796 1.71252C38.023 1.3762 37.4692 1.23251 37.1285 1.41378Z" fill="#6AC64C"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.71799 1.38014C5.96294 1.51648 6.06897 1.68277 6.36135 2.38939C6.9687 3.85688 7.46692 4.60364 8.20175 5.14794C8.60306 5.44516 8.97508 5.6448 10.2856 6.26626C10.6904 6.4582 10.8008 6.88806 10.7497 8.07354C10.715 8.88005 10.6759 9.1237 10.4958 9.65691C10.2487 10.3889 9.6219 11.6302 9.39973 11.8276C9.13976 12.0587 8.99568 12.0078 8.21046 11.4077C7.22513 10.6546 6.22954 9.60514 5.6255 8.68282C5.06173 7.82199 4.57944 6.6275 4.36383 5.55806C4.12627 4.37973 4.2439 2.0576 4.56152 1.65725C4.82437 1.32579 5.38072 1.19251 5.71799 1.38014Z" fill="#6AC64C"/></svg></div>
+        <span class="protip-text">Analysts anticipate sales growth in the current year</span>
+        <svg class="protip-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="protip-row bullish">
+        <div class="protip-bull-icon bullish"><svg viewBox="0 0 42.75 31.5" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21.3838 30.6031C19.4575 30.5336 17.9907 30.2211 16.6829 29.4224C15.3751 28.6237 14.4915 27.5473 14.5622 25.9152C14.5975 25.186 14.8803 24.5435 15.3575 23.9879C15.5695 23.7449 15.5872 23.5539 15.4458 23.2587C14.4385 21.1578 13.4488 19.057 12.4592 16.9387C12.3355 16.6783 12.1941 16.5568 11.9113 16.7998C11.1514 17.477 10.2678 17.7721 9.24275 17.668C8.44748 17.5812 7.81127 17.1818 7.26342 16.6436C7.2104 16.5915 7.26342 16.3137 7.35178 16.2269C8.27076 15.2546 9.18973 14.2823 10.1617 13.3621C11.2574 12.3203 12.1057 11.1049 12.4061 9.64647C12.5652 8.86516 12.4945 8.01439 12.4768 7.19835C12.4592 6.52121 12.4061 6.48649 13.0777 6.36495C14.4562 6.10451 15.817 5.82671 17.1954 5.68781C18.8213 5.51419 20.4472 5.39265 22.0731 5.42737C24.6886 5.4621 27.3041 5.70517 29.849 6.36495C30.1671 6.45176 30.2908 6.55594 30.2555 6.92055C30.1848 7.63242 30.1671 8.34428 30.2024 9.05615C30.3085 10.6188 31.1037 11.8862 32.1641 12.9974C33.1891 14.0566 34.2141 15.1157 35.2745 16.1574C35.5396 16.4179 35.5749 16.5915 35.2568 16.8519C33.843 18.0152 32.2878 18.0326 30.8387 16.8519C30.5559 16.6262 30.3968 16.6089 30.2378 16.9561C29.3011 18.9528 28.3645 20.9669 27.3925 22.9462C27.1628 23.415 27.1274 23.7275 27.4809 24.1963C28.6826 25.7763 28.2761 27.5646 26.8093 28.8495C25.2895 30.1864 23.045 30.6552 21.3838 30.6031ZM17.9907 17.286H18.0614C17.9553 16.8693 17.8846 16.4526 17.7079 16.088C17.3015 15.2719 16.5062 15.1157 15.6756 15.1157C15.2691 15.1157 14.6682 15.0809 14.4738 15.3067C14.1911 15.6539 14.4385 16.1748 14.6682 16.5915C15.1984 17.5812 16.1351 17.9805 17.1777 18.1715C17.7786 18.2757 17.9377 18.102 17.973 17.4943C17.973 17.4249 17.973 17.3554 17.973 17.286H17.9907ZM27.5339 15.133C27.2865 15.133 27.1628 15.0983 27.0567 15.0983C25.8903 15.0636 25.1658 15.4456 24.8653 16.3658C24.7239 16.7825 24.777 17.2686 24.7593 17.7201C24.7593 18.0152 24.936 18.1888 25.2188 18.1541C25.5369 18.1368 25.855 18.0847 26.1554 17.9979C27.1274 17.7027 27.905 17.1645 28.1878 16.1574C28.5412 14.9247 28.2938 15.1851 27.5162 15.1157L27.5339 15.133ZM23.8403 26.3666C23.8403 26.9222 24.1938 27.3042 24.7416 27.3042C25.2718 27.3042 25.6606 26.8875 25.6606 26.3492C25.6606 25.8457 25.2718 25.4638 24.7416 25.4638C24.1761 25.4638 23.8403 25.7936 23.8403 26.3666ZM18.8743 26.3666C18.8743 25.811 18.5385 25.4638 17.9907 25.4638C17.4782 25.4638 17.0187 25.8631 17.001 26.3492C17.001 26.8528 17.4782 27.3042 17.9907 27.3042C18.5032 27.3042 18.8743 26.9048 18.8743 26.3666Z" fill="#6AC64C"/><path fill-rule="evenodd" clip-rule="evenodd" d="M37.1285 1.41378C36.881 1.54552 36.7719 1.70978 36.4663 2.4108C35.8316 3.86666 35.3195 4.60395 34.5746 5.13438C34.1678 5.42404 33.7921 5.61667 32.4701 6.21346C32.0618 6.39779 31.9434 6.8255 31.9723 8.01173C31.9919 8.81875 32.0264 9.06309 32.1964 9.59958C32.4298 10.3361 33.0332 11.5889 33.2516 11.7905C33.5072 12.0264 33.6522 11.9782 34.4486 11.3929C35.4478 10.6584 36.4629 9.62776 37.0841 8.71692C37.6639 7.86681 38.1685 6.68157 38.4041 5.61635C38.6637 4.44268 38.5896 2.11875 38.2796 1.71252C38.023 1.3762 37.4692 1.23251 37.1285 1.41378Z" fill="#6AC64C"/><path fill-rule="evenodd" clip-rule="evenodd" d="M5.71799 1.38014C5.96294 1.51648 6.06897 1.68277 6.36135 2.38939C6.9687 3.85688 7.46692 4.60364 8.20175 5.14794C8.60306 5.44516 8.97508 5.6448 10.2856 6.26626C10.6904 6.4582 10.8008 6.88806 10.7497 8.07354C10.715 8.88005 10.6759 9.1237 10.4958 9.65691C10.2487 10.3889 9.6219 11.6302 9.39973 11.8276C9.13976 12.0587 8.99568 12.0078 8.21046 11.4077C7.22513 10.6546 6.22954 9.60514 5.6255 8.68282C5.06173 7.82199 4.57944 6.6275 4.36383 5.55806C4.12627 4.37973 4.2439 2.0576 4.56152 1.65725C4.82437 1.32579 5.38072 1.19251 5.71799 1.38014Z" fill="#6AC64C"/></svg></div>
+        <span class="protip-text">Holds more cash than debt</span>
+        <svg class="protip-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="protip-row bullish">
+        <div class="protip-bull-icon bearish"><svg viewBox="0 0 30.3563 27.01" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.9837 26.9911C14.7014 26.9911 14.2356 27.0335 13.784 26.9911C13.2052 26.9204 12.6407 26.8073 12.0761 26.6518C11.3986 26.4681 10.7352 26.2419 10.0859 25.9874C8.87201 25.5209 7.77106 24.8424 6.82537 23.9801C5.89379 23.1461 5.00456 22.2272 4.22825 21.2377C3.59309 20.4178 3.08495 19.4848 2.66151 18.5377C2.19572 17.5058 1.87108 16.4314 1.68759 15.3005C1.47587 14.0424 1.54644 12.7984 1.58879 11.5403C1.6029 10.9607 1.77228 10.3812 1.8852 9.81571C1.94166 9.56126 1.91343 9.33508 1.68759 9.15131C1.13711 8.68482 0.713671 8.10524 0.44549 7.45497C0.261998 7.03089 0.0926211 6.57853 0.0502767 6.12618C-0.0485267 5.2356 -0.0202972 4.35916 0.304343 3.49686C0.699556 2.45079 1.33472 1.61675 2.23807 0.980628C2.80266 0.584816 3.42371 0.259686 4.11533 0.174869C4.67992 0.104188 5.25863 0.00523522 5.80911 0.0617797C7.13589 0.203141 8.27919 0.796858 9.15431 1.81466C9.59187 2.32356 9.69067 2.35183 10.3399 2.16806C10.7352 2.05497 11.1586 1.97016 11.5679 1.94188C13.2194 1.8712 14.8708 1.78639 16.5222 1.77225C17.2985 1.77225 18.0748 1.85707 18.837 1.94188C19.3875 2.01257 19.938 2.13979 20.4744 2.25288C20.7143 2.30942 20.8837 2.22461 21.0107 2.04084C21.66 1.10785 22.5916 0.542408 23.6361 0.217277C24.4406 -0.0371732 25.2875 -0.0654454 26.1485 0.118324C27.5176 0.415183 28.5762 1.12199 29.3949 2.23874C29.8183 2.81832 30.143 3.44031 30.2277 4.16126C30.2841 4.62775 30.3688 5.09424 30.3547 5.5466C30.2982 6.88953 29.776 8.06283 28.788 8.98168C28.4492 9.30681 28.421 9.6178 28.5198 10.0136C28.8868 11.4838 28.9009 12.9963 28.7738 14.4948C28.7033 15.3005 28.5339 16.1204 28.2939 16.8838C27.7435 18.6367 26.9107 20.234 25.7533 21.6759C24.7088 22.9764 23.509 24.0791 22.1258 24.9838C21.1519 25.6199 20.0933 26.1005 18.9923 26.4539C17.7361 26.8639 16.4658 27.0618 14.9696 26.9628L14.9837 26.9911ZM21.4483 19.2869C21.5471 18.6508 21.293 17.9298 21.0107 17.2372C20.5308 16.0639 19.7969 15.0602 18.8229 14.2262C18.0043 13.5194 17.0727 13.0105 16.0141 12.855C14.7438 12.6712 13.5299 12.8974 12.4148 13.6183C10.4952 14.8623 9.3378 16.6152 8.92847 18.8628C8.73086 19.9654 9.02728 20.9267 9.60598 21.8314C10.2976 22.8916 11.2998 23.5136 12.4854 23.9236C13.5299 24.277 14.5885 24.4325 15.6753 24.3759C15.9435 24.3759 16.1976 24.277 16.4658 24.2487C17.4115 24.1497 18.2866 23.8529 19.1052 23.3723C20.5732 22.4817 21.4765 21.2377 21.4483 19.2869ZM8.82967 9.37749C8.58972 9.37749 8.33565 9.37749 8.0957 9.37749C7.89809 9.37749 7.77106 9.49058 7.77106 9.71675C7.77106 10.2398 7.94044 10.6921 8.25096 11.1021C8.80144 11.8089 9.57775 12.0775 10.4105 12.2471C10.7916 12.3178 11.0739 12.0775 11.0739 11.6817C11.0739 11.512 11.0739 11.1586 11.0457 10.5366C10.8057 10.0419 10.2553 9.68848 9.80359 9.39162C9.32369 9.34921 8.82967 9.39162V9.37749ZM19.3593 11.3707C19.3593 11.4838 19.3593 11.611 19.3593 11.7241C19.3734 12.0916 19.6698 12.3461 20.0086 12.2471C20.4885 12.1199 20.9684 11.9785 21.4059 11.7382C22.154 11.3283 22.6057 10.6921 22.6622 9.80157C22.6763 9.49058 22.5351 9.36335 22.2528 9.36335C21.8576 9.36335 21.4483 9.32094 21.0531 9.36335C20.7708 9.39162 20.5026 9.50471 20.2485 9.6178C19.5287 9.9712 19.3593 10.6215 19.3593 11.3565V11.3707Z" fill="#E7544D"/><path d="M15.2519 16.2476C16.0865 16.2475 16.9739 16.4173 17.6091 17.0534C18.5689 17.9864 18.4277 19.4424 17.1715 20.2199C16.3952 20.7005 15.5201 20.8843 14.645 20.7429C13.7981 20.6016 12.9794 20.2764 12.4713 19.5131C11.9067 18.6649 12.0196 17.7461 12.8665 16.9827C13.5299 16.3749 14.0766 16.2477 15.2519 16.2476Z" fill="#E7544D"/></svg></div>
+        <span class="protip-text">Trading at a high Price / Book multiple</span>
+        <svg class="protip-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="protip-row bullish">
+        <div class="protip-bull-icon bearish"><svg viewBox="0 0 30.3563 27.01" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14.9837 26.9911C14.7014 26.9911 14.2356 27.0335 13.784 26.9911C13.2052 26.9204 12.6407 26.8073 12.0761 26.6518C11.3986 26.4681 10.7352 26.2419 10.0859 25.9874C8.87201 25.5209 7.77106 24.8424 6.82537 23.9801C5.89379 23.1461 5.00456 22.2272 4.22825 21.2377C3.59309 20.4178 3.08495 19.4848 2.66151 18.5377C2.19572 17.5058 1.87108 16.4314 1.68759 15.3005C1.47587 14.0424 1.54644 12.7984 1.58879 11.5403C1.6029 10.9607 1.77228 10.3812 1.8852 9.81571C1.94166 9.56126 1.91343 9.33508 1.68759 9.15131C1.13711 8.68482 0.713671 8.10524 0.44549 7.45497C0.261998 7.03089 0.0926211 6.57853 0.0502767 6.12618C-0.0485267 5.2356 -0.0202972 4.35916 0.304343 3.49686C0.699556 2.45079 1.33472 1.61675 2.23807 0.980628C2.80266 0.584816 3.42371 0.259686 4.11533 0.174869C4.67992 0.104188 5.25863 0.00523522 5.80911 0.0617797C7.13589 0.203141 8.27919 0.796858 9.15431 1.81466C9.59187 2.32356 9.69067 2.35183 10.3399 2.16806C10.7352 2.05497 11.1586 1.97016 11.5679 1.94188C13.2194 1.8712 14.8708 1.78639 16.5222 1.77225C17.2985 1.77225 18.0748 1.85707 18.837 1.94188C19.3875 2.01257 19.938 2.13979 20.4744 2.25288C20.7143 2.30942 20.8837 2.22461 21.0107 2.04084C21.66 1.10785 22.5916 0.542408 23.6361 0.217277C24.4406 -0.0371732 25.2875 -0.0654454 26.1485 0.118324C27.5176 0.415183 28.5762 1.12199 29.3949 2.23874C29.8183 2.81832 30.143 3.44031 30.2277 4.16126C30.2841 4.62775 30.3688 5.09424 30.3547 5.5466C30.2982 6.88953 29.776 8.06283 28.788 8.98168C28.4492 9.30681 28.421 9.6178 28.5198 10.0136C28.8868 11.4838 28.9009 12.9963 28.7738 14.4948C28.7033 15.3005 28.5339 16.1204 28.2939 16.8838C27.7435 18.6367 26.9107 20.234 25.7533 21.6759C24.7088 22.9764 23.509 24.0791 22.1258 24.9838C21.1519 25.6199 20.0933 26.1005 18.9923 26.4539C17.7361 26.8639 16.4658 27.0618 14.9696 26.9628L14.9837 26.9911ZM21.4483 19.2869C21.5471 18.6508 21.293 17.9298 21.0107 17.2372C20.5308 16.0639 19.7969 15.0602 18.8229 14.2262C18.0043 13.5194 17.0727 13.0105 16.0141 12.855C14.7438 12.6712 13.5299 12.8974 12.4148 13.6183C10.4952 14.8623 9.3378 16.6152 8.92847 18.8628C8.73086 19.9654 9.02728 20.9267 9.60598 21.8314C10.2976 22.8916 11.2998 23.5136 12.4854 23.9236C13.5299 24.277 14.5885 24.4325 15.6753 24.3759C15.9435 24.3759 16.1976 24.277 16.4658 24.2487C17.4115 24.1497 18.2866 23.8529 19.1052 23.3723C20.5732 22.4817 21.4765 21.2377 21.4483 19.2869ZM8.82967 9.37749C8.58972 9.37749 8.33565 9.37749 8.0957 9.37749C7.89809 9.37749 7.77106 9.49058 7.77106 9.71675C7.77106 10.2398 7.94044 10.6921 8.25096 11.1021C8.80144 11.8089 9.57775 12.0775 10.4105 12.2471C10.7916 12.3178 11.0739 12.0775 11.0739 11.6817C11.0739 11.512 11.0739 11.1586 11.0457 10.5366C10.8057 10.0419 10.2553 9.68848 9.80359 9.39162C9.32369 9.34921 8.82967 9.39162V9.37749ZM19.3593 11.3707C19.3593 11.4838 19.3593 11.611 19.3593 11.7241C19.3734 12.0916 19.6698 12.3461 20.0086 12.2471C20.4885 12.1199 20.9684 11.9785 21.4059 11.7382C22.154 11.3283 22.6057 10.6921 22.6622 9.80157C22.6763 9.49058 22.5351 9.36335 22.2528 9.36335C21.8576 9.36335 21.4483 9.32094 21.0531 9.36335C20.7708 9.39162 20.5026 9.50471 20.2485 9.6178C19.5287 9.9712 19.3593 10.6215 19.3593 11.3565V11.3707Z" fill="#E7544D"/><path d="M15.2519 16.2476C16.0865 16.2475 16.9739 16.4173 17.6091 17.0534C18.5689 17.9864 18.4277 19.4424 17.1715 20.2199C16.3952 20.7005 15.5201 20.8843 14.645 20.7429C13.7981 20.6016 12.9794 20.2764 12.4713 19.5131C11.9067 18.6649 12.0196 17.7461 12.8665 16.9827C13.5299 16.3749 14.0766 16.2477 15.2519 16.2476Z" fill="#E7544D"/></svg></div>
+        <span class="protip-text">Revenue Growth has been slowing down</span>
+        <svg class="protip-chevron" width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+
+      <!-- View All Tips link -->
+      <div class="protips-view-all">
+        View All 17 Tips
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- News & Analysis -->
+    <div class="news-section" data-section="news">
+      <div class="news-header">
+        <span class="news-title">News &amp; Analysis</span>
+
+      </div>
+
+      <!-- Two-column horizontal scroll carousel -->
+      <div class="news-carousel">
+
+        <!-- Column 1 -->
+        <div class="news-col">
+          <!-- Article 1 - Pro -->
+          <div class="article-card">
+            <div class="article-headline-row">
+              <span class="article-pro-badge"><svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg1" x1="0" y1="2" x2="9" y2="8.5" gradientUnits="userSpaceOnUse"><stop stop-color="#FF6B00"/><stop offset="1" stop-color="#FFA500"/></linearGradient></defs><path fill-rule="evenodd" clip-rule="evenodd" d="M5 0C4.507 0 3.684.185 2.908.39 2.216.576 1.529.778.847.996A.9.9 0 0 0 .1 1.877C-.325 4.998.662 7.31 1.862 8.841c.45.578.96 1.1 1.53 1.545V2.545H5.057c.372 0 .73.036 1.072.109.35.072.656.196.918.37.263.167.47.396.624.686.16.283.24.638.24 1.066 0 .486-.084.878-.252 1.175-.167.298-.393.53-.677.697-.285.16-.617.268-.996.326-.372.058-.762.087-1.17.087H3.832v3.607c.185.119.377.225.576.319.2.093.415.168.592.168.177 0 .391-.075.592-.168.261-.124.512-.27.749-.436.681-.477 1.288-1.054 1.798-1.71C9.337 7.31 10.325 4.998 9.899 1.877A.9.9 0 0 0 9.153.996C8.471.778 7.784.576 7.092.39 6.316.185 5.492 0 5 0Zm.276 5.864c-.211.015-.415.022-.612.022H3.832V3.721h.985c.182 0 .372.01.569.032.197.022.375.073.535.153.16.072.292.181.394.326.102.138.153.327.153.566 0 .261-.058.464-.175.609-.109.145-.255.254-.437.327-.175.072-.368.116-.579.13Z" fill="url(#pg1)"/></svg></span>
+              <span class="article-headline">Investment Bank Updates Price Target for NVDA because of drop after Quarterly report</span>
+            </div>
+            <div class="article-meta-row">
+              <span class="article-source-time">Investing.com · 2 min ago</span>
+              <div class="article-comments">
+                <span class="article-comment-count">1</span>
+                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"><path d="M1.5 1h10a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H7L4.5 11.5V9H1.5A.5.5 0 0 1 1 8.5v-7A.5.5 0 0 1 1.5 1Z" stroke="#848C97" stroke-width="1" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Article 2 -->
+          <div class="article-card">
+            <div class="article-headline-row">
+              <span class="article-headline">Risk Appetite Remains Fragile Amid Geopolitics and Trump Rhetoric</span>
+            </div>
+            <div class="article-meta-row">
+              <span class="article-source-time">Trading Point · 3h ago</span>
+              <div class="article-comments">
+                <span class="article-comment-count">0</span>
+                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"><path d="M1.5 1h10a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H7L4.5 11.5V9H1.5A.5.5 0 0 1 1 8.5v-7A.5.5 0 0 1 1.5 1Z" stroke="#848C97" stroke-width="1" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Article 3 - Pro -->
+          <div class="article-card">
+            <div class="article-headline-row">
+              <span class="article-pro-badge"><svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg2" x1="0" y1="2" x2="9" y2="8.5" gradientUnits="userSpaceOnUse"><stop stop-color="#FF6B00"/><stop offset="1" stop-color="#FFA500"/></linearGradient></defs><path fill-rule="evenodd" clip-rule="evenodd" d="M5 0C4.507 0 3.684.185 2.908.39 2.216.576 1.529.778.847.996A.9.9 0 0 0 .1 1.877C-.325 4.998.662 7.31 1.862 8.841c.45.578.96 1.1 1.53 1.545V2.545H5.057c.372 0 .73.036 1.072.109.35.072.656.196.918.37.263.167.47.396.624.686.16.283.24.638.24 1.066 0 .486-.084.878-.252 1.175-.167.298-.393.53-.677.697-.285.16-.617.268-.996.326-.372.058-.762.087-1.17.087H3.832v3.607c.185.119.377.225.576.319.2.093.415.168.592.168.177 0 .391-.075.592-.168.261-.124.512-.27.749-.436.681-.477 1.288-1.054 1.798-1.71C9.337 7.31 10.325 4.998 9.899 1.877A.9.9 0 0 0 9.153.996C8.471.778 7.784.576 7.092.39 6.316.185 5.492 0 5 0Zm.276 5.864c-.211.015-.415.022-.612.022H3.832V3.721h.985c.182 0 .372.01.569.032.197.022.375.073.535.153.16.072.292.181.394.326.102.138.153.327.153.566 0 .261-.058.464-.175.609-.109.145-.255.254-.437.327-.175.072-.368.116-.579.13Z" fill="url(#pg2)"/></svg></span>
+              <span class="article-headline">Crypto Market Outlook: Bitcoin Faces Key Resistance as Altcoins Rally</span>
+            </div>
+            <div class="article-meta-row">
+              <span class="article-source-time">Investing.com · 5h ago</span>
+              <div class="article-comments">
+                <span class="article-comment-count">4</span>
+                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"><path d="M1.5 1h10a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H7L4.5 11.5V9H1.5A.5.5 0 0 1 1 8.5v-7A.5.5 0 0 1 1.5 1Z" stroke="#848C97" stroke-width="1" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2 (partially visible, implies scroll) -->
+        <div class="news-col">
+          <!-- Article 4 -->
+          <div class="article-card">
+            <div class="article-headline-row">
+              <span class="article-headline">China trained AI using Nvidia chips despite US export controls</span>
+            </div>
+            <div class="article-meta-row">
+              <span class="article-source-time">Investing.com · 4h ago</span>
+              <div class="article-comments">
+                <span class="article-comment-count">0</span>
+                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"><path d="M1.5 1h10a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H7L4.5 11.5V9H1.5A.5.5 0 0 1 1 8.5v-7A.5.5 0 0 1 1.5 1Z" stroke="#848C97" stroke-width="1" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Article 5 - Pro -->
+          <div class="article-card">
+            <div class="article-headline-row">
+              <span class="article-pro-badge"><svg width="10" height="11" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pg3" x1="0" y1="2" x2="9" y2="8.5" gradientUnits="userSpaceOnUse"><stop stop-color="#FF6B00"/><stop offset="1" stop-color="#FFA500"/></linearGradient></defs><path fill-rule="evenodd" clip-rule="evenodd" d="M5 0C4.507 0 3.684.185 2.908.39 2.216.576 1.529.778.847.996A.9.9 0 0 0 .1 1.877C-.325 4.998.662 7.31 1.862 8.841c.45.578.96 1.1 1.53 1.545V2.545H5.057c.372 0 .73.036 1.072.109.35.072.656.196.918.37.263.167.47.396.624.686.16.283.24.638.24 1.066 0 .486-.084.878-.252 1.175-.167.298-.393.53-.677.697-.285.16-.617.268-.996.326-.372.058-.762.087-1.17.087H3.832v3.607c.185.119.377.225.576.319.2.093.415.168.592.168.177 0 .391-.075.592-.168.261-.124.512-.27.749-.436.681-.477 1.288-1.054 1.798-1.71C9.337 7.31 10.325 4.998 9.899 1.877A.9.9 0 0 0 9.153.996C8.471.778 7.784.576 7.092.39 6.316.185 5.492 0 5 0Zm.276 5.864c-.211.015-.415.022-.612.022H3.832V3.721h.985c.182 0 .372.01.569.032.197.022.375.073.535.153.16.072.292.181.394.326.102.138.153.327.153.566 0 .261-.058.464-.175.609-.109.145-.255.254-.437.327-.175.072-.368.116-.579.13Z" fill="url(#pg3)"/></svg></span>
+              <span class="article-headline">China's customs agents told Nvidia's H200 chips are not permitted, sources say</span>
+            </div>
+            <div class="article-meta-row">
+              <span class="article-source-time">Reuters · 6h ago</span>
+              <div class="article-comments">
+                <span class="article-comment-count">12</span>
+                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"><path d="M1.5 1h10a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H7L4.5 11.5V9H1.5A.5.5 0 0 1 1 8.5v-7A.5.5 0 0 1 1.5 1Z" stroke="#848C97" stroke-width="1" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Article 6 -->
+          <div class="article-card">
+            <div class="article-headline-row">
+              <span class="article-headline">Nvidia stock rises after announcement of new Blackwell Ultra chip architecture</span>
+            </div>
+            <div class="article-meta-row">
+              <span class="article-source-time">Investing.com · 8h ago</span>
+              <div class="article-comments">
+                <span class="article-comment-count">3</span>
+                <svg width="13" height="12" viewBox="0 0 13 12" fill="none"><path d="M1.5 1h10a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5H7L4.5 11.5V9H1.5A.5.5 0 0 1 1 8.5v-7A.5.5 0 0 1 1.5 1Z" stroke="#848C97" stroke-width="1" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- More news link -->
+      <div class="news-more-link">
+        More News
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- Is NVDA undervalued? / Fair Value section -->
+    <div class="fairvalue-section" data-section="fair-value">
+
+      <div class="fv-section-header">
+        <div class="fv-section-title-row">
+          <span class="fv-section-title">Fair Value</span>
+          <span class="pro-badge-orange"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgdmlld0JveD0iMCAwIDEwIDExLjE1NDciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJHcm91cCA1ODEiPgo8cGF0aCBpZD0iU3VidHJhY3QiIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNS4wMDAwMiAwQzQuNTA2OTkgMCAzLjY4Mzc3IDAuMTg1MTY3IDIuOTA4MTUgMC4zOTA0MTNDMi4yMTYzNCAwLjU3NjE2MiAxLjUyOTAzIDAuNzc4MjQyIDAuODQ2NzcyIDAuOTk2NDgzQzAuNjUxOTg4IDEuMDU3ODMgMC40Nzg1NiAxLjE3MzA4IDAuMzQ2NTYgMS4zMjg5QzAuMjE0NTYxIDEuNDg0NzIgMC4xMjkzODcgMS42NzQ3NCAwLjEwMDg5NyAxLjg3Njk2Qy0wLjMyNTIxMSA0Ljk5ODAzIDAuNjYyMzQ4IDcuMzEwNzYgMS44NjE4NSA4Ljg0MTE4QzIuMDQ3MTUgOS4wNzk2NiAyLjI0NTA2IDkuMzA3NTcgMi40NTQ2MSA5LjUyMzk4VjIuNTQ1NUg1LjA1NzI3QzUuNDI5MDggMi41NDU1IDUuNzg2MzEgMi41ODE3NiA2LjEyODk2IDIuNjU0M0M2LjQ3ODkgMi43MjY4NCA2Ljc4NTEgMi44NTAxNSA3LjA0NzU1IDMuMDI0MjRDNy4zMTAwMSAzLjE5MTA4IDcuNTE3NzggMy40MTk1NyA3LjY3MDg4IDMuNzA5NzJDNy44MzEyNyAzLjk5MjYyIDcuOTExNDYgNC4zNDgwNSA3LjkxMTQ2IDQuNzc2MDJDNy45MTE0NiA1LjI2MjAyIDcuODI3NjIgNS42NTM3MiA3LjY1OTk0IDUuOTUxMTJDNy40OTIyNyA2LjI0ODUzIDcuMjY2MjYgNi40ODA2NSA2Ljk4MTk0IDYuNjQ3NDhDNi42OTc2MSA2LjgwNzA2IDYuMzY1OSA2LjkxNTg3IDUuOTg2OCA2Ljk3MzlDNS42MTQ5OSA3LjAzMTkzIDUuMjI0OTUgNy4wNjA5NCA0LjgxNjY5IDcuMDYwOTRIMy44MzI0OVYxMC42Njc5QzQuMDE3MjcgMTAuNzg2NSA0LjIwOTUyIDEwLjg5MzIgNC40MDgwOCAxMC45ODczQzQuNjA4ODcgMTEuMDc5NSA0LjgyMzA0IDExLjE1NDcgNS4wMDAwMiAxMS4xNTQ3QzUuMTc3MDEgMTEuMTU0NyA1LjM5MTE4IDExLjA3OTUgNS41OTE5NiAxMC45ODczQzUuODUzMzUgMTAuODYzMyA2LjEwMzg1IDEwLjcxNzUgNi4zNDA4MSAxMC41NTE2QzcuMDIyMzEgMTAuMDc0NSA3LjYyODQyIDkuNDk3OTcgOC4xMzg5NCA4Ljg0MTE4QzkuMzM2OTUgNy4zMTA3NiAxMC4zMjUzIDQuOTk4MDMgOS44OTkxNSAxLjg3Njk2QzkuODQxODkgMS40NTk3NyA5LjU0NTkyIDEuMTIxNDEgOS4xNTMyNyAwLjk5NjQ4M0M4LjQ3MTAyIDAuNzc4MjM2IDcuNzgzNyAwLjU3NjE1NiA3LjA5MTg5IDAuMzkwNDEzQzYuMzE2MjcgMC4xODUxNjcgNS40OTIzMSAwIDUuMDAwMDIgMFpNNS4yNzU5OSA1Ljg2NDA4QzUuMDY0NTcgNS44Nzg1OSA0Ljg2MDQ0IDUuODg1ODQgNC42NjM1OSA1Ljg4NTg0SDMuODMyNDlWMy43MjA2SDQuODE2NjlDNC45OTg5NSAzLjcyMDYgNS4xODg1IDMuNzMxNDggNS4zODUzNCAzLjc1MzI0QzUuNTgyMTggMy43NzUgNS43NjA4IDMuODI1NzggNS45MjExOSAzLjkwNTU3QzYuMDgxNTcgMy45NzgxMSA2LjIxMjggNC4wODY5MSA2LjMxNDg3IDQuMjMxOTlDNi40MTY5MyA0LjM2OTgxIDYuNDY3OTcgNC41NTg0MSA2LjQ2Nzk3IDQuNzk3NzhDNi40Njc5NyA1LjA1ODkxIDYuNDA5NjQgNS4yNjIwMiA2LjI5MyA1LjQwNzA5QzYuMTgzNjQgNS41NTIxNyA2LjAzNzgzIDUuNjYwOTcgNS44NTU1NyA1LjczMzUxQzUuNjgwNiA1LjgwNjA1IDUuNDg3NDEgNS44NDk1NyA1LjI3NTk5IDUuODY0MDhaIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMF81OSkiLz4KPC9nPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzBfNTkiIHgxPSItNy40MTgwMWUtMDkiIHkxPSIyLjEwNjk5IiB4Mj0iOC45MjM3MyIgeTI9IjguNTUxOSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjRkY2QjAwIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZGQTUwMCIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=" width="10" height="10" alt="Pro" style="display:block;"></span>
+        </div>
+        <div class="info-icon">?</div>
+      </div>
+
+      <!-- 3 stat boxes -->
+      <div class="fv-stats-row" style="gap:1px;">
+        <div class="fv-stat-box">
+          <div class="fv-stat-label-row">
+            <span class="fv-stat-label">Average</span>
+            <div class="info-icon" style="width:12px;height:12px;font-size:8px;">?</div>
+          </div>
+          <div class="fv-stat-value">197.85</div>
+        </div>
+        <div class="fv-stat-box">
+          <div class="fv-stat-label-row">
+            <span class="fv-stat-label">Upside</span>
+            <div class="info-icon" style="width:12px;height:12px;font-size:8px;">?</div>
+          </div>
+          <div class="fv-stat-value">+8.03%</div>
+        </div>
+        <div class="fv-stat-box">
+          <div class="fv-stat-label-row">
+            <span class="fv-stat-label">Uncertainty</span>
+            <div class="info-icon" style="width:12px;height:12px;font-size:8px;">?</div>
+          </div>
+          <div class="fv-stat-value white">MED</div>
+        </div>
+      </div>
+
+      <!-- Market Range slider -->
+      <div class="range-slider-section" style="margin-top:14px;">
+        <div class="range-slider-header">
+          <div class="range-slider-label">
+            Market Range
+            <div class="info-icon" style="width:12px;height:12px;font-size:8px;">?</div>
+          </div>
+          <span class="range-slider-right">52 weeks</span>
+        </div>
+        <div class="range-track-container" style="height:38px;">
+          <div class="range-track" style="background:#2C3037; margin: 0 4px;">
+            <!-- filled portion up to current price -->
+            <div style="position:absolute; left:0; top:0; height:100%; width:55%; background:#848C97; border-radius:2px;"></div>
+            <!-- thumb label -->
+            <div class="range-thumb-label" style="left:55%;">183.14</div>
+            <div class="range-thumb-triangle" style="left:55%; top:4px; border-top-color:#fff;"></div>
+          </div>
+        </div>
+        <div class="range-min-max" style="margin:0 4px;">
+          <span class="range-bound">86.62</span>
+          <span class="range-bound">212.19</span>
+        </div>
+      </div>
+
+      <!-- Analyst Targets slider -->
+      <div class="range-slider-section" style="margin-top:14px;">
+        <div class="range-slider-header">
+          <div class="range-slider-label">
+            Analyst Targets
+            <div class="info-icon" style="width:12px;height:12px;font-size:8px;">?</div>
+          </div>
+          <span class="range-slider-right">58 analysts</span>
+        </div>
+        <div class="range-track-container" style="height:38px;">
+          <div class="range-track" style="background:#2C3037; margin: 0 4px;">
+            <div style="position:absolute; left:0; top:0; height:100%; width:53%; background:#848C97; border-radius:2px;"></div>
+            <div class="range-thumb-label" style="left:53%;">252.59</div>
+            <div class="range-thumb-triangle" style="left:53%; top:4px; border-top-color:#fff;"></div>
+          </div>
+        </div>
+        <div class="range-min-max" style="margin:0 4px;">
+          <span class="range-bound">140.00</span>
+          <span class="range-bound">352.00</span>
+        </div>
+      </div>
+
+      <!-- InvPro Models slider -->
+      <div class="range-slider-section" style="margin-top:14px;">
+        <div class="range-slider-header">
+          <div class="range-slider-label">
+            InvPro Models
+            <div class="info-icon" style="width:12px;height:12px;font-size:8px;">?</div>
+          </div>
+        </div>
+        <div class="range-track-container" style="height:38px;">
+          <div class="range-track" style="background:#2C3037; margin: 0 4px;">
+            <div style="position:absolute; left:0; top:0; height:100%; width:44%; background:#848C97; border-radius:2px;"></div>
+            <div class="range-thumb-label" style="left:44%;">197.85</div>
+            <div class="range-thumb-triangle" style="left:44%; top:4px; border-top-color:#fff;"></div>
+          </div>
+        </div>
+        <div class="range-min-max" style="margin:0 4px;">
+          <span class="range-bound">84.54</span>
+          <span class="range-bound">288.23</span>
+        </div>
+      </div>
+
+      <div class="view-models-link">
+        View 14 Models
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- How healthy are NVDA's financials? -->
+    <div class="health-section" data-section="financials">
+
+      <div class="health-header">
+        <div class="health-title-row">
+          <span class="health-title">Financial Health</span>
+          <span class="pro-badge-orange"><img src="data:image/svg+xml;base64,PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgdmlld0JveD0iMCAwIDEwIDExLjE1NDciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxnIGlkPSJHcm91cCA1ODEiPgo8cGF0aCBpZD0iU3VidHJhY3QiIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNS4wMDAwMiAwQzQuNTA2OTkgMCAzLjY4Mzc3IDAuMTg1MTY3IDIuOTA4MTUgMC4zOTA0MTNDMi4yMTYzNCAwLjU3NjE2MiAxLjUyOTAzIDAuNzc4MjQyIDAuODQ2NzcyIDAuOTk2NDgzQzAuNjUxOTg4IDEuMDU3ODMgMC40Nzg1NiAxLjE3MzA4IDAuMzQ2NTYgMS4zMjg5QzAuMjE0NTYxIDEuNDg0NzIgMC4xMjkzODcgMS42NzQ3NCAwLjEwMDg5NyAxLjg3Njk2Qy0wLjMyNTIxMSA0Ljk5ODAzIDAuNjYyMzQ4IDcuMzEwNzYgMS44NjE4NSA4Ljg0MTE4QzIuMDQ3MTUgOS4wNzk2NiAyLjI0NTA2IDkuMzA3NTcgMi40NTQ2MSA5LjUyMzk4VjIuNTQ1NUg1LjA1NzI3QzUuNDI5MDggMi41NDU1IDUuNzg2MzEgMi41ODE3NiA2LjEyODk2IDIuNjU0M0M2LjQ3ODkgMi43MjY4NCA2Ljc4NTEgMi44NTAxNSA3LjA0NzU1IDMuMDI0MjRDNy4zMTAwMSAzLjE5MTA4IDcuNTE3NzggMy40MTk1NyA3LjY3MDg4IDMuNzA5NzJDNy44MzEyNyAzLjk5MjYyIDcuOTExNDYgNC4zNDgwNSA3LjkxMTQ2IDQuNzc2MDJDNy45MTE0NiA1LjI2MjAyIDcuODI3NjIgNS42NTM3MiA3LjY1OTk0IDUuOTUxMTJDNy40OTIyNyA2LjI0ODUzIDcuMjY2MjYgNi40ODA2NSA2Ljk4MTk0IDYuNjQ3NDhDNi42OTc2MSA2LjgwNzA2IDYuMzY1OSA2LjkxNTg3IDUuOTg2OCA2Ljk3MzlDNS42MTQ5OSA3LjAzMTkzIDUuMjI0OTUgNy4wNjA5NCA0LjgxNjY5IDcuMDYwOTRIMy44MzI0OVYxMC42Njc5QzQuMDE3MjcgMTAuNzg2NSA0LjIwOTUyIDEwLjg5MzIgNC40MDgwOCAxMC45ODczQzQuNjA4ODcgMTEuMDc5NSA0LjgyMzA0IDExLjE1NDcgNS4wMDAwMiAxMS4xNTQ3QzUuMTc3MDEgMTEuMTU0NyA1LjM5MTE4IDExLjA3OTUgNS41OTE5NiAxMC45ODczQzUuODUzMzUgMTAuODYzMyA2LjEwMzg1IDEwLjcxNzUgNi4zNDA4MSAxMC41NTE2QzcuMDIyMzEgMTAuMDc0NSA3LjYyODQyIDkuNDk3OTcgOC4xMzg5NCA4Ljg0MTE4QzkuMzM2OTUgNy4zMTA3NiAxMC4zMjUzIDQuOTk4MDMgOS44OTkxNSAxLjg3Njk2QzkuODQxODkgMS40NTk3NyA5LjU0NTkyIDEuMTIxNDEgOS4xNTMyNyAwLjk5NjQ4M0M4LjQ3MTAyIDAuNzc4MjM2IDcuNzgzNyAwLjU3NjE1NiA3LjA5MTg5IDAuMzkwNDEzQzYuMzE2MjcgMC4xODUxNjcgNS40OTIzMSAwIDUuMDAwMDIgMFpNNS4yNzU5OSA1Ljg2NDA4QzUuMDY0NTcgNS44Nzg1OSA0Ljg2MDQ0IDUuODg1ODQgNC42NjM1OSA1Ljg4NTg0SDMuODMyNDlWMy43MjA2SDQuODE2NjlDNC45OTg5NSAzLjcyMDYgNS4xODg1IDMuNzMxNDggNS4zODUzNCAzLjc1MzI0QzUuNTgyMTggMy43NzUgNS43NjA4IDMuODI1NzggNS45MjExOSAzLjkwNTU3QzYuMDgxNTcgMy45NzgxMSA2LjIxMjggNC4wODY5MSA2LjMxNDg3IDQuMjMxOTlDNi40MTY5MyA0LjM2OTgxIDYuNDY3OTcgNC41NTg0MSA2LjQ2Nzk3IDQuNzk3NzhDNi40Njc5NyA1LjA1ODkxIDYuNDA5NjQgNS4yNjIwMiA2LjI5MyA1LjQwNzA5QzYuMTgzNjQgNS41NTIxNyA2LjAzNzgzIDUuNjYwOTcgNS44NTU1NyA1LjczMzUxQzUuNjgwNiA1LjgwNjA1IDUuNDg3NDEgNS44NDk1NyA1LjI3NTk5IDUuODY0MDhaIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMF81OSkiLz4KPC9nPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzBfNTkiIHgxPSItNy40MTgwMWUtMDkiIHkxPSIyLjEwNjk5IiB4Mj0iOC45MjM3MyIgeTI9IjguNTUxOSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjRkY2QjAwIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZGQTUwMCIvPgo8L2xpbmVhckdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=" width="10" height="10" alt="Pro" style="display:block;"></span>
+        </div>
+        <div class="info-icon">?</div>
+      </div>
+
+      <!-- Health bar -->
+      <div class="health-bar-container" style="margin-top:28px; margin-bottom:4px;">
+        <div class="health-bar-track">
+          <!-- indicator at ~75% (Great) -->
+          <div class="health-bar-indicator" style="left:75%;">Great</div>
+          <div class="health-bar-triangle" style="left:75%;"></div>
+        </div>
+      </div>
+      <div class="health-scale-row">
+        <span class="health-scale-weak">Weak</span>
+        <span class="health-scale-excellent">Excellent</span>
+      </div>
+
+      <!-- Health cards -->
+      <div class="health-cards-row">
+        <div class="health-card">
+          <div class="health-card-label">
+            <span class="health-card-rating">Great</span>
+            <svg width="6" height="10" viewBox="0 0 6 10" fill="none" style="margin-left:2px;"><path d="M1 1L5 5L1 9" stroke="#6AC64C" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="health-card-title">Cash Flow Rating</div>
+        </div>
+        <div class="health-card">
+          <div class="health-card-label">
+            <span class="health-card-rating excellent">Excellent</span>
+            <svg width="6" height="10" viewBox="0 0 6 10" fill="none" style="margin-left:2px;"><path d="M1 1L5 5L1 9" stroke="#00D4A0" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="health-card-title">Profitability Rating</div>
+        </div>
+        <div class="health-card">
+          <div class="health-card-label">
+            <span class="health-card-rating">Great</span>
+            <svg width="6" height="10" viewBox="0 0 6 10" fill="none" style="margin-left:2px;"><path d="M1 1L5 5L1 9" stroke="#6AC64C" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="health-card-title">Growth Rating</div>
+        </div>
+      </div>
+
+      <div class="health-details-link">
+        Health Details
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+
+    <!-- Section Divider -->
+    <div class="section-divider"></div>
+
+    <!-- How strong is NVDA momentum? + Technical -->
+    <div class="technical-section" data-section="technical">
+
+      <div class="technical-header">
+        <div class="technical-title-row">
+          <span class="technical-title">Technical</span>
+        </div>
+      </div>
+
+      <div class="technical-grid">
+        <div class="tech-cell">
+          <span class="tech-cell-period">1 Min.</span>
+          <div class="tech-cell-signal buy">Buy <span class="tech-cell-arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="#6AC64C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="tech-cell">
+          <span class="tech-cell-period">5 Min.</span>
+          <div class="tech-cell-signal buy">Buy <span class="tech-cell-arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="#6AC64C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="tech-cell">
+          <span class="tech-cell-period">15 Min.</span>
+          <div class="tech-cell-signal neutral">Neutral <span class="tech-cell-arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6H10M10 6L7 3M10 6L7 9" stroke="#949495" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="tech-cell">
+          <span class="tech-cell-period">30 Min.</span>
+          <div class="tech-cell-signal sell">Sell <span class="tech-cell-arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2L10 10M10 10H4M10 10V4" stroke="#E7544D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="tech-cell">
+          <span class="tech-cell-period">Hourly</span>
+          <div class="tech-cell-signal buy">Buy <span class="tech-cell-arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="#6AC64C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="tech-cell">
+          <span class="tech-cell-period">Daily</span>
+          <div class="tech-cell-signal strong-sell">Strong Sell <span class="tech-cell-arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2L10 10M10 10H4M10 10V4" stroke="#E7544D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="tech-cell">
+          <span class="tech-cell-period">Weekly</span>
+          <div class="tech-cell-signal strong-buy">Strong Buy <span class="tech-cell-arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="#6AC64C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+        <div class="tech-cell">
+          <span class="tech-cell-period">Monthly</span>
+          <div class="tech-cell-signal neutral">Neutral <span class="tech-cell-arrow"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6H10M10 6L7 3M10 6L7 9" stroke="#949495" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+        </div>
+      </div>
+      <div class="technical-view-more">
+        More Technical
+        <svg width="6" height="10" viewBox="0 0 6 10" fill="none"><path d="M1 1L5 5L1 9" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+
+    <!-- Bottom padding -->
+    <div style="height: 100px; background: var(--bg-primary);"></div>
+
+  </div><!-- end scroll-content -->
+
+  <!-- Bottom Tab Bar -->
+  <div class="bottom-tab-bar">
+    <div class="tab-bar-buttons">
+      <div class="tab-bar-fill"></div>
+      <div class="tab-bar-glass"></div>
+      <div class="tab-bar-tabs">
+        <div class="tab-item active" onclick="showToast('Markets')">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span class="tab-label">Markets</span>
+        </div>
+        <div class="tab-item" onclick="showToast('News')">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg>
+          <span class="tab-label">News</span>
+        </div>
+        <div class="tab-item" onclick="showToast('Ideas')">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><path d="M12 6a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/><line x1="12" y1="18" x2="12" y2="22"/><path d="M9 21h6"/></svg>
+          <span class="tab-label">Ideas</span>
+        </div>
+        <div class="tab-item" onclick="showToast('Watchlist')">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          <span class="tab-label">Watchlist</span>
+        </div>
+        <div class="tab-item" onclick="showToast('More')">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg>
+          <span class="tab-label">More</span>
+        </div>
+      </div>
+    </div>
+    <div class="home-indicator-bar">
+      <div class="home-bar"></div>
+    </div>
+  </div>
+
+  <!-- WARREN AI SCRIM -->
+  <div class="wai-scrim" id="waiScrim" onclick="closeWarren()"></div>
+
+  <!-- WARREN AI CHAT SHEET -->
+  <div class="wai-sheet" id="waiSheet">
+    <!-- Grab handle -->
+    <div class="wai-handle-area" id="waiHandle">
+      <div class="wai-handle"></div>
+    </div>
+    <!-- Header -->
+    <div class="wai-header">
+      <div class="wai-header-left">
+        <button class="wai-header-link" onclick="closeWarren()">
+          <span class="wai-header-title">Warren
+            <span class="wai-ai-badge">
+              <svg width="26" height="24" viewBox="0 0 30 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2 0.5 H28 C29.1 0.5 29.5 1.4 29.5 2.5 V18.5 C29.5 19.6 28.6 20.5 27.5 20.5 H8 L4 27 L5 20.5 H2.5 C1.4 20.5 0.5 19.6 0.5 18.5 V2.5 C0.5 1.4 1.4 0.5 2.5 0.5 Z" fill="white" stroke="none"/>
+                <text x="15" y="15.5" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="800" fill="#0a0a0a" letter-spacing="0.3">AI</text>
+              </svg>
+            </span>
+          </span>
+          <svg class="wai-header-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M6 4l4 4-4 4" stroke="#8B949E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <button class="wai-close-btn" onclick="closeWarren()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <!-- Gradient rule -->
+    <div class="wai-gradient-rule"></div>
+
+    <!-- Messages -->
+    <div class="wai-messages-wrap">
+    <div class="wai-messages" id="waiMessages">
+      <!-- Suggested queries -->
+      <div class="wai-suggestions" id="waiSuggestions" style="display:none">
+        <button class="wai-suggestion-pill" onclick="sendSuggestion(this)">What's AAPL's momentum like right now?</button>
+        <button class="wai-suggestion-pill" onclick="sendSuggestion(this)">Is AAPL overvalued at current price?</button>
+        <button class="wai-suggestion-pill" onclick="sendSuggestion(this)">What are the biggest risks for AAPL?</button>
+      </div>
+    </div>
+
+    </div><!-- /wai-messages-wrap -->
+
+    <!-- Scroll hint -->
+    <div class="wai-scroll-hint" id="waiScrollHint" onclick="waiMessages.scrollTo({top:waiMessages.scrollHeight,behavior:'smooth'})">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 2V12M7 12L3 8M7 12L11 8" stroke="#2278FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- Minimize banner (shown while waiting for response) -->
+    <div class="wai-minimize-banner" id="waiMinimizeBanner">
+      <div class="wai-minimize-banner-inner">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px">
+          <circle cx="8" cy="8" r="7" stroke="#ec4899" stroke-width="1.5"/>
+          <path d="M8 5v3.5l2 2" stroke="#ec4899" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Minimize to keep browsing - we'll notify you when Warren responds</span>
+      </div>
+      <button class="wai-minimize-banner-dismiss" onclick="document.getElementById('waiMinimizeBanner').classList.remove('visible')">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#8B949E" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <!-- Proactive placeholder (hidden by default) -->
+    <div class="wai-proactive-placeholder" id="waiProactivePlaceholder">
+      <div class="wai-proactive-inner">
+        <div class="wai-proactive-icon">
+          <svg width="32" height="27" viewBox="0 0 34 28" fill="none">
+            <path d="M13 1 C13 1 14.2 8.5 18.5 13 C14.2 17.5 13 25 13 25 C13 25 11.8 17.5 7.5 13 C11.8 8.5 13 1 13 1Z" fill="rgba(168,85,247,0.7)"/>
+            <path d="M1 13 C1 13 8.5 14.2 13 18.5 C17.5 14.2 25 13 25 13 C25 13 17.5 11.8 13 7.5 C8.5 11.8 1 13 1 13Z" fill="rgba(168,85,247,0.7)"/>
+            <path d="M27 1 C27 1 27.5 4.5 30 6.5 C27.5 8.5 27 12 27 12 C27 12 26.5 8.5 24 6.5 C26.5 4.5 27 1 27 1Z" fill="rgba(168,85,247,0.5)"/>
+            <path d="M21 6.5 C21 6.5 24.5 7 26.5 9.5 C28.5 7 32 6.5 32 6.5 C32 6.5 28.5 6 26.5 3.5 C24.5 6 21 6.5 21 6.5Z" fill="rgba(168,85,247,0.5)"/>
+          </svg>
+        </div>
+        <div class="wai-proactive-label">Proactive Insights</div>
+        <div class="wai-proactive-desc">Warren will surface relevant insights about your instruments before you even ask — earnings surprises, analyst rating changes, unusual volume, and more.</div>
+        <div class="wai-proactive-tag">Coming soon · Warren Team</div>
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="wai-input-area" id="waiInputArea">
+      <div class="wai-credits"><span>1/500</span> credits used this month</div>
+      <div class="wai-input-wrap">
+        <div class="wai-input-inner">
+          <input class="wai-input" id="waiInput" type="text" placeholder="Ask Warren" oninput="updateSendBtn()" onkeydown="handleEnter(event)"/>
+          <button class="wai-send-btn" id="waiSendBtn" onclick="sendMessage()" disabled>
+            <!-- Send icon (paper airplane, blue, no bg) -->
+            <svg id="waiIconSend" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 2L11 13" stroke="#2278FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#2278FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <!-- Pause icon (blue circle bg + single black square) -->
+            <svg id="waiIconPause" width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none">
+              <circle cx="16" cy="16" r="16" fill="#2278FF"/>
+              <rect x="11" y="11" width="10" height="10" rx="2" fill="black"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="wai-disclaimer">WarrenAI may provide incorrect information and is never financial advice. More in our <a href="#">T&amp;Cs</a></div>
+    </div>
+  </div>
+
+  <!-- WARREN AI FAB -->
+  <div class="fab-wrapper" id="fab">
+    <div class="pulse-ring pulse-response" id="pulseResponse"></div>
+    <div class="pulse-ring pulse-proactive" id="pulseProactive"></div>
+    <div class="fab-ring">
+      <div class="fab-ring-inner">
+        <svg class="fab-icon fab-icon-default" viewBox="0 0 34 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13 1 C13 1 14.2 8.5 18.5 13 C14.2 17.5 13 25 13 25 C13 25 11.8 17.5 7.5 13 C11.8 8.5 13 1 13 1Z" fill="white"/>
+          <path d="M1 13 C1 13 8.5 14.2 13 18.5 C17.5 14.2 25 13 25 13 C25 13 17.5 11.8 13 7.5 C8.5 11.8 1 13 1 13Z" fill="white"/>
+          <path d="M27 1 C27 1 27.5 4.5 30 6.5 C27.5 8.5 27 12 27 12 C27 12 26.5 8.5 24 6.5 C26.5 4.5 27 1 27 1Z" fill="white"/>
+          <path d="M21 6.5 C21 6.5 24.5 7 26.5 9.5 C28.5 7 32 6.5 32 6.5 C32 6.5 28.5 6 26.5 3.5 C24.5 6 21 6.5 21 6.5Z" fill="white"/>
+        </svg>
+        <svg class="fab-icon fab-icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </div>
+    </div>
+    <div class="fab-badge" id="badgeResponse">
+      <div class="badge-response">
+        <!-- Checkmark -->
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6.5L4.5 9L10 3.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="fab-badge" id="badgeProactive">
+      <div class="badge-proactive">
+        <!-- Ellipsis -->
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <circle cx="2.5" cy="6" r="1.2" fill="white"/>
+          <circle cx="6" cy="6" r="1.2" fill="white"/>
+          <circle cx="9.5" cy="6" r="1.2" fill="white"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Speed dial scrim -->
+  <div class="wai-dial-scrim" id="waiDialScrim" onclick="closeSpeedDial()"></div>
+
+  <!-- Speed dial actions -->
+  <div class="wai-speed-dial" id="waiSpeedDial">
+    <div class="wai-dial-item">
+      <div class="wai-dial-label">Bull &amp; Bear</div>
+      <button class="wai-dial-btn dial-summarise" onclick="dialAction('bullbear')">
+        <!-- dual arrows: up + down -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <polyline points="6 10 12 4 18 10"/>
+          <line x1="12" y1="20" x2="12" y2="10"/>
+          <polyline points="6 14 12 20 18 14"/>
+        </svg>
+      </button>
+    </div>
+    <div class="wai-dial-item">
+      <div class="wai-dial-label">Catalysts</div>
+      <button class="wai-dial-btn dial-templates" onclick="dialAction('catalysts')">
+        <!-- calendar with spark -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+          <polyline points="12 15 13.5 13.5 15 15 12 18 9 15 10.5 13.5 12 15"/>
+        </svg>
+      </button>
+    </div>
+    <div class="wai-dial-item">
+      <div class="wai-dial-label">Analyst view</div>
+      <button class="wai-dial-btn dial-updates" onclick="dialAction('analysts')">
+        <!-- group of people -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </button>
+    </div>
+    <div class="wai-dial-item">
+      <div class="wai-dial-label">Key risks</div>
+      <button class="wai-dial-btn dial-updates" onclick="dialAction('risks')">
+        <!-- shield with alert -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </button>
+    </div>
+    <div class="wai-dial-item">
+      <div class="wai-dial-label">Ask Warren</div>
+      <button class="wai-dial-btn dial-ask" onclick="dialAction('ask')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Drag-to-dismiss target -->
+  <div class="fab-dismiss-target" id="fabDismissTarget">
+    <div class="fab-dismiss-zone" id="fabDismissZone">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M3 3l12 12M15 3L3 15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Dismissed toast -->
+  <div class="fab-dismissed-toast" id="fabDismissedToast">
+    <span class="fab-toast-msg">Warren dismissed</span>
+    <span class="fab-toast-link">Re-enable in Settings</span>
+  </div>
+
+  <!-- Mock iOS keyboard -->
+  <div class="mock-keyboard" id="mockKeyboard">
+    <div class="mock-kb-row">
+      <div class="mock-kb-key">q</div><div class="mock-kb-key">w</div><div class="mock-kb-key">e</div><div class="mock-kb-key">r</div><div class="mock-kb-key">t</div><div class="mock-kb-key">y</div><div class="mock-kb-key">u</div><div class="mock-kb-key">i</div><div class="mock-kb-key">o</div><div class="mock-kb-key">p</div>
+    </div>
+    <div class="mock-kb-row">
+      <div class="mock-kb-key">a</div><div class="mock-kb-key">s</div><div class="mock-kb-key">d</div><div class="mock-kb-key">f</div><div class="mock-kb-key">g</div><div class="mock-kb-key">h</div><div class="mock-kb-key">j</div><div class="mock-kb-key">k</div><div class="mock-kb-key">l</div>
+    </div>
+    <div class="mock-kb-row">
+      <div class="mock-kb-key mock-kb-wide">⇧</div><div class="mock-kb-key">z</div><div class="mock-kb-key">x</div><div class="mock-kb-key">c</div><div class="mock-kb-key">v</div><div class="mock-kb-key">b</div><div class="mock-kb-key">n</div><div class="mock-kb-key">m</div><div class="mock-kb-key mock-kb-wide">⌫</div>
+    </div>
+    <div class="mock-kb-row mock-kb-bottom">
+      <div class="mock-kb-key mock-kb-special">123</div><div class="mock-kb-key mock-kb-space">space</div><div class="mock-kb-key mock-kb-special">return</div>
+    </div>
+  </div>
+
+</div><!-- end phone-shell -->
+
+<script>
+  // Section tab switching
+  document.querySelectorAll('.section-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // Timeframe tab switching
+  document.querySelectorAll('.tf-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tf-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // Bottom tab switching
+  document.querySelectorAll('.tab-bar-tabs .tab-item').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab-bar-tabs .tab-item').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // Show more stats toggle
+  document.querySelector('.show-more-row').addEventListener('click', function() {
+    const chevron = this.querySelector('svg');
+    const isOpen = this.dataset.open === 'true';
+    this.dataset.open = !isOpen;
+    this.querySelector('.show-more-text').textContent = isOpen ? 'Show more' : 'Show less';
+    chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  });
+
+  // Close fair value banner
+  document.querySelector('.fv-close-btn').addEventListener('click', function() {
+    this.closest('.fair-value-banner').style.display = 'none';
+  });
+
+  // Warren AI FAB + Chat
+  const fab          = document.getElementById('fab');
+  const waiScrim     = document.getElementById('waiScrim');
+  const waiSheet     = document.getElementById('waiSheet');
+  const waiMessages  = document.getElementById('waiMessages');
+  const waiScrollHint = document.getElementById('waiScrollHint');
+  const waiInput     = document.getElementById('waiInput');
+  const mockKeyboard = document.getElementById('mockKeyboard');
+  const waiSheetEl   = document.getElementById('waiSheet');
+
+  function showMockKeyboard() {
+    mockKeyboard.classList.add('visible');
+    requestAnimationFrame(() => {
+      const kbH = mockKeyboard.offsetHeight;
+      const transition = 'top 0.32s cubic-bezier(0.32,0.72,0,1), bottom 0.32s cubic-bezier(0.32,0.72,0,1), height 0.32s cubic-bezier(0.32,0.72,0,1)';
+      waiSheetEl.style.transition = transition;
+      waiSheetEl.style.top = '56px';
+      waiSheetEl.style.bottom = kbH + 'px';
+      waiSheetEl.style.height = 'auto';
+    });
+  }
+  function hideMockKeyboard() {
+    mockKeyboard.classList.remove('visible');
+    waiSheetEl.style.top = '';
+    waiSheetEl.style.bottom = '';
+    waiSheetEl.style.height = '';
+    waiSheetEl.style.transition = '';
+  }
+  waiInput.addEventListener('focus', showMockKeyboard);
+  waiInput.addEventListener('blur',  hideMockKeyboard);
+
+  function updateScrollHint() {
+    const notAtBottom = waiMessages.scrollHeight - waiMessages.scrollTop - waiMessages.clientHeight > 40;
+    waiScrollHint.classList.toggle('visible', notAtBottom);
+  }
+  waiMessages.addEventListener('scroll', updateScrollHint);
+  const waiSendBtn   = document.getElementById('waiSendBtn');
+  const badgeResponse  = document.getElementById('badgeResponse');
+  const badgeProactive = document.getElementById('badgeProactive');
+  const pulseResponse  = document.getElementById('pulseResponse');
+  const pulseProactive = document.getElementById('pulseProactive');
+
+  let fabState = 'default';
+  let chatOpen = false;
+
+  let proactiveTimer = null;
+
+  function setFabState(state) {
+    // Cancel any pending proactive timer
+    clearTimeout(proactiveTimer);
+    fabState = state;
+    badgeResponse.classList.remove('visible');
+    badgeProactive.classList.remove('visible');
+    pulseResponse.classList.remove('active');
+    pulseProactive.classList.remove('active');
+    // Highlight active toggle button immediately
+    ['default','response','proactive'].forEach(s => {
+      const btn = document.getElementById('toggle' + s.charAt(0).toUpperCase() + s.slice(1));
+      if (!btn) return;
+      btn.style.background = s === state ? '#f97316' : '#222';
+      btn.style.color      = s === state ? '#fff'    : '#aaa';
+      btn.style.borderColor= s === state ? '#f97316' : '#444';
+    });
+    if (state === 'response') {
+      badgeResponse.classList.add('visible');
+      pulseResponse.classList.add('active');
+    } else if (state === 'proactive') {
+      // 2s delay before badge + animation appear
+      proactiveTimer = setTimeout(() => {
+        if (fabState !== 'proactive') return; // state changed before timer fired
+        badgeProactive.classList.add('visible');
+        pulseProactive.classList.add('active');
+        fab.classList.remove('proactive-ready');
+        void fab.offsetWidth;
+        fab.classList.add('proactive-ready');
+        setTimeout(() => fab.classList.remove('proactive-ready'), 700);
+      }, 2000);
+    }
+  }
+  setFabState('default');
+
+  // ── Drag-to-dismiss ───────────────────────────────────────────────
+  let fabDismissed = false;
+  (function() {
+    const dismissTarget = document.getElementById('fabDismissTarget');
+    const dismissZone   = document.getElementById('fabDismissZone');
+    const toast         = document.getElementById('fabDismissedToast');
+    const phoneShell    = document.querySelector('.phone-shell');
+    let dragging = false;
+    let startX, startY, fabOrigLeft, fabOrigTop;
+    let toastTimer = null;
+
+    function getFabOrigin() {
+      const shellRect = phoneShell.getBoundingClientRect();
+      const fabRect   = fab.getBoundingClientRect();
+      return {
+        left: fabRect.left - shellRect.left,
+        top:  fabRect.top  - shellRect.top
+      };
+    }
+
+    function isOverZone() {
+      const shellRect = phoneShell.getBoundingClientRect();
+      const fabRect   = fab.getBoundingClientRect();
+      const fabCx = fabRect.left + fabRect.width  / 2 - shellRect.left;
+      const fabCy = fabRect.top  + fabRect.height / 2 - shellRect.top;
+      const zoneRect = dismissZone.getBoundingClientRect();
+      const zoneCx = zoneRect.left + zoneRect.width  / 2 - shellRect.left;
+      const zoneCy = zoneRect.top  + zoneRect.height / 2 - shellRect.top;
+      const dist = Math.hypot(fabCx - zoneCx, fabCy - zoneCy);
+      return dist < 44;
+    }
+
+    function onPointerDown(e) {
+      if (fabDismissed || chatOpen) return;
+      dragging = false;
+      const origin = getFabOrigin();
+      fabOrigLeft = origin.left;
+      fabOrigTop  = origin.top;
+      startX = e.clientX ?? e.touches[0].clientX;
+      startY = e.clientY ?? e.touches[0].clientY;
+
+      function onMove(ev) {
+        const cx = ev.clientX ?? ev.touches[0].clientX;
+        const cy = ev.clientY ?? ev.touches[0].clientY;
+        const dx = cx - startX, dy = cy - startY;
+        if (!dragging && Math.hypot(dx, dy) > 6) {
+          dragging = true;
+          fab.style.transition = 'none';
+          fab.style.zIndex = '70';
+          dismissTarget.classList.add('visible');
+        }
+        if (!dragging) return;
+        fab.style.left = (fabOrigLeft + dx) + 'px';
+        fab.style.top  = (fabOrigTop  + dy) + 'px';
+        fab.style.right = 'auto';
+        fab.style.bottom = 'auto';
+        dismissZone.classList.toggle('hot', isOverZone());
+      }
+
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup',   onUp);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend',  onUp);
+        dismissTarget.classList.remove('visible');
+        dismissZone.classList.remove('hot');
+
+        if (!dragging) {
+          // Notification states go straight to chat; default state opens speed dial
+          if (fabState === 'response' || fabState === 'proactive') {
+            openWarren();
+          } else {
+            toggleSpeedDial();
+          }
+          return;
+        }
+
+        if (isOverZone()) {
+          // Dismiss!
+          fab.style.transition = 'transform 0.2s ease-in, opacity 0.2s ease-in';
+          fab.style.transform = 'scale(0)';
+          fab.style.opacity = '0';
+          fabDismissed = true;
+          setTimeout(() => {
+            fab.style.display = 'none';
+            toast.classList.add('visible');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('visible'), 5000);
+          }, 200);
+        } else {
+          // Snap back
+          fab.style.transition = 'left 0.3s cubic-bezier(0.34,1.56,0.64,1), top 0.3s cubic-bezier(0.34,1.56,0.64,1)';
+          fab.style.left   = fabOrigLeft + 'px';
+          fab.style.top    = fabOrigTop  + 'px';
+          fab.style.right  = 'auto';
+          fab.style.bottom = 'auto';
+          setTimeout(() => {
+            fab.style.transition = '';
+            fab.style.left = '';
+            fab.style.top  = '';
+            fab.style.right  = '';
+            fab.style.bottom = '';
+            fab.style.zIndex = '';
+          }, 320);
+        }
+        dragging = false;
+      }
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup',   onUp);
+      document.addEventListener('touchmove', onMove, { passive: true });
+      document.addEventListener('touchend',  onUp);
+    }
+
+    fab.addEventListener('mousedown',  onPointerDown);
+    fab.addEventListener('touchstart', onPointerDown, { passive: true });
+  })();
+
+  function reviveWarren() {
+    const toast = document.getElementById('fabDismissedToast');
+    toast.classList.remove('visible');
+    fab.style.display = '';
+    fab.style.transform = 'scale(0)';
+    fab.style.opacity = '0';
+    setTimeout(() => {
+      fab.style.transition = 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease';
+      fab.style.transform = 'scale(1)';
+      fab.style.opacity = '1';
+      setTimeout(() => { fab.style.transition = ''; fab.style.transform = ''; fab.style.opacity = ''; }, 320);
+    }, 50);
+    fabDismissed = false;
+  }
+  // ── End drag-to-dismiss ───────────────────────────────────────────
+
+  // ── Speed dial ───────────────────────────────────────────────────
+  let speedDialOpen = false;
+  const speedDial = document.getElementById('waiSpeedDial');
+  const dialScrim = document.getElementById('waiDialScrim');
+
+  function toggleSpeedDial() {
+    if (chatOpen) return;
+    speedDialOpen ? closeSpeedDial() : openSpeedDial();
+  }
+  function openSpeedDial() {
+    speedDialOpen = true;
+    speedDial.classList.add('open');
+    dialScrim.classList.add('open');
+    fab.classList.add('dial-open');
+  }
+  function closeSpeedDial() {
+    speedDialOpen = false;
+    speedDial.classList.remove('open');
+    dialScrim.classList.remove('open');
+    fab.classList.remove('dial-open');
+  }
+
+  function dialAction(type) {
+    closeSpeedDial();
+    const ticker = 'AAPL';
+    const queries = {
+      bullbear:  `What are the strongest bull and bear arguments for ${ticker} right now? Keep it concise — 3 points each, based on recent fundamentals, sentiment, and market conditions.`,
+      catalysts: `What are the most important upcoming catalysts for ${ticker}? Include earnings dates, product launches, macro events, or anything else that could move the price in the near term.`,
+      analysts:  `What is the current analyst consensus on ${ticker}? Summarize the rating distribution, average price target, and the main reasons analysts are bullish or bearish.`,
+      risks:     `What are the key risks facing ${ticker} right now? Cover fundamental, competitive, macro, and any stock-specific risks an investor should be aware of.`,
+
+      ask:       null
+    };
+    if (type === 'ask') {
+      openWarren();
+    } else if (queries[type]) {
+      openWarrenWithQuery(queries[type]);
+    }
+  }
+
+  function openWarrenWithQuery(query) {
+    const s = document.getElementById('waiSuggestions');
+    if (s) s.style.display = 'none';
+    openWarren();
+    setTimeout(() => {
+      const input = document.getElementById('waiInput');
+      if (!input) return;
+      input.value = query;
+      input.dispatchEvent(new Event('input'));
+      setTimeout(() => sendMessage(), 120);
+    }, 460);
+  }
+
+  function openWarrenTemplates() {
+    openWarren();
+    setTimeout(() => {
+      const s = document.getElementById('waiSuggestions');
+      if (!s) return;
+      s.style.display = '';
+      const templates = [
+        `How does AAPL compare to its peers on valuation?`,
+        `What are the key risks for AAPL over the next quarter?`,
+        `Summarise AAPL's earnings trend over the last 4 quarters`
+      ];
+      s.querySelectorAll('.wai-suggestion-pill').forEach((pill, i) => {
+        if (templates[i]) pill.textContent = templates[i];
+      });
+      if (!s.previousElementSibling?.classList.contains('wai-templates-label')) {
+        const lbl = document.createElement('div');
+        lbl.className = 'wai-templates-label';
+        lbl.textContent = 'My templates';
+        lbl.style.cssText = 'font-size:11px;font-weight:600;color:#8B949E;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:-2px;';
+        s.parentNode.insertBefore(lbl, s);
+      }
+    }, 460);
+  }
+  // ── End speed dial ────────────────────────────────────────────────
+
+  const AAPL_PREFILL = {
+    question: "What's AAPL's momentum like right now?",
+    answer: `<p style="margin:0 0 12px">AAPL's momentum is cautiously bullish heading into the session. Here's the full picture:</p>
+<p style="margin:0 0 6px"><strong>📈 Price Action</strong></p>
+<ul style="margin:0 0 12px;padding-left:18px;line-height:1.7">
+  <li>Trading at <strong>$185.81</strong>, up <strong>0.47%</strong> on the day — holding above the 50-day MA</li>
+  <li>Pre-market showing mild selling pressure at <strong>$184.73</strong>, down 0.58% — worth watching at the open</li>
+  <li>52-week range: <strong>$86.62 – $188+</strong> — currently near the upper end</li>
+</ul>
+<p style="margin:0 0 6px"><strong>🔧 Technical Signals</strong></p>
+<ul style="margin:0 0 12px;padding-left:18px;line-height:1.7">
+  <li>RSI at <strong>58</strong> — bullish but not overbought</li>
+  <li>MACD showing positive crossover on the daily — a buy signal</li>
+  <li>Volume today is <strong>12% above</strong> 30-day average, confirming the move</li>
+</ul>
+<p style="margin:0 0 6px"><strong>💡 Analyst View</strong></p>
+<ul style="margin:0 0 0;padding-left:18px;line-height:1.7">
+  <li>38 Buy / 6 Hold / 0 Sell — consensus is firmly constructive</li>
+  <li>Average price target: <strong>$197.82</strong> — aligns with Fair Value, implying ~6.5% upside</li>
+  <li>Upcoming catalyst: next earnings in ~6 weeks</li>
+</ul>`
+  };
+
+  function openWarren() {
+    if (chatOpen) return;
+    closeSpeedDial();
+    chatOpen = true;
+    const proactivePlaceholder = document.getElementById('waiProactivePlaceholder');
+    const messagesWrap = document.querySelector('.wai-messages-wrap');
+    const inputArea = document.getElementById('waiInputArea');
+
+    // FAB: shrink + fade out, clear badge
+    fab.style.transition = 'opacity 0.16s ease-in, transform 0.16s ease-in';
+    fab.style.opacity = '0';
+    fab.style.transform = 'scale(0.85)';
+    fab.style.pointerEvents = 'none';
+    badgeResponse.classList.remove('visible');
+    badgeProactive.classList.remove('visible');
+    pulseResponse.classList.remove('active');
+    pulseProactive.classList.remove('active');
+
+    if (fabState === 'response') {
+      // Show Q&A - use real pending response if available, else demo prefill
+      const qa = pendingResponse || AAPL_PREFILL;
+      pendingResponse = null;
+      fabState = 'default';
+      proactivePlaceholder.classList.remove('visible');
+      messagesWrap.style.display = '';
+      inputArea.style.display = '';
+      // Clear messages and inject the exchange
+      waiMessages.innerHTML = '';
+      const userRow = document.createElement('div');
+      userRow.className = 'wai-msg-row wai-msg-user';
+      userRow.innerHTML = `<div class="wai-bubble wai-bubble-user">${qa.question}</div>`;
+      waiMessages.appendChild(userRow);
+      const warrenRow = document.createElement('div');
+      warrenRow.className = 'wai-msg-row wai-msg-warren';
+      warrenRow.innerHTML = `<div class="wai-bubble-warren">${qa.answer}</div>`;
+      waiMessages.appendChild(warrenRow);
+      setTimeout(() => { waiMessages.scrollTop = 0; updateScrollHint(); }, 50);
+    } else if (fabState === 'proactive') {
+      fabState = 'default';
+      // Show proactive placeholder, hide normal chat UI
+      messagesWrap.style.display = 'none';
+      inputArea.style.display = 'none';
+      document.getElementById('waiScrollHint').style.display = 'none';
+      proactivePlaceholder.classList.add('visible');
+    } else {
+      // Default: normal empty chat — focus input to raise keyboard
+      proactivePlaceholder.classList.remove('visible');
+      messagesWrap.style.display = '';
+      inputArea.style.display = '';
+      setTimeout(() => document.getElementById('waiInput')?.focus(), 460);
+    }
+
+    // Sheet + scrim open
+    waiScrim.classList.add('open');
+    waiSheet.classList.add('open');
+    // Glow pulse after sheet settles
+    setTimeout(() => {
+      waiSheet.classList.add('glow-pulse');
+      setTimeout(() => waiSheet.classList.remove('glow-pulse'), 700);
+    }, 440);
+  }
+
+  function closeWarren() {
+    if (!chatOpen) return;
+    chatOpen = false;
+    const proactivePlaceholder = document.getElementById('waiProactivePlaceholder');
+    const messagesWrap = document.querySelector('.wai-messages-wrap');
+    const inputArea = document.getElementById('waiInputArea');
+    // Reset sheet to default state
+    proactivePlaceholder.classList.remove('visible');
+    messagesWrap.style.display = '';
+    inputArea.style.display = '';
+    document.getElementById('waiScrollHint').style.display = '';
+    const banner = document.getElementById('waiMinimizeBanner');
+    if (banner) banner.classList.remove('visible');
+    // If a response is already ready (typed while chat was open), notify in 3s
+    if (pendingReply) {
+      const { question, answer } = pendingReply;
+      clearTimeout(notifyTimer);
+      notifyTimer = setTimeout(() => triggerFabNotification(question, answer), 3000);
+    }
+    // Sheet + scrim close
+    waiSheet.classList.remove('open');
+    waiScrim.classList.remove('open');
+    // FAB bounces back after 150ms
+    setTimeout(() => {
+      fab.style.transition = 'opacity 0.2s ease-out, transform 0.2s cubic-bezier(0.34,1.56,0.64,1)';
+      fab.style.opacity = '1';
+      fab.style.transform = 'scale(1)';
+      fab.style.pointerEvents = '';
+    }, 150);
+  }
+
+  function updateSendBtn() {
+    waiSendBtn.disabled = waiInput.value.trim() === '';
+  }
+
+  function sendSuggestion(pill) {
+    const text = pill.textContent.trim();
+    hideSuggestions();
+    waiInput.value = text;
+    updateSendBtn();
+    sendMessage();
+  }
+
+  function hideSuggestions() {
+    const s = document.getElementById('waiSuggestions');
+    if (s) s.style.display = 'none';
+  }
+
+  function handleEnter(e) {
+    if (e.key === 'Enter' && !waiSendBtn.disabled) sendMessage();
+  }
+
+  // Simulated Warren responses
+  const warrenReplies = [
+    `<p style="margin:0 0 12px">NVDA's momentum has shifted in the short term despite a remarkable long-term run. Here's a full breakdown:</p>
+<p style="margin:0 0 6px"><strong>📉 Short-Term Stumble, Long-Term Leader</strong></p>
+<ul style="margin:0 0 12px;padding-left:18px;line-height:1.7">
+  <li>Currently trading at <strong>$207.45</strong>, down <strong>6.3%</strong> for the week and <strong>2.9%</strong> for the month</li>
+  <li>Momentum has clearly turned negative in the short term, despite a blockbuster <strong>46.5% gain</strong> over the past year</li>
+  <li>Strong technical sell signals across intraday timeframes</li>
+  <li>RSI cooling at <strong>46.5</strong> — approaching oversold but not there yet</li>
+</ul>
+<p style="margin:0 0 6px"><strong>🌍 Geopolitics &amp; Policy</strong></p>
+<ul style="margin:0 0 12px;padding-left:18px;line-height:1.7">
+  <li><strong>Export restrictions</strong> on advanced chips to China remain a key overhang — China represents ~20% of NVDA revenue</li>
+  <li>U.S. regulatory scrutiny on AI and semiconductors is heating up, adding uncertainty to forward guidance</li>
+</ul>
+<p style="margin:0 0 6px"><strong>💡 Sentiment &amp; Technicals</strong></p>
+<ul style="margin:0 0 0;padding-left:18px;line-height:1.7">
+  <li>Institutional ownership remains high at ~65% — strong long-term conviction</li>
+  <li>Trading above 200-day MA, but below the 50-day — mixed signal</li>
+  <li>Options market pricing in elevated volatility through next earnings</li>
+</ul>`,
+
+    `<p style="margin:0 0 12px">NVDA's valuation is stretched but arguably justified. Here's the breakdown:</p>
+<p style="margin:0 0 6px"><strong>📊 Valuation Snapshot</strong></p>
+<ul style="margin:0 0 12px;padding-left:18px;line-height:1.7">
+  <li>Forward P/E of <strong>68x</strong> vs. sector median of ~28x</li>
+  <li>Price/Sales of <strong>24x</strong> — pricing in sustained hypergrowth</li>
+  <li>EV/EBITDA at <strong>55x</strong>, elevated but declining as earnings scale</li>
+</ul>
+<p style="margin:0 0 6px"><strong>⚖️ Bull vs. Bear Case</strong></p>
+<ul style="margin:0 0 12px;padding-left:18px;line-height:1.7">
+  <li><strong>Bulls argue:</strong> data center AI capex is still in early innings; NVDA has 80%+ GPU market share with no near-term challenger</li>
+  <li><strong>Bears argue:</strong> customer concentration risk (Microsoft, Meta, Google = ~40% revenue), and any slowdown in AI spend hits hard</li>
+</ul>
+<p style="margin:0 0 6px"><strong>🎯 Analyst Consensus</strong></p>
+<ul style="margin:0 0 0;padding-left:18px;line-height:1.7">
+  <li>42 Buy / 5 Hold / 1 Sell</li>
+  <li>Average price target: <strong>$248</strong> — implying ~20% upside from current levels</li>
+</ul>`,
+
+    `<p style="margin:0 0 12px">NVDA faces several material risks worth monitoring closely:</p>
+<p style="margin:0 0 6px"><strong>🚧 Key Risk Factors</strong></p>
+<ul style="margin:0 0 12px;padding-left:18px;line-height:1.7">
+  <li><strong>Export controls:</strong> U.S. restrictions on H100/H200 exports to China could reduce addressable market by 15-20%</li>
+  <li><strong>Competition:</strong> AMD MI300X gaining traction; custom silicon from hyperscalers (Google TPU, Amazon Trainium) could erode share</li>
+  <li><strong>Concentration:</strong> Top 5 customers represent over 45% of revenue — any capex pullback is amplified</li>
+  <li><strong>Valuation compression:</strong> A re-rating to 40x forward P/E would imply ~40% downside from current price</li>
+</ul>
+<p style="margin:0 0 6px"><strong>🛡️ Mitigating Factors</strong></p>
+<ul style="margin:0 0 0;padding-left:18px;line-height:1.7">
+  <li>CUDA software moat creates deep switching costs — estimated 3-5 years to replicate</li>
+  <li>Blackwell architecture ramp expected to drive another leg of revenue growth in H2 2025</li>
+  <li>Balance sheet is fortress-level: $26B cash, minimal debt</li>
+</ul>`,
+  ];
+  let replyIndex = 0;
+  let pendingResponse = null;   // stores {question, answer} when ready while chat is closed
+  let pendingReply = null;      // reply prepped but waiting for close to start 3s countdown
+  let notifyTimer = null;       // the 3s post-close notification timer
+
+  function triggerFabNotification(question, reply) {
+    pendingResponse = { question, answer: reply };
+    pendingReply = null;
+    fabState = 'response';
+    badgeResponse.classList.add('visible');
+    pulseResponse.classList.add('active');
+    // Pink flash + jiggle on FAB
+    fab.classList.remove('response-ready');
+    void fab.offsetWidth;
+    fab.classList.add('response-ready');
+    setTimeout(() => fab.classList.remove('response-ready'), 700);
+    // Sync toggle buttons
+    ['default','response','proactive'].forEach(s => {
+      const btn = document.getElementById('toggle' + s.charAt(0).toUpperCase() + s.slice(1));
+      if (!btn) return;
+      btn.style.background = s === 'response' ? '#f97316' : '#222';
+      btn.style.color      = s === 'response' ? '#fff'    : '#aaa';
+      btn.style.borderColor= s === 'response' ? '#f97316' : '#444';
+    });
+  }
+
+  function sendMessage() {
+    const text = waiInput.value.trim();
+    if (!text) return;
+    hideSuggestions();
+    // Clear any previous pending notification
+    clearTimeout(notifyTimer);
+    pendingReply = null;
+    // Add user bubble
+    const userRow = document.createElement('div');
+    userRow.className = 'wai-msg-row wai-msg-user';
+    userRow.innerHTML = `<div class="wai-bubble wai-bubble-user">${text}</div>`;
+    waiMessages.appendChild(userRow);
+    waiInput.value = '';
+    waiSendBtn.disabled = false;
+    waiSendBtn.classList.add('waiting');
+    document.getElementById('waiIconSend').style.display = 'none';
+    document.getElementById('waiIconPause').style.display = 'block';
+    waiMessages.scrollTop = waiMessages.scrollHeight;
+    // Show typing indicator
+    const typingRow = document.createElement('div');
+    typingRow.className = 'wai-msg-row wai-msg-warren';
+    typingRow.innerHTML = `<div class="wai-bubble-warren"><div class="wai-typing"><span></span><span></span><span></span></div></div>`;
+    waiMessages.appendChild(typingRow);
+    waiMessages.scrollTop = waiMessages.scrollHeight;
+    // Show minimize banner after a short delay
+    setTimeout(() => {
+      const banner = document.getElementById('waiMinimizeBanner');
+      if (banner) banner.classList.add('visible');
+    }, 400);
+    // Simulate Warren "thinking" — response ready after 2s
+    setTimeout(() => {
+      const reply = warrenReplies[replyIndex % warrenReplies.length];
+      replyIndex++;
+      // Dismiss banner
+      const banner = document.getElementById('waiMinimizeBanner');
+      if (banner) banner.classList.remove('visible');
+      // Restore send button
+      waiSendBtn.classList.remove('waiting');
+      waiSendBtn.disabled = true;
+      document.getElementById('waiIconSend').style.display = 'block';
+      document.getElementById('waiIconPause').style.display = 'none';
+      if (!chatOpen) {
+        // Chat already closed — notify 3s after close (which already happened)
+        triggerFabNotification(text, reply);
+      } else {
+        // Chat is still open — inject response inline
+        typingRow.querySelector('.wai-bubble-warren').innerHTML = reply;
+        updateScrollHint();
+        // Also store as pending so if user closes right after, it's retrievable
+        pendingReply = { question: text, answer: reply };
+      }
+    }, 2000);
+  }
+
+  // ── Section-aware suggested queries ──────────────────────────────
+  const sectionSuggestions = {
+    'chart':      ["What does AAPL's chart pattern tell us?", "Is this a good entry point based on technicals?", "How has AAPL performed vs. the S&P 500 this year?"],
+    'key-stats':  ["Is AAPL's P/E ratio high compared to peers?", "What does AAPL's market cap say about its valuation?", "How does today's volume compare to normal?"],
+    'protips':    ["Tell me more about AAPL's 5-year performance", "Are AAPL's ProTips bullish or bearish overall?", "What are analysts saying about AAPL right now?"],
+    'news':       ["What's the latest news that could move AAPL?", "How are macro trends affecting AAPL?", "Any recent analyst upgrades or downgrades?"],
+    'fair-value': ["Is AAPL overvalued or undervalued right now?", "How is AAPL's fair value calculated?", "What's the upside potential from current price?"],
+    'financials': ["How healthy are AAPL's financials?", "Is AAPL's revenue growth slowing down?", "How much cash does Apple have on its balance sheet?"],
+    'technical':  ["What's AAPL's momentum like right now?", "Is AAPL technically overbought or oversold?", "What are the key support and resistance levels?"],
+    'default':    ["What's AAPL's momentum like right now?", "Is AAPL overvalued at current price?", "What are the biggest risks for AAPL?"],
+  };
+
+  function getVisibleSection() {
+    const scrollable = document.querySelector('.scroll-content');
+    if (!scrollable) return 'default';
+    const containerTop = scrollable.getBoundingClientRect().top;
+    const containerBottom = scrollable.getBoundingClientRect().bottom;
+    const sections = Array.from(scrollable.querySelectorAll('[data-section]'));
+    // Find the first section whose header is still visible (top within viewport)
+    for (const el of sections) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top >= containerTop && rect.top < containerBottom) {
+        return el.dataset.section;
+      }
+    }
+    // All headers scrolled off — use the last one that passed the top
+    let last = 'default';
+    for (const el of sections) {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < containerTop) last = el.dataset.section;
+    }
+    return last;
+  }
+
+  function updateSuggestions() {
+    const suggestionsEl = document.getElementById('waiSuggestions');
+    if (!suggestionsEl || suggestionsEl.style.display === 'none') return;
+    const section = getVisibleSection();
+    const queries = sectionSuggestions[section] || sectionSuggestions['default'];
+    const pills = suggestionsEl.querySelectorAll('.wai-suggestion-pill');
+    pills.forEach((pill, i) => { if (queries[i]) pill.textContent = queries[i]; });
+  }
+
+  // Update suggestions when sheet opens
+  const _origOpenWarren = openWarren;
+  openWarren = function() { _origOpenWarren(); setTimeout(updateSuggestions, 50); };
+
+  // Also update on page scroll (while sheet is open)
+  const scrollEl = document.querySelector('.scroll-content');
+  if (scrollEl) scrollEl.addEventListener('scroll', function() {
+    const suggestionsEl = document.getElementById('waiSuggestions');
+    if (suggestionsEl && suggestionsEl.style.display !== 'none' && document.getElementById('waiSheet').classList.contains('open')) {
+      updateSuggestions();
+    }
+  });
+
+  // Swipe-to-dismiss on sheet handle
+  let dragStartY = 0, dragCurrentY = 0, isDragging = false;
+  document.getElementById('waiHandle').addEventListener('touchstart', e => {
+    isDragging = true; dragStartY = e.touches[0].clientY;
+  });
+  document.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    dragCurrentY = e.touches[0].clientY;
+    const delta = Math.max(0, dragCurrentY - dragStartY);
+    waiSheet.style.transition = 'none';
+    waiSheet.style.transform = `translateY(${delta}px)`;
+  });
+  document.addEventListener('touchend', e => {
+    if (!isDragging) return;
+    isDragging = false;
+    const delta = dragCurrentY - dragStartY;
+    waiSheet.style.transition = '';
+    if (delta > 100) {
+      closeWarren();
+    } else {
+      waiSheet.style.transform = 'translateY(0)';
+    }
+  });
+</script>
+
+</body>
+</html>

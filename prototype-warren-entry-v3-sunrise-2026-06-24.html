@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warren Entry V3 – FAB Sunrise</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --font:'Roboto',system-ui,sans-serif;
+  --bg-primary:#0B0F14; --bg-surface:#1A1E24; --bg-card:#1F242A;
+  --text-primary:#FFFFFF; --text-secondary:#C7CACD; --text-muted:#848C97;
+  --divider:rgba(255,255,255,0.08); --green:#6AC64C; --red:#E7544D;
+  --blue:#2278FF; --nav-height:56px; --status-height:44px;
+}
+body { background:#0d1117; display:flex; flex-direction:column; align-items:center; min-height:100vh; padding:40px 20px; font-family:var(--font); }
+.phone-shell { width:393px; height:852px; background:var(--bg-primary); border-radius:54px; box-shadow:0 0 0 10px #111417, 0 0 0 12px #222629, 0 40px 120px rgba(0,0,0,0.9); position:relative; overflow:hidden; display:flex; flex-direction:column; }
+.dynamic-island { position:absolute; top:12px; left:50%; transform:translateX(-50%); width:120px; height:36px; background:#000; border-radius:20px; z-index:100; }
+.status-bar { height:var(--status-height); padding:14px 20px 0; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; position:relative; z-index:50; background:var(--bg-primary); }
+.status-time { font-size:15px; font-weight:600; color:var(--text-primary); }
+.status-right { display:flex; align-items:center; gap:6px; }
+.nav-bar { height:var(--nav-height); padding:0 16px; display:flex; align-items:center; justify-content:space-between; background:var(--bg-primary); flex-shrink:0; position:relative; z-index:40; }
+.nav-pill-btn { height:44px; border-radius:1000px; background:rgba(45,48,54,0.85); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; box-shadow:0 8px 40px rgba(0,0,0,0.28); border:1px solid rgba(255,255,255,0.07); }
+.nav-pill-back { width:44px; }
+.nav-pill-actions { width:82px; }
+.nav-pill-icons { display:flex; align-items:center; gap:10px; padding:0 8px; }
+.nav-center { flex:1; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:2px; padding:0 8px; }
+.nav-title-text { font-size:16px; font-weight:700; color:#FFFFFF; }
+.nav-subtitle-row { display:flex; align-items:center; gap:3px; }
+.nav-subtitle-text { font-size:12px; font-weight:510; color:#949495; }
+.scroll-content { flex:1; overflow-y:auto; overflow-x:hidden; background:var(--bg-primary); -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.scroll-content::-webkit-scrollbar { display:none; }
+.instrument-header { padding:8px 16px 0; }
+.price-block { margin-top:8px; }
+.price-main-row { display:flex; align-items:baseline; gap:10px; }
+.price-main { font-size:22px; font-weight:700; color:var(--text-primary); }
+.price-change { font-size:17px; font-weight:510; color:var(--green); }
+.price-meta-row { display:flex; align-items:center; gap:6px; margin-top:3px; }
+.price-meta-text { font-size:11px; color:#C7CACD; }
+.pre-market-row { display:flex; align-items:center; gap:8px; margin-top:6px; padding:6px 0; border-top:0.5px solid var(--divider); }
+.pre-market-label { display:flex; align-items:center; gap:4px; font-size:12px; color:var(--text-primary); font-weight:510; }
+.pre-market-price { font-size:12px; font-weight:510; color:var(--text-primary); margin-left:4px; }
+.pre-market-change { font-size:12px; font-weight:510; color:var(--red); }
+.pre-market-time { font-size:11px; color:#C7CACD; margin-left:auto; }
+.fair-value-banner { margin:10px 16px 0; background:var(--bg-card); border-radius:10px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+.fv-label { font-size:13px; color:var(--text-muted); margin-bottom:1px; }
+.fv-value { font-size:15px; font-weight:600; color:var(--text-primary); }
+.fv-upside { font-size:12px; color:var(--green); font-weight:500; margin-top:1px; }
+.fv-right { display:flex; align-items:center; gap:8px; }
+.fv-bar-thumb { width:60px; height:6px; border-radius:3px; background:linear-gradient(90deg,#E7544D 0%,#FF7800 30%,#FFD700 55%,#6AC64C 100%); }
+.fv-close-btn { color:var(--text-muted); font-size:16px; cursor:pointer; padding:2px; }
+.section-tabs-bar { display:flex; border-bottom:0.5px solid var(--divider); margin-top:10px; padding:0 16px; background:var(--bg-primary); gap:24px; overflow-x:auto; scrollbar-width:none; }
+.section-tabs-bar::-webkit-scrollbar { display:none; }
+.section-tab { font-size:15px; font-weight:500; color:var(--text-muted); padding:10px 0 9px; cursor:pointer; position:relative; white-space:nowrap; flex-shrink:0; transition:color 0.15s; }
+.section-tab.active { color:var(--text-primary); font-weight:600; }
+.section-tab.active::after { content:''; position:absolute; bottom:-0.5px; left:0; right:0; height:2px; background:var(--text-primary); border-radius:1px; }
+.chart-section { background:var(--bg-primary); }
+.chart-header { display:flex; align-items:center; justify-content:space-between; padding:8px 16px 0; }
+.analyze-chart-btn { display:flex; align-items:center; gap:5px; background:rgba(34,120,255,0.15); border:0.5px solid rgba(34,120,255,0.4); border-radius:20px; padding:5px 10px; cursor:pointer; }
+.analyze-chart-icon { width:14px; height:14px; background:var(--blue); border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:8px; color:#fff; font-weight:700; }
+.analyze-chart-label { font-size:12px; color:var(--blue); font-weight:500; }
+.chart-container { position:relative; height:200px; margin:4px 0 0; overflow:hidden; }
+.chart-svg { width:100%; height:100%; }
+.timeframe-bar { display:flex; align-items:center; justify-content:space-between; padding:0 16px; margin:4px 0 8px; }
+.tf-group { display:flex; gap:2px; }
+.tf-tab { font-size:13px; font-weight:500; color:var(--text-muted); padding:5px 9px; cursor:pointer; border-radius:20px; transition:all 0.15s; }
+.tf-tab.active { color:var(--text-primary); background:#2C3037; }
+.section-divider { height:8px; background:#0D1016; }
+.stats-section { background:var(--bg-primary); padding:16px 16px 8px; }
+.stats-title { font-size:20px; font-weight:700; color:var(--text-primary); }
+.stat-row { display:flex; align-items:center; justify-content:space-between; padding:6.5px 0; border-top:0.5px solid var(--divider); }
+.stat-label { font-size:15px; color:var(--text-secondary); }
+.stat-value { font-size:15px; color:var(--text-primary); text-align:right; }
+.show-more-row { display:flex; align-items:center; justify-content:center; gap:6px; padding:14px 0 4px; cursor:pointer; }
+.show-more-text { font-size:17px; color:var(--text-primary); }
+.protips-section { background:var(--bg-primary); padding:16px 16px 8px; }
+.protips-title { font-size:20px; font-weight:700; color:var(--text-primary); }
+.protip-row { display:flex; align-items:center; padding:10px 12px; border-radius:10px; gap:12px; cursor:pointer; margin-bottom:8px; }
+.protip-row.bullish { background:rgba(106,198,76,0.08); }
+.protip-row.bearish { background:rgba(231,84,77,0.08); }
+.protip-bull-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.protip-bull-icon.bullish { background:rgba(106,198,76,0.2); }
+.protip-bull-icon.bearish { background:rgba(231,84,77,0.2); }
+.protip-text { flex:1; font-size:15px; color:var(--text-primary); line-height:20px; }
+.news-section { background:var(--bg-primary); padding:16px 0 8px; }
+.news-header { display:flex; align-items:center; justify-content:space-between; padding:0 16px; margin-bottom:14px; }
+.news-title { font-size:20px; font-weight:700; color:var(--text-primary); }
+.news-read-more { font-size:13px; color:var(--blue); cursor:pointer; }
+.news-carousel { overflow-x:auto; display:flex; gap:16px; padding:0 16px; scrollbar-width:none; }
+.news-carousel::-webkit-scrollbar { display:none; }
+.news-col { width:310px; flex-shrink:0; display:flex; flex-direction:column; }
+.article-card { padding:10px 0; cursor:pointer; border-bottom:0.5px solid var(--divider); min-height:97px; display:flex; flex-direction:column; justify-content:space-between; }
+.article-card:last-child { border-bottom:none; }
+.article-headline { font-size:15px; font-weight:600; color:var(--text-primary); line-height:20px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.article-meta-row { display:flex; align-items:center; margin-top:auto; }
+.article-source-time { font-size:12px; color:var(--text-muted); flex:1; }
+.health-section { background:var(--bg-primary); padding:16px 16px 12px; }
+.health-title { font-size:20px; font-weight:700; color:var(--text-primary); }
+.health-bar-track { height:6px; border-radius:3px; background:linear-gradient(90deg,#E7544D 0%,#FF7800 25%,#FFD700 50%,#9DC846 75%,#6AC64C 100%); }
+.health-cards-row { display:flex; gap:8px; }
+.health-card { flex:1; background:var(--bg-card); border-radius:10px; padding:10px; cursor:pointer; }
+.health-card-rating { font-size:14px; font-weight:600; color:var(--green); margin-bottom:2px; }
+.health-card-title { font-size:12px; color:var(--text-muted); }
+.technical-section { background:var(--bg-primary); padding:16px 16px 12px; }
+.technical-title { font-size:20px; font-weight:700; color:var(--text-primary); }
+.technical-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; }
+.tech-cell { padding:6px 4px; display:flex; flex-direction:column; gap:6px; cursor:pointer; }
+.tech-cell-period { font-size:11px; color:var(--text-muted); }
+.tech-cell-signal { font-size:12px; font-weight:700; border-radius:6px; padding:0 8px; height:44px; display:flex; align-items:center; justify-content:flex-end; }
+.tech-cell-signal.strong-buy { background:rgba(106,198,76,0.2); color:var(--green); }
+.tech-cell-signal.buy { background:rgba(106,198,76,0.2); color:var(--green); }
+.tech-cell-signal.sell { background:rgba(231,84,77,0.2); color:var(--red); }
+.tech-cell-signal.neutral { background:rgba(148,148,149,0.15); color:var(--text-muted); }
+
+/* ── VARIANT 3: FAB SUNRISE ── */
+/* Bottom tab bar with center notch space for the sunrise FAB */
+.bottom-tab-bar {
+  position:absolute; bottom:0; left:0; width:100%; height:94px;
+  background:linear-gradient(to top,#0d1016 0%,rgba(13,16,22,0) 100%);
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  padding:0 8px 4px; gap:4px; z-index:30;
+}
+.tab-bar-buttons { position:relative; height:62px; width:100%; display:flex; align-items:center; }
+.tab-bar-fill { position:absolute; inset:0; border-radius:100px; background:rgba(13,16,22,0.6); }
+.tab-bar-glass { position:absolute; inset:0 -4px; border-radius:100px; background:rgba(0,0,0,0.2); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); }
+.tab-bar-tabs { position:relative; display:flex; flex:1; align-items:center; }
+.tab-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; padding:6px 4px 7px; position:relative; cursor:pointer; }
+.tab-item.active::before { content:''; position:absolute; inset:0 0.2px; border-radius:100px; background:rgba(148,148,149,0.2); }
+.tab-item .tab-icon { width:24px; height:24px; position:relative; z-index:1; flex-shrink:0; color:var(--text-secondary); }
+.tab-item.active .tab-icon { color:var(--text-primary); }
+.tab-label { font-size:10px; font-weight:510; color:var(--text-secondary); position:relative; z-index:1; }
+.tab-item.active .tab-label { color:var(--text-primary); }
+.home-indicator-bar { height:20px; width:100%; display:flex; align-items:flex-end; justify-content:center; padding-bottom:8px; }
+.home-bar { width:134px; height:5px; background:rgba(255,255,255,0.3); border-radius:100px; }
+
+/* The center spacer / sliver zone */
+.tab-spacer {
+  width:64px;
+  flex-shrink:0;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+/* Warren sliver - hairline peek of FAB arc above nav bar */
+.warren-sliver {
+  position:absolute;
+  /* Container is 4px tall, sits exactly at the nav bar top so only 4px of arc shows */
+  bottom:82px;
+  left:50%;
+  transform:translateX(-50%);
+  width:56px;
+  height:5px;
+  z-index:36;
+  cursor:pointer;
+  transition:opacity 0.25s ease;
+  overflow:hidden;
+}
+.warren-sliver.risen {
+  opacity:0;
+  pointer-events:none;
+}
+/* Radial item label is below the button (flex-direction:column already handles this) */
+
+/* The risen FAB - appears above nav when triggered */
+.warren-fab-risen {
+  position:absolute;
+  bottom:calc(94px + 8px); /* above tab bar (94px tall) */
+  left:50%;
+  transform:translateX(-50%) translateY(60px);
+  opacity:0;
+  width:56px;
+  height:56px;
+  z-index:50;
+  transition:transform 0.42s cubic-bezier(0.34,1.56,0.64,1), opacity 0.28s ease;
+  pointer-events:none;
+}
+.warren-fab-risen.risen {
+  transform:translateX(-50%) translateY(0);
+  opacity:1;
+  pointer-events:all;
+}
+.warren-fab-risen.dial-open {
+  opacity:0;
+  pointer-events:none;
+}
+.warren-fab-ring {
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:linear-gradient(145deg, #FF9500, #FF5F00);
+  box-shadow:0 6px 24px rgba(255,120,0,0.45), 0 2px 8px rgba(0,0,0,0.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:box-shadow 0.2s;
+}
+.warren-fab-ring:active { transform:scale(0.93); }
+.warren-fab-ring svg { width:24px; height:24px; }
+
+/* Radial arc dial - action buttons fan out above central FAB */
+.wai-sunrise-dial {
+  position:absolute;
+  /* Anchor at risen FAB center: tab-bar (94px) + 8px gap above it + half FAB (28px) = 130px from bottom */
+  bottom:138px;
+  left:50%;
+  /* The container is a zero-size point at FAB center */
+  width:0;
+  height:0;
+  z-index:65;
+  pointer-events:none;
+}
+.wai-sunrise-dial.open { pointer-events:all; }
+
+/* Ask Warren hub FAB - stays fixed at center (0,0) of the dial container */
+.warren-hub-fab {
+  position:absolute;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#FF9500,#FF5F00);
+  box-shadow:0 6px 24px rgba(255,120,0,0.55), 0 2px 8px rgba(0,0,0,0.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  /* Center it on the anchor point */
+  margin-left:-28px;
+  margin-bottom:-28px;
+  opacity:0;
+  transform:scale(0.6);
+  transition:opacity 0.28s ease, transform 0.36s cubic-bezier(0.34,1.56,0.64,1);
+  z-index:2;
+  border:none;
+  overflow:hidden;
+}
+.warren-hub-fab svg { width:26px; height:26px; }
+.wai-sunrise-dial.open .warren-hub-fab {
+  opacity:1;
+  transform:scale(1);
+  transition-delay:0s;
+}
+.warren-hub-fab:active { transform:scale(0.9); }
+
+
+/* Warren hub label */
+.warren-hub-label {
+  position:absolute;
+  background:rgba(28,33,40,0.95);
+  color:#F0F2F5;
+  font-size:11px;
+  font-weight:500;
+  padding:4px 9px;
+  border-radius:20px;
+  white-space:nowrap;
+  box-shadow:0 2px 10px rgba(0,0,0,0.5);
+  border:0.5px solid rgba(255,255,255,0.1);
+  /* Position label below the hub FAB */
+  top:34px;
+  left:50%;
+  transform:translateX(-50%);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.2s ease;
+  z-index:3;
+}
+.wai-sunrise-dial.open .warren-hub-label { opacity:1; transition-delay:0s; }
+
+/* Each radial action item is absolutely positioned around the FAB hub */
+.sunrise-dial-item {
+  position:absolute;
+  opacity:0;
+  transform:scale(0.4);
+  transition:opacity 0.22s ease, transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
+  /* Wrapper is 48px button centered. We offset by -24px so the button center sits at the arc point. */
+  width:48px;
+  height:48px;
+  margin-left:-24px;
+  margin-bottom:-24px;
+}
+/* Stagger: center pair (Catalysts + Analyst view) first, outer pair 30ms later */
+.wai-sunrise-dial.open .sunrise-dial-item { opacity:1; transform:scale(1); }
+/* arc0 = Bull & Bear (outer-left), arc3 = Key risks (outer-right) — 30ms delay */
+.wai-sunrise-dial.open #arc0 { transition-delay:0.03s; }
+.wai-sunrise-dial.open #arc3 { transition-delay:0.03s; }
+/* arc1 = Catalysts, arc2 = Analyst view — appear first (0ms) */
+.wai-sunrise-dial.open #arc1 { transition-delay:0s; }
+.wai-sunrise-dial.open #arc2 { transition-delay:0s; }
+
+/* Button inside each item — fills the wrapper */
+.sunrise-dial-btn {
+  position:absolute;
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  box-shadow:0 4px 20px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.15);
+  transition:transform 0.12s;
+  background:#2A3140;
+  color:#E6EDF3;
+  left:0;
+  top:0;
+  margin:0;
+}
+.sunrise-dial-btn:active { transform:scale(0.88); }
+.sunrise-dial-btn svg { width:20px; height:20px; }
+
+.sunrise-dial-label {
+  background:rgba(28,33,40,0.95);
+  color:#F0F2F5;
+  font-size:11px;
+  font-weight:500;
+  line-height:12px;
+  padding:4px 9px;
+  border-radius:20px;
+  white-space:nowrap;
+  min-width:90px;
+  text-align:center;
+  box-shadow:0 2px 10px rgba(0,0,0,0.5);
+  flex-shrink:0;
+  border:0.5px solid rgba(255,255,255,0.1);
+  position:absolute;
+  overflow:visible;
+}
+
+/* Bull & Bear: label LEFT of button, vertically centered */
+#arc0 .sunrise-dial-label {
+  right:56px; /* 48px wrapper width + 8px gap */
+  top:50%;
+  transform:translateY(-50%);
+}
+/* Catalysts: label ABOVE button, horizontally centered */
+#arc1 .sunrise-dial-label {
+  bottom:56px; /* 48px wrapper height + 8px gap */
+  left:50%;
+  transform:translateX(-50%);
+}
+/* Analyst view: label ABOVE button, horizontally centered */
+#arc2 .sunrise-dial-label {
+  bottom:56px;
+  left:50%;
+  transform:translateX(-50%);
+}
+/* Key risks: label RIGHT of button, vertically centered */
+#arc3 .sunrise-dial-label {
+  left:56px; /* 48px wrapper width + 8px gap */
+  top:50%;
+  transform:translateY(-50%);
+}
+
+/* Scrim for sunrise dial */
+.wai-dial-scrim { position:absolute; inset:0; z-index:64; background:rgba(0,0,0,0.55); opacity:0; pointer-events:none; transition:opacity 0.25s ease; }
+.wai-dial-scrim.open { opacity:1; pointer-events:all; }
+
+/* Chat sheet */
+.wai-scrim { position:absolute; inset:0; z-index:60; background:rgba(0,0,0,0.6); opacity:0; pointer-events:none; transition:opacity 0.3s ease; }
+.wai-scrim.open { opacity:1; pointer-events:all; }
+.wai-sheet { position:absolute; bottom:0; left:0; right:0; height:85%; max-height:calc(100% - 56px); background:#1C2128; border-radius:24px 24px 0 0; z-index:70; display:flex; flex-direction:column; transform:translateY(100%); transition:transform 0.42s cubic-bezier(0.32,0.72,0,1); overflow:hidden; box-shadow:0 -4px 24px rgba(0,0,0,0.6); }
+.wai-sheet.open { transform:translateY(0); }
+.wai-handle-area { display:flex; justify-content:center; padding:10px 0 4px; flex-shrink:0; cursor:grab; }
+.wai-handle { width:36px; height:4px; background:#30363D; border-radius:100px; }
+.wai-header { display:flex; align-items:center; justify-content:space-between; padding:0 16px; height:52px; flex-shrink:0; }
+.wai-header-left { display:flex; align-items:center; gap:8px; }
+.wai-header-link { display:flex; align-items:center; gap:2px; background:none; border:none; padding:4px 6px 4px 0; cursor:pointer; border-radius:8px; }
+.wai-header-title { font-size:18px; font-weight:700; color:#fff; display:flex; align-items:center; gap:5px; }
+.wai-close-btn { width:44px; height:44px; border-radius:50%; background:none; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#8B949E; }
+.wai-gradient-rule { height:1px; flex-shrink:0; background:#21262D; }
+.wai-messages { flex:1; overflow-y:auto; padding:16px 16px 32px; display:flex; flex-direction:column; gap:12px; scrollbar-width:none; background:#13181F; }
+.wai-messages::-webkit-scrollbar { display:none; }
+.wai-messages-wrap { position:relative; flex:1; overflow:hidden; display:flex; flex-direction:column; }
+.wai-messages-wrap::after { content:''; position:absolute; bottom:0; left:0; right:0; height:48px; background:linear-gradient(to bottom,transparent,#13181F); pointer-events:none; z-index:2; }
+.wai-msg-row { display:flex; align-items:flex-start; gap:10px; }
+.wai-msg-warren { justify-content:flex-start; }
+.wai-msg-user { justify-content:flex-end; }
+.wai-bubble-warren { flex:1; font-size:14px; line-height:1.6; color:#e6edf3; }
+.wai-bubble-user { max-width:75%; padding:10px 14px; font-size:14px; line-height:1.5; color:#fff; background:#30363D; border-radius:18px 18px 4px 18px; }
+.wai-typing { display:flex; align-items:center; gap:4px; padding:4px 0; }
+.wai-typing span { width:6px; height:6px; border-radius:50%; background:#8B949E; display:block; animation:wai-bounce 1.2s ease-in-out infinite; }
+.wai-typing span:nth-child(2) { animation-delay:0.15s; }
+.wai-typing span:nth-child(3) { animation-delay:0.3s; }
+@keyframes wai-bounce { 0%,60%,100% { transform:translateY(0); opacity:0.4; } 30% { transform:translateY(-5px); opacity:1; } }
+.wai-input-area { flex-shrink:0; padding:8px 16px 16px; background:#13181F; }
+.wai-credits { text-align:center; font-size:12px; color:#8B949E; margin-bottom:8px; }
+.wai-credits span { color:#2278FF; font-weight:600; }
+.wai-input-wrap { position:relative; border-radius:24px; background:linear-gradient(90deg,#f97316,#ec4899,#a855f7); padding:1.5px; }
+.wai-input-inner { display:flex; align-items:center; gap:8px; background:#0D1117; border-radius:23px; padding:0 6px 0 16px; height:50px; }
+.wai-input { flex:1; height:100%; background:transparent; border:none; color:#fff; font-size:15px; outline:none; font-family:var(--font); }
+.wai-input::placeholder { color:#8B949E; }
+.wai-send-btn { width:36px; height:36px; border-radius:50%; border:none; background:transparent; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; opacity:0.3; transition:opacity 0.15s; }
+.wai-send-btn:not(:disabled) { opacity:1; }
+.wai-disclaimer { text-align:center; font-size:11px; color:#8B949E; margin-top:8px; line-height:1.5; }
+.wai-minimize-banner { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 14px; background:rgba(236,72,153,0.08); border-top:1px solid rgba(236,72,153,0.18); border-bottom:1px solid rgba(236,72,153,0.18); max-height:0; overflow:hidden; opacity:0; transition:max-height 0.25s ease, opacity 0.25s ease, padding 0.25s ease; }
+.wai-minimize-banner.visible { max-height:60px; padding:10px 14px; opacity:1; }
+.wai-minimize-banner-inner { display:flex; align-items:flex-start; gap:8px; font-size:12px; line-height:1.5; color:#c9d1d9; flex:1; }
+.wai-minimize-banner-dismiss { background:none; border:none; cursor:pointer; padding:2px; color:#8B949E; flex-shrink:0; display:flex; align-items:center; }
+@keyframes wai-glow-pulse { 0% { opacity:0; } 40% { opacity:0.35; } 100% { opacity:0; } }
+.wai-sheet::before { content:''; pointer-events:none; position:absolute; top:0; left:0; right:0; height:60px; background:linear-gradient(180deg,rgba(249,115,22,0.18) 0%,transparent 100%); border-radius:24px 24px 0 0; opacity:0; }
+.wai-sheet.glow-pulse::before { animation:wai-glow-pulse 0.6s ease-out forwards; }
+.mock-keyboard { position:absolute; bottom:0; left:0; right:0; background:#D1D5DB; z-index:200; padding:8px 4px 20px; transform:translateY(100%); transition:transform 0.32s cubic-bezier(0.32,0.72,0,1); display:flex; flex-direction:column; gap:8px; }
+.mock-keyboard.visible { transform:translateY(0); }
+.mock-kb-row { display:flex; justify-content:center; gap:6px; }
+.mock-kb-key { background:#fff; border-radius:5px; height:42px; min-width:32px; flex:1; max-width:34px; display:flex; align-items:center; justify-content:center; font-size:16px; color:#000; box-shadow:0 1px 0 rgba(0,0,0,0.35); user-select:none; }
+.mock-kb-wide { min-width:42px; max-width:44px; font-size:13px; background:#ADB5BD; }
+.mock-kb-special { min-width:64px; max-width:70px; font-size:14px; background:#ADB5BD; }
+.mock-kb-space { flex:1; max-width:180px; font-size:15px; }
+.variant-label { font-family:system-ui,sans-serif; font-size:11px; color:#666; text-transform:uppercase; letter-spacing:0.08em; text-align:center; margin-bottom:12px; }
+</style>
+</head>
+<body>
+<div class="variant-label">V3 — FAB Sunrise (rises from nav bar, arc fan)</div>
+<div class="phone-shell">
+  <div class="dynamic-island"></div>
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-right">
+      <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect x="0" y="9" width="2.5" height="3" rx="0.5" fill="white" fill-opacity="0.3"/><rect x="4" y="6" width="2.5" height="6" rx="0.5" fill="white" fill-opacity="0.3"/><rect x="8" y="3" width="2.5" height="9" rx="0.5" fill="white" fill-opacity="0.3"/><rect x="12" y="0" width="2.5" height="12" rx="0.5" fill="white"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 9.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3z" fill="white"/><path d="M3.5 6.5C4.9 5.1 6.35 4.4 8 4.4s3.1.7 4.5 2.1" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M1 4C3 2 5.4 1 8 1s5 1 7 3" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="22" y="3.5" width="2.5" height="5" rx="1.5" fill="white" fill-opacity="0.4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="white"/></svg>
+    </div>
+  </div>
+  <div class="nav-bar">
+    <div class="nav-pill-btn nav-pill-back"><svg width="10" height="17" viewBox="0 0 10 17" fill="none"><path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="nav-center">
+      <div class="nav-title-text">Apple</div>
+      <div class="nav-subtitle-row"><span style="font-size:14px;line-height:1">🇺🇸</span><span class="nav-subtitle-text">NASDAQ (AAPL)</span><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="#949495" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div class="nav-pill-btn nav-pill-actions">
+      <div class="nav-pill-icons">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M9 17.5c.3.87 1.08 1.5 2 1.5s1.7-.63 2-1.5" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M11 3.5V2M11 3.5C8.24 3.5 6 5.74 6 8.5v5l-1.5 2h13L16 13.5V8.5c0-2.76-2.24-5-5-5z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2l2.4 4.87 5.37.78-3.88 3.78.92 5.34L11 14.27l-4.81 2.5.92-5.34-3.88-3.78 5.37-.78L11 2z" stroke="white" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-content">
+    <div class="instrument-header">
+      <div class="price-block">
+        <div class="price-main-row">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-bottom:-2px;flex-shrink:0"><path d="M8 2L8 14M3 7L8 2L13 7" stroke="#6AC64C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="price-main">185.81</span>
+          <span class="price-change">+0.87 (+0.47%)</span>
+        </div>
+        <div class="price-meta-row"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#848C97" stroke-width="1.2"/><path d="M7 4v3l2 2" stroke="#848C97" stroke-width="1.2" stroke-linecap="round"/></svg><span class="price-meta-text">9:41 | Real Time. Currency in USD</span></div>
+      </div>
+      <div class="pre-market-row">
+        <div class="pre-market-label"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#FFD700" stroke-width="1.2"/><path d="M7 4v2.5l1.5 1.5" stroke="#FFD700" stroke-width="1.2" stroke-linecap="round"/></svg><span>Pre Market</span></div>
+        <span style="width:1px;height:12px;background:rgba(255,255,255,0.15);display:inline-block;margin:0 2px"></span>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 9L5 1M9 5L5 9L1 5" stroke="#E7544D" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="pre-market-price">184.73</span>
+        <span class="pre-market-change">-1.08 (-0.58%)</span>
+        <span class="pre-market-time">9:41:22</span>
+      </div>
+    </div>
+
+    <div class="fair-value-banner" id="fvBanner">
+      <div><div class="fv-label">Fair Value</div><div style="display:flex;align-items:flex-start;gap:5px"><span class="fv-value">197.82</span></div><div class="fv-upside">Fair with 6.46% Upside</div></div>
+      <div class="fv-right"><div class="fv-bar-thumb"></div><div class="fv-close-btn" onclick="document.getElementById('fvBanner').style.display='none'">&#x2715;</div></div>
+    </div>
+
+    <div class="section-tabs-bar">
+      <div class="section-tab active">Overview</div>
+      <div class="section-tab">News</div>
+      <div class="section-tab">Health</div>
+      <div class="section-tab">Technical</div>
+    </div>
+
+    <div class="chart-section" data-section="chart">
+      <div class="chart-header">
+        <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 2l5 5M2 2H7M2 2V7" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 18l-5-5M18 18H13M18 18V13" stroke="#848C97" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="analyze-chart-btn" onclick="openWarren()"><div class="analyze-chart-icon">W</div><span class="analyze-chart-label">Analyze Chart</span></div>
+      </div>
+      <div class="chart-container">
+        <svg class="chart-svg" viewBox="0 0 393 200" preserveAspectRatio="none" fill="none">
+          <line x1="0" y1="30" x2="360" y2="30" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/><line x1="0" y1="70" x2="360" y2="70" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/><line x1="0" y1="110" x2="360" y2="110" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/><line x1="0" y1="150" x2="360" y2="150" stroke="rgba(255,255,255,0.05)" stroke-width="0.5"/>
+          <path d="M0 155 C8 153 15 150 22 148 C30 145 35 143 42 138 C50 130 55 118 62 105 C70 90 75 75 82 68 C90 60 95 55 100 58 C108 62 113 72 120 80 C128 88 133 95 140 105 C148 116 153 130 160 140 C168 150 173 155 180 152 C188 148 193 140 200 130 C208 118 213 108 220 100 C228 92 233 88 240 86 C248 84 253 83 260 85 C268 87 273 90 280 92 C285 93 288 94 292 93 L393 92" stroke="#2278FF" stroke-width="1.5" fill="none"/>
+          <rect x="340" y="85" width="50" height="14" rx="3" fill="#2278FF"/><text x="365" y="96" text-anchor="middle" font-family="system-ui" font-size="9" font-weight="600" fill="white">185.81</text>
+          <defs><linearGradient id="cg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2278FF" stop-opacity="0.15"/><stop offset="100%" stop-color="#2278FF" stop-opacity="0"/></linearGradient></defs>
+          <path d="M0 155 C8 153 15 150 22 148 C30 145 35 143 42 138 C50 130 55 118 62 105 C70 90 75 75 82 68 C90 60 95 55 100 58 C108 62 113 72 120 80 C128 88 133 95 140 105 C148 116 153 130 160 140 C168 150 173 155 180 152 C188 148 193 140 200 130 C208 118 213 108 220 100 C228 92 233 88 240 86 C248 84 253 83 260 85 C268 87 273 90 280 92 C285 93 288 94 292 93 L393 92 L393 200 L0 200 Z" fill="url(#cg3)"/>
+        </svg>
+      </div>
+      <div class="timeframe-bar">
+        <div class="tf-group"><div class="tf-tab">1D</div><div class="tf-tab active">1W</div><div class="tf-tab">1M</div><div class="tf-tab">3M</div><div class="tf-tab">6M</div><div class="tf-tab">1Y</div><div class="tf-tab">5Y</div></div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="stats-section" data-section="key-stats">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><span class="stats-title">Key Statistics</span><span style="font-size:14px;color:var(--blue);cursor:pointer">Edit</span></div>
+      <div class="stat-row"><span class="stat-label">Market Cap</span><span class="stat-value">2.86T</span></div>
+      <div class="stat-row"><span class="stat-label">P/E Ratio</span><span class="stat-value">29.84</span></div>
+      <div class="stat-row"><span class="stat-label">EPS (TTM)</span><span class="stat-value">6.22</span></div>
+      <div class="stat-row"><span class="stat-label">Dividend Yield</span><span class="stat-value" style="color:var(--green)">0.44%</span></div>
+      <div class="show-more-row" data-open="false"><span class="show-more-text">Show more</span><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="transition:transform 0.2s"><path d="M3 5.5l4 4 4-4" stroke="#848C97" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="protips-section" data-section="protips">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><span class="protips-title">ProTips</span></div>
+      <div class="protip-row bullish"><div class="protip-bull-icon bullish"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6AC64C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><div class="protip-text">Outperformed the S&P 500 by 28% over the last 5 years</div></div>
+      <div class="protip-row bearish"><div class="protip-bull-icon bearish"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E7544D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></div><div class="protip-text">Trading at a high valuation vs. historical average P/E</div></div>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="news-section" data-section="news">
+      <div class="news-header"><span class="news-title">News &amp; Analysis</span><span class="news-read-more">See all</span></div>
+      <div class="news-carousel">
+        <div class="news-col">
+          <div class="article-card"><div class="article-headline">Apple Sets Record High Ahead of Vision Pro Launch Event</div><div class="article-meta-row"><span class="article-source-time">Reuters · 2h</span></div></div>
+          <div class="article-card"><div class="article-headline">Analysts Raise AAPL Price Targets After Services Revenue Beats</div><div class="article-meta-row"><span class="article-source-time">Bloomberg · 5h</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:100px;background:var(--bg-primary)"></div>
+  </div>
+
+  <!-- Bottom Tab Bar - no center FAB, just the standard 5 tabs -->
+  <div class="bottom-tab-bar">
+    <div class="tab-bar-buttons">
+      <div class="tab-bar-fill"></div>
+      <div class="tab-bar-glass"></div>
+      <div class="tab-bar-tabs">
+        <div class="tab-item active" onclick="switchTab(this)"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span class="tab-label">Markets</span></div>
+        <div class="tab-item" onclick="switchTab(this)"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2"/></svg><span class="tab-label">News</span></div>
+        <!-- Center Ideas tab - sliver floats above as a separate overlay, does not affect this tab -->
+        <div class="tab-item" onclick="triggerSunrise()"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span class="tab-label">Ideas</span></div>
+        <div class="tab-item" onclick="switchTab(this)"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span class="tab-label">Watchlist</span></div>
+        <div class="tab-item" onclick="switchTab(this)"><svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg><span class="tab-label">More</span></div>
+      </div>
+    </div>
+    <div class="home-indicator-bar"><div class="home-bar"></div></div>
+  </div>
+
+  <!-- Warren tiny peek sliver above tab bar - SVG arc for crisp rendering -->
+  <div class="warren-sliver" id="warrenSliver" onclick="triggerSunrise()">
+    <svg width="56" height="5" viewBox="0 0 56 5" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;overflow:hidden">
+      <defs>
+        <radialGradient id="sliverGrad" cx="50%" cy="100%" r="100%" fx="50%" fy="100%">
+          <stop offset="0%" stop-color="#FF9500"/>
+          <stop offset="100%" stop-color="#FF5F00"/>
+        </radialGradient>
+      </defs>
+      <!-- Arc: endpoints at bottom corners, radius 32 gives visible curve within 5px height -->
+      <path d="M1 5 A32 32 0 0 1 55 5" fill="url(#sliverGrad)"/>
+    </svg>
+  </div>
+
+  <!-- Risen FAB (appears above tab bar after trigger) -->
+  <div class="warren-fab-risen" id="warrenFabRisen">
+    <div class="warren-fab-ring" onclick="triggerSunrise()">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3 C12 3 12.8 7.5 15.5 10 C12.8 12.5 12 17 12 17 C12 17 11.2 12.5 8.5 10 C11.2 7.5 12 3 12 3Z" fill="white" opacity="0.95"/>
+        <path d="M5 10 C5 10 9.5 10.8 12 13.5 C14.5 10.8 19 10 19 10 C19 10 14.5 9.2 12 6.5 C9.5 9.2 5 10 5 10Z" fill="white" opacity="0.95"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Radial arc dial around FAB -->
+  <div class="wai-dial-scrim" id="waiDialScrim" onclick="closeSunrise()"></div>
+  <div class="wai-sunrise-dial" id="waiSunriseDial">
+    <!-- Ask Warren hub FAB - always opens chat. Never closes the dial. -->
+    <button class="warren-hub-fab" onclick="handleHubTap()">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3C12 3 12.8 7.5 15.5 10C12.8 12.5 12 17 12 17C12 17 11.2 12.5 8.5 10C11.2 7.5 12 3 12 3Z" fill="white" opacity="0.95"/>
+        <path d="M5 10C5 10 9.5 10.8 12 13.5C14.5 10.8 19 10 19 10C19 10 14.5 9.2 12 6.5C9.5 9.2 5 10 5 10Z" fill="white" opacity="0.95"/>
+      </svg>
+    </button>
+    <div class="warren-hub-label">Ask Warren</div>
+
+<!-- 4 action buttons orbit in semicircle arc above the hub -->
+    <!-- Positions set by JS using trig. Order: far-left, mid-left, mid-right, far-right -->
+    <div class="sunrise-dial-item" id="arc0">
+      <!-- Bull & Bear: up/down arrows on a chart axis -->
+      <button class="sunrise-dial-btn" onclick="dialAction('bullbear')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 7 9 2 15 7"/><line x1="9" y1="2" x2="9" y2="15"/>
+          <polyline points="15 17 21 22 9 22"/><line x1="15" y1="22" x2="15" y2="9"/>
+        </svg>
+      </button>
+      <div class="sunrise-dial-label">Bull &amp; Bear</div>
+    </div>
+    <div class="sunrise-dial-item" id="arc1">
+      <!-- Catalysts: lightning bolt -->
+      <button class="sunrise-dial-btn" onclick="dialAction('catalysts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+      </button>
+      <div class="sunrise-dial-label">Catalysts</div>
+    </div>
+    <div class="sunrise-dial-item" id="arc2">
+      <!-- Analyst view: person with chart -->
+      <button class="sunrise-dial-btn" onclick="dialAction('analysts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </button>
+      <div class="sunrise-dial-label">Analyst view</div>
+    </div>
+    <div class="sunrise-dial-item" id="arc3">
+      <!-- Key risks: shield with exclamation -->
+      <button class="sunrise-dial-btn" onclick="dialAction('risks')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+        </svg>
+      </button>
+      <div class="sunrise-dial-label">Key risks</div>
+    </div>
+  </div>
+
+  <!-- Chat sheet -->
+  <div class="wai-scrim" id="waiScrim" onclick="closeWarren()"></div>
+  <div class="wai-sheet" id="waiSheet">
+    <div class="wai-handle-area" id="waiHandle"><div class="wai-handle"></div></div>
+    <div class="wai-header">
+      <div class="wai-header-left">
+        <button class="wai-header-link" onclick="closeWarren()">
+          <span class="wai-header-title">Warren<span style="display:inline-flex;align-items:flex-start;margin-left:2px;line-height:0"><svg width="26" height="24" viewBox="0 0 30 28" fill="none"><path d="M2 0.5 H28 C29.1 0.5 29.5 1.4 29.5 2.5 V18.5 C29.5 19.6 28.6 20.5 27.5 20.5 H8 L4 27 L5 20.5 H2.5 C1.4 20.5 0.5 19.6 0.5 18.5 V2.5 C0.5 1.4 1.4 0.5 2.5 0.5 Z" fill="white" stroke="none"/><text x="15" y="15.5" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="800" fill="#0a0a0a" letter-spacing="0.3">AI</text></svg></span></span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#8B949E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <button class="wai-close-btn" onclick="closeWarren()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="wai-gradient-rule"></div>
+    <div class="wai-messages-wrap">
+      <div class="wai-messages" id="waiMessages"></div>
+    </div>
+    <div class="wai-minimize-banner" id="waiMinimizeBanner">
+      <div class="wai-minimize-banner-inner"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px"><circle cx="8" cy="8" r="7" stroke="#ec4899" stroke-width="1.5"/><path d="M8 5v3.5l2 2" stroke="#ec4899" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Minimize to keep browsing - Warren will notify you when ready</span></div>
+      <button class="wai-minimize-banner-dismiss" onclick="document.getElementById('waiMinimizeBanner').classList.remove('visible')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#8B949E" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="wai-input-area" id="waiInputArea">
+      <div class="wai-credits"><span>1/500</span> credits used this month</div>
+      <div class="wai-input-wrap">
+        <div class="wai-input-inner">
+          <input class="wai-input" id="waiInput" type="text" placeholder="Ask Warren" oninput="updateSendBtn()" onkeydown="handleEnter(event)"/>
+          <button class="wai-send-btn" id="waiSendBtn" onclick="sendMessage()" disabled>
+            <svg id="waiIconSend" width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="#2278FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg id="waiIconPause" width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:none"><rect x="6" y="4" width="4" height="16" rx="1" fill="#2278FF"/><rect x="14" y="4" width="4" height="16" rx="1" fill="#2278FF"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="wai-disclaimer">WarrenAI can make mistakes. Check important info.</div>
+    </div>
+  </div>
+
+  <div class="mock-keyboard" id="mockKeyboard">
+    <div class="mock-kb-row"><div class="mock-kb-key">q</div><div class="mock-kb-key">w</div><div class="mock-kb-key">e</div><div class="mock-kb-key">r</div><div class="mock-kb-key">t</div><div class="mock-kb-key">y</div><div class="mock-kb-key">u</div><div class="mock-kb-key">i</div><div class="mock-kb-key">o</div><div class="mock-kb-key">p</div></div>
+    <div class="mock-kb-row"><div class="mock-kb-key">a</div><div class="mock-kb-key">s</div><div class="mock-kb-key">d</div><div class="mock-kb-key">f</div><div class="mock-kb-key">g</div><div class="mock-kb-key">h</div><div class="mock-kb-key">j</div><div class="mock-kb-key">k</div><div class="mock-kb-key">l</div></div>
+    <div class="mock-kb-row"><div class="mock-kb-key mock-kb-wide">⇧</div><div class="mock-kb-key">z</div><div class="mock-kb-key">x</div><div class="mock-kb-key">c</div><div class="mock-kb-key">v</div><div class="mock-kb-key">b</div><div class="mock-kb-key">n</div><div class="mock-kb-key">m</div><div class="mock-kb-key mock-kb-wide">⌫</div></div>
+    <div class="mock-kb-row"><div class="mock-kb-key mock-kb-special">123</div><div class="mock-kb-key mock-kb-space">space</div><div class="mock-kb-key mock-kb-special">return</div></div>
+  </div>
+</div>
+
+<script>
+const waiScrim = document.getElementById('waiScrim');
+const waiSheet = document.getElementById('waiSheet');
+const waiMessages = document.getElementById('waiMessages');
+const waiInput = document.getElementById('waiInput');
+const mockKeyboard = document.getElementById('mockKeyboard');
+const waiSendBtn = document.getElementById('waiSendBtn');
+const sunriseDial = document.getElementById('waiSunriseDial');
+const dialScrim = document.getElementById('waiDialScrim');
+const warrenSliver = document.getElementById('warrenSliver');
+const warrenFabRisen = document.getElementById('warrenFabRisen');
+
+// Arc geometry: radius=90px, spread=160°, 4 buttons evenly spaced
+// Angles from 12 o'clock: -80°, -26.7°, +26.7°, +80°
+// x = r * sin(angle), y = r * cos(angle) [y positive = upward in screen coords]
+(function positionArcItems() {
+  const r = 90;
+  const spread = 160;
+  const n = 4;
+  const angles = [-spread/2, -spread/6, spread/6, spread/2]; // degrees from 12 o'clock
+  const items = document.querySelectorAll('.sunrise-dial-item');
+  items.forEach((item, i) => {
+    const rad = angles[i] * Math.PI / 180;
+    const x = Math.round(r * Math.sin(rad));
+    const y = Math.round(r * Math.cos(rad)); // positive = upward
+    item.style.left = x + 'px';
+    item.style.bottom = y + 'px';
+  });
+})();
+
+let chatOpen = false;
+let sunriseOpen = false;
+let replyIndex = 0;
+
+function triggerSunrise() {
+  if (chatOpen) return;
+  if (sunriseOpen) { closeSunrise(); return; }
+  sunriseOpen = true;
+  warrenSliver.classList.add('risen');
+  warrenFabRisen.classList.add('risen');
+  warrenFabRisen.classList.add('dial-open');
+  dialScrim.classList.add('open');
+  setTimeout(() => sunriseDial.classList.add('open'), 60);
+}
+
+// Hub FAB tap: always open Warren chat (whether dial open or not).
+function handleHubTap() {
+  dialAction('ask');
+}
+
+function closeSunrise() {
+  sunriseOpen = false;
+  sunriseDial.classList.remove('open');
+  dialScrim.classList.remove('open');
+  warrenSliver.classList.remove('risen');
+  warrenFabRisen.classList.remove('risen');
+  warrenFabRisen.classList.remove('dial-open');
+}
+
+function dialAction(type) {
+  closeSunrise();
+  const queries = {
+    bullbear: 'What are the strongest bull and bear arguments for AAPL right now?',
+    catalysts: 'What are the most important upcoming catalysts for AAPL?',
+    analysts: 'What is the current analyst consensus on AAPL?',
+    risks: 'What are the key risks facing AAPL right now?',
+    ask: null
+  };
+  setTimeout(() => {
+    if (type === 'ask') openWarren();
+    else openWarrenWithQuery(queries[type]);
+  }, 150);
+}
+
+function openWarrenWithQuery(query) {
+  openWarren();
+  setTimeout(() => {
+    waiInput.value = query;
+    updateSendBtn();
+    setTimeout(() => sendMessage(), 120);
+  }, 460);
+}
+
+function openWarren() {
+  if (chatOpen) return;
+  closeSunrise();
+  chatOpen = true;
+  waiScrim.classList.add('open');
+  waiSheet.classList.add('open');
+  setTimeout(() => {
+    waiSheet.classList.add('glow-pulse');
+    setTimeout(() => waiSheet.classList.remove('glow-pulse'), 700);
+  }, 440);
+  setTimeout(() => waiInput?.focus(), 460);
+}
+
+function closeWarren() {
+  if (!chatOpen) return;
+  chatOpen = false;
+  waiSheet.classList.remove('open');
+  waiScrim.classList.remove('open');
+  document.getElementById('waiMinimizeBanner').classList.remove('visible');
+}
+
+function switchTab(el) {
+  document.querySelectorAll('.tab-bar-tabs .tab-item').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function showMockKeyboard() {
+  mockKeyboard.classList.add('visible');
+  requestAnimationFrame(() => {
+    const kbH = mockKeyboard.offsetHeight;
+    waiSheet.style.transition = 'top 0.32s cubic-bezier(0.32,0.72,0,1), bottom 0.32s cubic-bezier(0.32,0.72,0,1), height 0.32s cubic-bezier(0.32,0.72,0,1)';
+    waiSheet.style.top = '56px';
+    waiSheet.style.bottom = kbH + 'px';
+    waiSheet.style.height = 'auto';
+  });
+}
+function hideMockKeyboard() {
+  mockKeyboard.classList.remove('visible');
+  waiSheet.style.top = '';
+  waiSheet.style.bottom = '';
+  waiSheet.style.height = '';
+  waiSheet.style.transition = '';
+}
+waiInput.addEventListener('focus', showMockKeyboard);
+waiInput.addEventListener('blur', hideMockKeyboard);
+
+function updateSendBtn() { waiSendBtn.disabled = waiInput.value.trim() === ''; }
+function handleEnter(e) { if (e.key === 'Enter' && !waiSendBtn.disabled) sendMessage(); }
+
+const warrenReplies = [
+  `<p style="margin:0 0 12px">AAPL's momentum is cautiously bullish heading into the session.</p><ul style="margin:0 0 12px;padding-left:18px;line-height:1.7"><li>Trading at <strong>$185.81</strong>, up <strong>0.47%</strong> on the day</li><li>RSI at <strong>58</strong> - bullish but not overbought</li><li>Average price target: <strong>$197.82</strong> (~6.5% upside)</li></ul>`,
+  `<p style="margin:0 0 12px">Key bull and bear arguments for AAPL:</p><p style="margin:0 0 6px"><strong>Bull case:</strong></p><ul style="margin:0 0 10px;padding-left:18px;line-height:1.7"><li>Services revenue growing 14% YoY</li><li>~$90B annual buyback program</li><li>AI integration into iOS catalyst</li></ul><p style="margin:0 0 6px"><strong>Bear case:</strong></p><ul style="margin:0;padding-left:18px;line-height:1.7"><li>China exposure (~18% of revenue)</li><li>Premium valuation at 30x P/E</li><li>Hardware cycle plateauing</li></ul>`
+];
+
+function sendMessage() {
+  const text = waiInput.value.trim();
+  if (!text) return;
+  const userRow = document.createElement('div');
+  userRow.className = 'wai-msg-row wai-msg-user';
+  userRow.innerHTML = `<div class="wai-bubble wai-bubble-user">${text}</div>`;
+  waiMessages.appendChild(userRow);
+  waiInput.value = '';
+  waiSendBtn.disabled = false;
+  waiSendBtn.classList.add('waiting');
+  document.getElementById('waiIconSend').style.display = 'none';
+  document.getElementById('waiIconPause').style.display = 'block';
+  waiMessages.scrollTop = waiMessages.scrollHeight;
+  const typingRow = document.createElement('div');
+  typingRow.className = 'wai-msg-row wai-msg-warren';
+  typingRow.innerHTML = `<div class="wai-bubble-warren"><div class="wai-typing"><span></span><span></span><span></span></div></div>`;
+  waiMessages.appendChild(typingRow);
+  waiMessages.scrollTop = waiMessages.scrollHeight;
+  setTimeout(() => { document.getElementById('waiMinimizeBanner').classList.add('visible'); }, 400);
+  setTimeout(() => {
+    const reply = warrenReplies[replyIndex++ % warrenReplies.length];
+    document.getElementById('waiMinimizeBanner').classList.remove('visible');
+    waiSendBtn.classList.remove('waiting');
+    waiSendBtn.disabled = true;
+    document.getElementById('waiIconSend').style.display = 'block';
+    document.getElementById('waiIconPause').style.display = 'none';
+    typingRow.querySelector('.wai-bubble-warren').innerHTML = reply;
+    waiMessages.scrollTop = waiMessages.scrollHeight;
+  }, 2000);
+}
+
+document.querySelectorAll('.section-tab').forEach(tab => { tab.addEventListener('click', function() { document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); }); });
+document.querySelectorAll('.tf-tab').forEach(tab => { tab.addEventListener('click', function() { document.querySelectorAll('.tf-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); }); });
+document.querySelector('.show-more-row').addEventListener('click', function() { const isOpen = this.dataset.open === 'true'; this.dataset.open = !isOpen; this.querySelector('.show-more-text').textContent = isOpen ? 'Show more' : 'Show less'; this.querySelector('svg').style.transform = isOpen ? '' : 'rotate(180deg)'; });
+
+
+let dragStartY = 0, dragCurrentY = 0, isDragging = false;
+document.getElementById('waiHandle').addEventListener('touchstart', e => { isDragging = true; dragStartY = e.touches[0].clientY; });
+document.addEventListener('touchmove', e => { if (!isDragging) return; dragCurrentY = e.touches[0].clientY; const delta = Math.max(0, dragCurrentY - dragStartY); waiSheet.style.transition = 'none'; waiSheet.style.transform = `translateY(${delta}px)`; });
+document.addEventListener('touchend', e => { if (!isDragging) return; isDragging = false; waiSheet.style.transition = ''; if (dragCurrentY - dragStartY > 100) closeWarren(); else waiSheet.style.transform = 'translateY(0)'; });
+</script>
+</body>
+</html>
