@@ -1,0 +1,2630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WarrenAI — Conversation Management</title>
+<style>
+/* ===== RESET & TOKENS ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-deep:    #0e0f11;
+  --bg-surface: #1a1a2e;
+  --bg-card:    #1a1c1f;
+  --bg-card2:   #161819;
+  --bg-input:   #2a2a45;
+  --text-pri:   #f0f0f0;
+  --text-sec:   #8a8a8a;
+  --text-muted: #555558;
+  --orange:     #f97316;
+  --pink:       #ec4899;
+  --purple:     #a855f7;
+  --blue:       #2278ff;
+  --green:      #22c55e;
+  --red:        #ef4444;
+  --border:     rgba(255,255,255,0.07);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --tab-h: 56px;
+  --header-h: 54px;
+}
+
+html, body {
+  width: 100%; min-height: 100vh; overflow: auto;
+  background: #0a0a0f;
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 48px 24px;
+}
+
+/* ===== DEVICE SHELL ===== */
+.device-shell {
+  width: 393px;
+  height: 852px;
+  border-radius: 54px;
+  background: #1a1a1a;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.08),
+    0 0 0 10px #111,
+    0 0 0 11px rgba(255,255,255,0.05),
+    0 48px 96px rgba(0,0,0,0.8),
+    0 0 140px rgba(0,0,0,0.4);
+  position: relative;
+  flex-shrink: 0;
+}
+/* side buttons */
+.device-shell::before {
+  content: '';
+  position: absolute; right: -3px; top: 160px;
+  width: 3px; height: 80px;
+  background: #222; border-radius: 0 2px 2px 0;
+  box-shadow: 0 100px 0 #222;
+}
+.device-shell::after {
+  content: '';
+  position: absolute; left: -3px; top: 190px;
+  width: 3px; height: 60px;
+  background: #222; border-radius: 2px 0 0 2px;
+  box-shadow: 0 80px 0 #222;
+}
+.dynamic-island {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 34px;
+  background: #000; border-radius: 20px;
+  z-index: 9999; pointer-events: none;
+}
+
+/* ===== PHONE SHELL ===== */
+.phone {
+  position: absolute;
+  inset: 0;
+  width: 390px; height: 844px;
+  margin: 4px auto 0;
+  background: var(--bg-deep);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  border-radius: 52px;
+}
+
+/* ===== STATUS BAR ===== */
+.status-bar {
+  height: 50px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px 0;
+}
+.status-time { font-size: 15px; font-weight: 600; color: var(--text-pri); letter-spacing: -0.3px; }
+.status-icons { display: flex; gap: 6px; align-items: center; }
+.status-icons svg { color: var(--text-pri); }
+
+/* ===== NAV BAR ===== */
+.nav-bar {
+  height: var(--header-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.nav-back {
+  width: 36px; height: 36px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-sec);
+}
+.nav-title {
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-title-text {
+  font-size: 17px; font-weight: 700; color: var(--text-pri); letter-spacing: -0.3px;
+}
+.nav-warren-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--pink), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-right {
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-icon-btn {
+  width: 36px; height: 36px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-sec); border-radius: 10px;
+  transition: background 0.15s;
+}
+.nav-icon-btn:active { background: rgba(255,255,255,0.06); }
+
+/* ===== SEGMENT TABS ===== */
+.seg-tabs {
+  height: 48px; flex-shrink: 0;
+  display: flex; align-items: center;
+  padding: 0 16px;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-deep);
+}
+.seg-tab {
+  flex: 1; height: 34px;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  border-radius: 10px;
+  font-size: 12px; font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer; border: none; background: none;
+  transition: all 0.18s ease;
+  font-family: var(--font);
+  letter-spacing: -0.1px;
+  white-space: nowrap;
+}
+.seg-tab.active {
+  color: var(--text-pri);
+  background: var(--bg-card);
+}
+.tab-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 15px; height: 15px; padding: 0 4px;
+  border-radius: 8px; background: rgba(255,255,255,0.12);
+  color: var(--text-muted); font-size: 9.5px; font-weight: 600;
+  line-height: 1; letter-spacing: 0;
+}
+.seg-tab.active .tab-badge { background: rgba(255,255,255,0.15); color: var(--text-sec); }
+
+/* ===== VIEWS ===== */
+.view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+.view.active { display: flex; }
+
+/* ─── CHAT VIEW ─── */
+.chat-messages-wrap {
+  position: relative; flex: 1; overflow: hidden;
+}
+.chat-messages-wrap::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 40px;
+  background: linear-gradient(to bottom, transparent, var(--bg-deep));
+  pointer-events: none; z-index: 2;
+}
+.chat-messages {
+  height: 100%; overflow-y: auto;
+  padding: 16px 16px 32px;
+  display: flex; flex-direction: column; gap: 14px;
+  scrollbar-width: none;
+}
+.chat-messages::-webkit-scrollbar { display: none; }
+
+/* Day divider */
+.day-divider {
+  display: flex; align-items: center; gap: 10px; margin: 6px 0;
+}
+.day-divider::before, .day-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.day-divider-label {
+  font-size: 11px; font-weight: 500; color: var(--text-muted);
+  letter-spacing: 0.02em; white-space: nowrap;
+}
+
+/* Message rows */
+.msg-row { display: flex; align-items: flex-start; gap: 10px; }
+.msg-warren { justify-content: flex-start; }
+.msg-user   { justify-content: flex-end; }
+
+.msg-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--pink), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+
+.bubble-warren {
+  flex: 1; font-size: 14px; line-height: 1.65; color: var(--text-pri);
+}
+.bubble-warren strong { color: var(--text-pri); }
+.bubble-warren p { margin: 0 0 10px; }
+.bubble-warren p:last-child { margin-bottom: 0; }
+.bubble-warren ul { padding-left: 16px; margin: 0 0 10px; }
+.bubble-warren li { line-height: 1.7; margin-bottom: 2px; }
+
+.bubble-user {
+  max-width: 76%;
+  padding: 10px 14px;
+  font-size: 14px; line-height: 1.5; color: var(--text-pri);
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 18px 18px 4px 18px;
+}
+
+/* Suggestion pills */
+.suggestions { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.suggestion-pill {
+  display: inline-flex; align-items: center;
+  padding: 9px 14px; border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.13);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-sec); font-size: 13px; line-height: 1.4;
+  cursor: pointer; text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: var(--font);
+}
+.suggestion-pill:active { background: rgba(255,255,255,0.09); border-color: var(--purple); color: var(--text-pri); }
+
+/* Typing indicator */
+.wai-typing { display: flex; align-items: center; gap: 4px; padding: 6px 0; }
+.wai-typing span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-muted); display: block;
+  animation: bounce 1.2s ease-in-out infinite;
+}
+.wai-typing span:nth-child(2) { animation-delay: 0.15s; }
+.wai-typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* Chat input */
+.chat-input-area {
+  flex-shrink: 0; padding: 8px 16px 20px;
+  background: var(--bg-deep);
+  border-top: 1px solid var(--border);
+}
+.chat-input-wrap {
+  position: relative; border-radius: 26px;
+  background: linear-gradient(90deg, var(--orange), var(--pink), var(--purple));
+  padding: 1.5px;
+}
+.chat-input-inner {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg-surface); border-radius: 25px;
+  padding: 0 6px 0 16px; height: 48px;
+}
+.chat-input {
+  flex: 1; height: 100%; background: transparent; border: none;
+  color: var(--text-pri); font-size: 15px; outline: none; font-family: var(--font);
+}
+.chat-input::placeholder { color: var(--text-muted); }
+.chat-send-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: none;
+  background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  opacity: 0.3; transition: opacity 0.15s, transform 0.1s;
+}
+.chat-send-btn:not(:disabled) { opacity: 1; }
+.chat-send-btn:not(:disabled):active { transform: scale(0.9); }
+.chat-disclaimer {
+  text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 7px;
+}
+
+
+/* ─── HISTORY VIEW ─── */
+.history-scroll {
+  flex: 1; overflow-y: auto; scrollbar-width: none;
+  padding: 8px 0 24px;
+}
+.history-scroll::-webkit-scrollbar { display: none; }
+
+.history-month {
+  padding: 12px 16px 4px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+
+.history-item {
+  padding: 12px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.history-item:active { background: rgba(255,255,255,0.04); }
+
+.history-item-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--bg-card);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--text-muted);
+}
+
+.history-item-body { flex: 1; min-width: 0; }
+.history-item-title {
+  font-size: 14px; font-weight: 600; color: var(--text-pri);
+  margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.history-item-preview {
+  font-size: 12px; color: var(--text-sec); line-height: 1.45;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.history-item-meta {
+  font-size: 11px; color: var(--text-muted);
+  white-space: nowrap; flex-shrink: 0; padding-top: 2px;
+}
+
+/* Jump-back banner */
+.jump-back {
+  margin: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid rgba(168,85,247,0.25);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.jump-back:active { border-color: var(--purple); }
+.jump-back-icon {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: rgba(168,85,247,0.14);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.jump-back-body { flex: 1; }
+.jump-back-label { font-size: 11px; color: var(--purple); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+.jump-back-text { font-size: 13px; color: var(--text-pri); line-height: 1.45; }
+.jump-back-chevron { color: var(--text-muted); flex-shrink: 0; }
+
+
+/* ─── TOPICS VIEW ─── */
+.topics-scroll {
+  flex: 1; overflow-y: auto; scrollbar-width: none;
+  padding: 12px 0 24px;
+}
+.topics-scroll::-webkit-scrollbar { display: none; }
+
+.topics-intro {
+  padding: 0 16px 14px;
+  font-size: 13px; color: var(--text-sec); line-height: 1.55;
+}
+
+.topic-chip-row {
+  display: flex; gap: 8px; flex-wrap: wrap; padding: 0 16px 16px;
+}
+.topic-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-card2);
+  font-size: 12.5px; font-weight: 500; color: var(--text-sec);
+  cursor: pointer; transition: all 0.15s;
+  font-family: var(--font);
+}
+.topic-chip.active {
+  border-color: var(--purple);
+  background: rgba(168,85,247,0.12);
+  color: var(--purple);
+}
+.topic-chip-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+.topic-chip.active .topic-chip-dot { background: var(--purple); }
+
+/* ─── TOPIC GROUPS (expandable categories) ─── */
+.topic-group { border-bottom: 1px solid var(--border); }
+
+.topic-group-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; cursor: pointer;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.topic-group-header:active { background: rgba(255,255,255,0.03); }
+
+.topic-group-icon {
+  width: 32px; height: 32px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; line-height: 1; flex-shrink: 0;
+}
+.topic-group-label {
+  flex: 1; font-size: 14px; font-weight: 700; color: var(--text-pri);
+}
+.topic-group-count {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  background: var(--bg-card); border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 10px; flex-shrink: 0;
+}
+.topic-group-chevron {
+  color: var(--text-muted); flex-shrink: 0;
+  transition: transform 0.22s cubic-bezier(0.32,0.72,0,1);
+}
+.topic-group.open .topic-group-chevron { transform: rotate(90deg); }
+
+.topic-group-items {
+  overflow: hidden; max-height: 0;
+  transition: max-height 0.28s cubic-bezier(0.32,0.72,0,1);
+}
+.topic-group.open .topic-group-items { max-height: 800px; }
+
+/* compact topic row */
+.topic-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer; border-top: 1px solid var(--border);
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.topic-item:active { background: rgba(255,255,255,0.04); }
+
+.topic-item-badge {
+  width: 22px; height: 22px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 9px; font-weight: 800;
+  letter-spacing: 0.03em;
+}
+.topic-item-body { flex: 1; min-width: 0; }
+.topic-item-name {
+  font-size: 13.5px; font-weight: 600; color: var(--text-pri);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-bottom: 1px;
+}
+.topic-item-meta { font-size: 11.5px; color: var(--text-muted); }
+.topic-item-time { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+.topic-item-chevron { color: var(--text-muted); flex-shrink: 0; margin-left: 4px; }
+
+
+/* ─── CHAT CONTEXT BANNER (hidden — replaced by thread divider) ─── */
+.chat-context-bar { display: none; }
+
+/* ─── THREAD DIVIDER ─── */
+.thread-divider {
+  display: flex; align-items: center; gap: 8px; margin: 2px 0;
+}
+.thread-divider::before, .thread-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(168,85,247,0.2));
+}
+.thread-divider::after {
+  background: linear-gradient(to left, transparent, rgba(168,85,247,0.2));
+}
+.thread-divider-label {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 500;
+  color: rgba(168,85,247,0.45);
+  white-space: nowrap; letter-spacing: 0.01em;
+}
+
+/* ─── THREAD NEW-ACTIVITY INDICATOR ─── */
+.thread-updated {
+  display: none; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--purple); font-weight: 600;
+  white-space: nowrap; flex-shrink: 0;
+}
+.thread-updated.visible { display: flex; }
+.thread-updated-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--purple); flex-shrink: 0;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* updated state on history items */
+.history-item.has-new .history-item-meta { display: none; }
+.history-item .thread-updated { padding-top: 2px; }
+
+
+/* ─── THESES VIEW ─── */
+.theses-scroll {
+  flex: 1; overflow-y: auto; scrollbar-width: none;
+  padding: 12px 0 24px;
+}
+.theses-scroll::-webkit-scrollbar { display: none; }
+
+.theses-intro {
+  padding: 0 16px 14px;
+  font-size: 13px; color: var(--text-sec); line-height: 1.55;
+}
+
+.thesis-card {
+  margin: 0 16px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.thesis-card:active { background: rgba(255,255,255,0.03); }
+.thesis-card-header {
+  padding: 13px 14px 9px;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.thesis-card-icon {
+  width: 28px; height: 28px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px; line-height: 1;
+  background: transparent;
+}
+.thesis-card-title { font-size: 14px; font-weight: 700; color: var(--text-pri); margin-bottom: 3px; }
+.thesis-card-sub { font-size: 11.5px; color: var(--text-muted); line-height: 1.4; }
+.thesis-card-body {
+  padding: 0 14px 12px;
+}
+.thesis-card-summary {
+  font-size: 13px; color: var(--text-sec); line-height: 1.6;
+  margin-bottom: 10px;
+}
+.thesis-tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.thesis-tag {
+  padding: 3px 8px; border-radius: 8px;
+  font-size: 11px; font-weight: 500;
+  background: var(--bg-card2); color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.thesis-footer {
+  padding: 9px 14px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.thesis-footer-meta { font-size: 11px; color: var(--text-muted); }
+.thesis-footer-action {
+  font-size: 12px; font-weight: 600; color: #0A84FF;
+  background: none; border: none; cursor: pointer; font-family: var(--font);
+  padding: 4px 0;
+}
+
+.thesis-add-btn {
+  margin: 4px 16px 0;
+  width: calc(100% - 32px);
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  color: var(--text-muted); font-size: 13.5px; font-weight: 600;
+  cursor: pointer; font-family: var(--font);
+  transition: background 0.15s;
+}
+.thesis-add-btn:active { background: rgba(255,255,255,0.04); }
+
+
+/* ─── TOPIC DETAIL PANEL ─── */
+.topic-detail {
+  position: absolute;
+  top: 0; left: 0;
+  width: 390px; height: 844px;
+  z-index: 50;
+  background: var(--bg-deep);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.32,0.72,0,1);
+}
+.topic-detail.open { transform: translateX(0); }
+
+.topic-detail-nav {
+  height: var(--header-h); flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+.topic-detail-back {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg-card); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-sec); flex-shrink: 0;
+  transition: background 0.15s;
+}
+.topic-detail-back:active { background: var(--bg-card2); }
+.topic-detail-nav-body { flex: 1; min-width: 0; }
+.topic-detail-topic-label {
+  font-size: 11px; font-weight: 600; color: var(--purple);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1px;
+}
+.topic-detail-title {
+  font-size: 14px; font-weight: 700; color: var(--text-pri);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.topic-detail-scroll {
+  flex: 1; overflow-y: auto; scrollbar-width: none;
+  padding: 16px 16px 48px;
+}
+.topic-detail-scroll::-webkit-scrollbar { display: none; }
+
+/* Conversation thread in detail */
+.td-msg-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+.td-msg-warren { justify-content: flex-start; }
+.td-msg-user   { justify-content: flex-end; }
+.td-avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--pink), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.td-bubble-warren {
+  flex: 1; font-size: 13.5px; line-height: 1.65; color: var(--text-pri);
+}
+.td-bubble-warren p { margin: 0 0 8px; }
+.td-bubble-warren p:last-child { margin-bottom: 0; }
+.td-bubble-warren ul { padding-left: 16px; margin: 0 0 8px; }
+.td-bubble-warren li { line-height: 1.7; margin-bottom: 2px; }
+.td-bubble-user {
+  max-width: 78%; padding: 9px 13px;
+  font-size: 13.5px; line-height: 1.5; color: var(--text-pri);
+  background: var(--bg-card2); border: 1px solid var(--border);
+  border-radius: 16px 16px 4px 16px;
+}
+.td-date-chip {
+  display: flex; align-items: center; gap: 8px; margin: 4px 0 14px;
+}
+.td-date-chip::before, .td-date-chip::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.td-date-chip span {
+  font-size: 11px; color: var(--text-muted); font-weight: 500; white-space: nowrap;
+}
+
+/* Sticky CTA at bottom of detail */
+.topic-detail-cta {
+  flex-shrink: 0;
+  padding: 12px 16px 24px;
+  background: var(--bg-deep);
+  position: relative;
+}
+.topic-detail-cta::before {
+  content: ''; position: absolute; top: -32px; left: 0; right: 0; height: 32px;
+  background: linear-gradient(to bottom, transparent, var(--bg-deep));
+  pointer-events: none;
+}
+.topic-detail-cta-btn {
+  width: 100%; padding: 14px;
+  border-radius: 14px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  color: #fff; font-size: 15px; font-weight: 700;
+  font-family: var(--font); letter-spacing: -0.1px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.topic-detail-cta-btn:active { opacity: 0.88; transform: scale(0.98); }
+.topic-detail-cta-sub {
+  text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 6px;
+}
+
+/* ─── HISTORY (NEW) ─── */
+.hist-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 4px;
+}
+.hist-section-label {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-muted);
+  display: block;
+}
+.hist-section-add {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: none; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  transition: color 0.15s;
+}
+.hist-section-add:active { color: var(--text-pri); }
+
+.folder-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; height: 44px;
+  cursor: pointer;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.folder-row:active { background: rgba(255,255,255,0.04); }
+.folder-row-left { display: flex; align-items: center; gap: 10px; }
+.folder-icon { color: var(--text-muted); flex-shrink: 0; }
+.folder-name { font-size: 14px; font-weight: 500; color: var(--text-pri); }
+.folder-row-right { display: flex; align-items: center; gap: 8px; }
+.folder-chevron {
+  color: var(--text-muted); flex-shrink: 0;
+  transition: transform 0.22s cubic-bezier(0.32,0.72,0,1);
+}
+.folder-chevron.open { transform: rotate(90deg); }
+
+.folder-contents {
+  overflow: hidden; max-height: 0;
+  transition: max-height 0.25s cubic-bezier(0.32,0.72,0,1);
+}
+.folder-contents.open { max-height: 400px; }
+
+.hist-row {
+  display: flex; align-items: center;
+  padding: 0 16px; height: 44px;
+  gap: 10px; cursor: pointer;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.hist-row:active { background: rgba(255,255,255,0.04); }
+.hist-row.selected { background: rgba(255,255,255,0.06); }
+.folder-contents .hist-row { padding-left: 42px; }
+.hist-row-title {
+  flex: 1; font-size: 14px; color: var(--text-pri);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  min-width: 0;
+}
+.hist-row-meta {
+  font-size: 11px; color: var(--text-muted); flex-shrink: 0;
+}
+.hist-more-btn {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 13px; letter-spacing: 1px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: color 0.15s, background 0.15s;
+  line-height: 1; padding-bottom: 4px;
+}
+.hist-more-btn:active { color: var(--text-pri); background: rgba(255,255,255,0.06); }
+
+/* ─── TEMPLATES VIEW ─── */
+.template-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.template-row:active { background: rgba(255,255,255,0.04); }
+.template-name { font-size: 14px; color: var(--text-pri); }
+
+/* ─── INSIGHTS VIEW ─── */
+.insights-scroll {
+  flex: 1; overflow-y: auto; scrollbar-width: none;
+  padding: 12px 0 32px;
+}
+.insights-scroll::-webkit-scrollbar { display: none; }
+
+.insights-section-label {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 4px 16px 8px;
+}
+.insight-card {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+}
+.insight-card::after {
+  content: ''; position: absolute; bottom: 0; left: 16px; right: 16px;
+  height: 1px; background: var(--border);
+}
+.insight-card:last-child::after { display: none; }
+.insight-card:active { background: rgba(255,255,255,0.03); }
+.insight-card.read { opacity: 0.55; }
+
+.insight-type-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; line-height: 1;
+  flex-shrink: 0; margin-top: 1px;
+  background: var(--bg-card);
+}
+.insight-card-body { flex: 1; min-width: 0; }
+.insight-card-type {
+  font-size: 10.5px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+.insight-card-headline {
+  font-size: 13.5px; font-weight: 700; color: var(--text-pri);
+  line-height: 1.4; margin-bottom: 3px;
+}
+.insight-card.read .insight-card-headline { font-weight: 500; }
+.insight-card-preview {
+  font-size: 12.5px; color: var(--text-sec); line-height: 1.4;
+  margin-bottom: 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.insight-card-meta {
+  display: flex; align-items: center; gap: 6px;
+}
+.insight-card-tag {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 5px; padding: 1px 6px;
+}
+.insight-card-time {
+  font-size: 11px; color: var(--text-muted);
+}
+.insight-card-right {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  flex-shrink: 0; margin-top: 2px;
+}
+.insight-unread-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #0A84FF;
+  flex-shrink: 0;
+}
+.insight-dismiss-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--bg-card); border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 14px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s, color 0.12s;
+}
+.insight-dismiss-btn:active { background: var(--bg-card2); color: var(--text-pri); }
+
+/* Insight detail panel */
+.insight-detail {
+  position: absolute;
+  top: 0; left: 0;
+  width: 390px; height: 844px;
+  z-index: 51;
+  background: var(--bg-deep);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.32,0.72,0,1);
+}
+.insight-detail.open { transform: translateX(0); }
+
+.insight-detail-nav {
+  height: var(--header-h); flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+.insight-detail-nav-body { flex: 1; min-width: 0; }
+.insight-detail-type-label {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1px;
+}
+.insight-detail-title {
+  font-size: 14px; font-weight: 700; color: var(--text-pri);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.insight-detail-scroll {
+  flex: 1; overflow-y: auto; scrollbar-width: none;
+  padding: 20px 16px 0;
+}
+.insight-detail-scroll::-webkit-scrollbar { display: none; }
+.insight-detail-headline {
+  font-size: 17px; font-weight: 800; color: var(--text-pri);
+  line-height: 1.35; margin-bottom: 10px; letter-spacing: -0.2px;
+}
+.insight-detail-meta {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 18px;
+}
+.insight-detail-tag {
+  font-size: 11px; font-weight: 700;
+  border-radius: 5px; padding: 2px 7px; border: 1px solid transparent;
+}
+.insight-detail-time-text {
+  font-size: 12px; color: var(--text-muted);
+}
+.insight-detail-body {
+  font-size: 14px; color: var(--text-sec); line-height: 1.7;
+  white-space: pre-wrap;
+}
+.insight-detail-cta {
+  flex-shrink: 0;
+  padding: 12px 16px 24px;
+  background: var(--bg-deep);
+  border-top: 1px solid var(--border);
+}
+.insight-detail-cta-btn {
+  width: 100%; padding: 14px;
+  border-radius: 14px; border: none; cursor: pointer;
+  background: #0A84FF;
+  color: #fff; font-size: 15px; font-weight: 700;
+  font-family: var(--font); letter-spacing: -0.1px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.insight-detail-cta-btn:active { opacity: 0.88; transform: scale(0.98); }
+.insight-detail-cta-sub {
+  text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 6px;
+}
+
+/* ─── THESIS DUAL CTA ─── */
+.thesis-card-body-tap { cursor: pointer; }
+.thesis-footer-actions { display: flex; align-items: center; gap: 8px; }
+.thesis-chat-quick {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--bg-card2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-sec);
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.thesis-chat-quick:active { border-color: var(--purple); color: var(--purple); }
+
+/* ─── STATE OF PLAY PANEL ─── */
+.sop-status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.sop-status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+}
+.sop-status-badge.bullish {
+  background: rgba(34,197,94,0.12); color: var(--green);
+  border: 1px solid rgba(34,197,94,0.25);
+}
+.sop-status-badge.cautious {
+  background: rgba(249,115,22,0.12); color: var(--orange);
+  border: 1px solid rgba(249,115,22,0.25);
+}
+.sop-status-badge.watching {
+  background: rgba(168,85,247,0.12); color: var(--purple);
+  border: 1px solid rgba(168,85,247,0.25);
+}
+.sop-conviction {
+  font-size: 11px; color: var(--text-muted); font-weight: 500;
+}
+.sop-current-state {
+  font-size: 13.5px; color: var(--text-sec); line-height: 1.65;
+  margin-bottom: 18px; padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.sop-section-label {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 14px;
+}
+.sop-timeline { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.sop-milestone { display: flex; gap: 12px; margin-bottom: 0; }
+.sop-milestone-spine {
+  display: flex; flex-direction: column; align-items: center;
+  flex-shrink: 0; width: 8px;
+}
+.sop-milestone-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--purple); flex-shrink: 0; margin-top: 5px;
+}
+.sop-milestone-line {
+  width: 1px; flex: 1; min-height: 14px;
+  background: var(--border); margin-top: 4px;
+}
+.sop-milestone-right { flex: 1; padding-bottom: 14px; }
+.sop-milestone:last-child .sop-milestone-right { padding-bottom: 0; }
+.sop-milestone-date { font-size: 10.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 1px; }
+.sop-milestone-label { font-size: 13px; font-weight: 700; color: var(--text-pri); margin-bottom: 3px; }
+.sop-milestone-note { font-size: 12.5px; color: var(--text-sec); line-height: 1.55; }
+
+.sop-signals {}
+.sop-signal {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+  font-size: 12.5px; color: var(--text-sec); line-height: 1.55;
+}
+.sop-signal:last-child { border-bottom: none; }
+.sop-signal-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; width: 16px; text-align: center; }
+.sop-signal.confirms .sop-signal-icon { color: var(--green); }
+.sop-signal.challenges .sop-signal-icon { color: var(--orange); }
+.sop-signal.watching .sop-signal-icon { color: var(--purple); }
+
+/* ===== SOP: NEW FOR THIS THESIS ===== */
+.sop-section-header {
+  display: flex; align-items: center; gap: 7px;
+  margin: 18px 0 10px;
+}
+.sop-section-header-text { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; }
+.sop-new-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #0A84FF; flex-shrink: 0;
+}
+.sop-insight-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.sop-insight-card {
+  background: #16191D;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 9px 10px;
+  display: flex; align-items: center; gap: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.sop-insight-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+}
+.sop-insight-card.type-earnings::before { background: #FF852B; }
+.sop-insight-card.type-macro::before { background: #30D8C0; }
+.sop-insight-card.type-risk::before { background: #FF453A; }
+.sop-insight-card.type-default::before { background: #0A84FF; }
+.sop-insight-body { flex: 1; min-width: 0; }
+.sop-insight-type {
+  font-size: 10px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 2px;
+}
+.sop-insight-headline {
+  font-size: 13px; font-weight: 500; color: var(--text-pri);
+  line-height: 1.4; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.sop-insight-time {
+  font-size: 10px; color: var(--text-muted); margin-top: 2px;
+}
+.sop-insight-discuss {
+  background: none; border: none; cursor: pointer;
+  color: #0A84FF; font-size: 12px; font-weight: 600;
+  white-space: nowrap; padding: 4px 2px; flex-shrink: 0;
+  font-family: var(--font);
+}
+.sop-insight-discuss:active { opacity: 0.7; }
+
+/* ===== SOP: YOUR POSITIONS ===== */
+.sop-positions-list { display: flex; flex-direction: column; gap: 0; margin-bottom: 4px; }
+.sop-position-row {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.sop-position-row:last-child { border-bottom: none; }
+.sop-position-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.sop-position-ticker-block { flex: 1; min-width: 0; }
+.sop-position-ticker {
+  font-size: 15px; font-weight: 700; color: var(--text-pri); letter-spacing: -0.3px;
+}
+.sop-position-name {
+  font-size: 11px; color: var(--text-muted); margin-top: 1px;
+}
+.sop-position-right-block {
+  flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+}
+.sop-position-pnl {
+  font-size: 14px; font-weight: 700; letter-spacing: -0.3px;
+}
+.sop-position-pnl.pos { color: #30D158; }
+.sop-position-pnl.neg { color: #FF453A; }
+.sop-position-pnl-pct {
+  font-size: 11px; font-weight: 600;
+}
+.sop-position-pnl-pct.pos { color: #30D158; }
+.sop-position-pnl-pct.neg { color: #FF453A; }
+.sop-position-flag {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600; color: #FF852B;
+}
+.sop-position-flag-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #FF852B; flex-shrink: 0;
+}
+.sop-position-plan {
+  font-size: 11px; color: var(--text-muted); line-height: 1.5;
+  margin-top: 5px;
+}
+.sop-position-alert {
+  background: rgba(255,133,43,0.08);
+  border-left: 3px solid #FF852B;
+  border-radius: 0 7px 7px 0;
+  padding: 7px 10px;
+  font-size: 11.5px; color: var(--text-sec); line-height: 1.5;
+  margin-top: 6px;
+}
+.sop-position-alert-cta {
+  display: inline-block; margin-top: 4px;
+  color: #0A84FF; font-weight: 600; cursor: pointer; background: none; border: none;
+  font-family: var(--font); font-size: 11.5px; padding: 0;
+}
+.sop-position-alert-cta:active { opacity: 0.7; }
+
+/* ===== SOP: TIMELINE TOGGLE ===== */
+.sop-timeline-toggle {
+  display: flex; align-items: center; gap: 6px;
+  margin: 18px 0 0; cursor: pointer; user-select: none;
+}
+.sop-timeline-toggle-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; }
+.sop-timeline-toggle-chevron {
+  font-size: 11px; color: var(--text-muted);
+  transition: transform 0.22s ease;
+  flex-shrink: 0;
+}
+.sop-timeline-toggle-chevron.open { transform: rotate(90deg); }
+.sop-timeline-body {
+  display: none; padding-top: 12px;
+}
+.sop-timeline-body.open { display: block; }
+
+/* ===== PROTOTYPE CONTROLS ===== */
+#controls {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(14,14,26,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 10px 16px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  pointer-events: none; z-index: 999;
+}
+#controls .ctrl-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(255,255,255,0.2);
+}
+#controls .ctrl-row {
+  display: flex; gap: 6px; pointer-events: all;
+}
+.ctrl-btn {
+  padding: 6px 12px; border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(20,20,40,0.8);
+  font-family: var(--font); font-size: 11.5px; font-weight: 500;
+  color: rgba(255,255,255,0.45); cursor: pointer;
+  transition: all 0.15s;
+}
+.ctrl-btn.on {
+  border-color: var(--purple); color: var(--purple);
+  background: rgba(168,85,247,0.12);
+}
+
+</style>
+</head>
+<body>
+<div class="device-shell">
+  <div class="dynamic-island"></div>
+  <div class="phone" id="phone">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="3" width="3" height="9" rx="1" opacity="0.4"/><rect x="4.5" y="2" width="3" height="10" rx="1" opacity="0.6"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="14" y="4" width="2" height="6" rx="0.5" opacity="0.3"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 2.5C10.2 2.5 12.2 3.4 13.6 4.9L15 3.5C13.2 1.6 10.7 0.5 8 0.5C5.3 0.5 2.8 1.6 1 3.5L2.4 4.9C3.8 3.4 5.8 2.5 8 2.5Z" fill="white"/><path d="M8 5.5C9.4 5.5 10.7 6.1 11.6 7L13 5.6C11.7 4.3 9.9 3.5 8 3.5C6.1 3.5 4.3 4.3 3 5.6L4.4 7C5.3 6.1 6.6 5.5 8 5.5Z" fill="white" opacity="0.7"/><circle cx="8" cy="10" r="1.5" fill="white"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="white" stroke-opacity="0.35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="white"/><path d="M23 4.5V7.5C23.8 7.2 24.5 6.5 24.5 6C24.5 5.5 23.8 4.8 23 4.5Z" fill="white" opacity="0.4"/></svg>
+    </div>
+  </div>
+
+  <!-- NAV BAR -->
+  <div class="nav-bar">
+    <button class="nav-back">
+      <svg width="10" height="17" viewBox="0 0 10 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1L1 8.5L9 16"/></svg>
+    </button>
+    <div class="nav-title">
+      <div class="nav-warren-icon">
+        <svg width="14" height="12" viewBox="0 0 34 28" fill="none">
+          <path d="M13 1 C13 1 14.2 8.5 18.5 13 C14.2 17.5 13 25 13 25 C13 25 11.8 17.5 7.5 13 C11.8 8.5 13 1 13 1Z" fill="white"/>
+          <path d="M1 13 C1 13 8.5 14.2 13 18.5 C17.5 14.2 25 13 25 13 C25 13 17.5 11.8 13 7.5 C8.5 11.8 1 13 1 13Z" fill="white"/>
+          <path d="M27 1 C27 1 27.5 4.5 30 6.5 C27.5 8.5 27 12 27 12 C27 12 26.5 8.5 24 6.5 C26.5 4.5 27 1 27 1Z" fill="white" opacity="0.7"/>
+          <path d="M21 6.5 C21 6.5 24.5 7 26.5 9.5 C28.5 7 32 6.5 32 6.5 C32 6.5 28.5 6 26.5 3.5 C24.5 6 21 6.5 21 6.5Z" fill="white" opacity="0.7"/>
+        </svg>
+      </div>
+      <span class="nav-title-text">Warren</span>
+    </div>
+    <div class="nav-right">
+      <button class="nav-icon-btn" title="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
+      <button class="nav-icon-btn" title="New conversation" onclick="newChat()" style="color:#0A84FF">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- SEGMENT TABS -->
+  <div class="seg-tabs">
+    <button class="seg-tab active" onclick="switchTab('chat')" id="tab-chat">Chat</button>
+    <button class="seg-tab" onclick="switchTab('history')" id="tab-history">History</button>
+    <button class="seg-tab" onclick="switchTab('templates')" id="tab-templates">Templates</button>
+  </div>
+
+  <!-- ─── CHAT VIEW ─── -->
+  <div class="view active" id="view-chat">
+    <div class="chat-messages-wrap" style="position:relative">
+      <div class="chat-messages" id="chatMessages">
+
+        <div class="day-divider"><span class="day-divider-label">Today</span></div>
+
+        <!-- Warren greeting -->
+        <div class="msg-row msg-warren">
+          <div class="msg-avatar">
+            <svg width="12" height="10" viewBox="0 0 34 28" fill="none">
+              <path d="M13 1 C13 1 14.2 8.5 18.5 13 C14.2 17.5 13 25 13 25 C13 25 11.8 17.5 7.5 13 C11.8 8.5 13 1 13 1Z" fill="white"/>
+              <path d="M1 13 C1 13 8.5 14.2 13 18.5 C17.5 14.2 25 13 25 13 C25 13 17.5 11.8 13 7.5 C8.5 11.8 1 13 1 13Z" fill="white"/>
+            </svg>
+          </div>
+          <div class="bubble-warren">
+            <p>Good morning. Markets are mixed — NVDA is up 2.1% pre-market ahead of tonight's earnings. Anything you'd like to dig into?</p>
+            <div class="suggestions" id="chatSuggestions">
+              <button class="suggestion-pill" onclick="sendSuggestion(this)">Walk me through the NVDA earnings setup</button>
+              <button class="suggestion-pill" onclick="sendSuggestion(this)">Any macro risks I should be aware of today?</button>
+              <button class="suggestion-pill" onclick="sendSuggestion(this)">Update me on my AI infrastructure thesis</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="chat-input-wrap">
+        <div class="chat-input-inner">
+          <input class="chat-input" id="chatInput" type="text" placeholder="Ask Warren anything" oninput="updateSend()" onkeydown="handleKey(event)">
+          <button class="chat-send-btn" id="chatSendBtn" onclick="sendMessage()" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M22 2L11 13" stroke="var(--purple)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="var(--purple)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="chat-disclaimer">Warren may be wrong. Not financial advice.</div>
+    </div>
+  </div>
+
+  <!-- ─── HISTORY VIEW ─── -->
+  <div class="view" id="view-history">
+    <div class="history-scroll">
+
+      <!-- FOLDERS section -->
+      <div class="hist-section-header">
+        <span class="hist-section-label">Folders</span>
+        <button class="hist-section-add" onclick="alert('Add folder')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+
+      <!-- Folder: Tech Stocks -->
+      <div class="folder-row" onclick="toggleFolder('folder-tech')">
+        <div class="folder-row-left">
+          <svg class="folder-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span class="folder-name">Tech Stocks</span>
+        </div>
+        <div class="folder-row-right">
+          <svg class="folder-chevron" id="fchev-tech" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4-4 4"/></svg>
+          <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+        </div>
+      </div>
+      <div class="folder-contents" id="folder-tech">
+        <div class="hist-row" onclick="openTopicDetail('hist-tsla')">
+          <div class="hist-row-title">TSLA delivery numbers deep dive</div>
+          <div class="hist-row-meta">Yesterday</div>
+          <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+        </div>
+        <div class="hist-row" onclick="openTopicDetail('hist-semis')">
+          <div class="hist-row-title">Semiconductor supply chain update</div>
+          <div class="hist-row-meta">Mon</div>
+          <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+        </div>
+      </div>
+
+      <!-- Folder: Macro -->
+      <div class="folder-row" onclick="toggleFolder('folder-macro')">
+        <div class="folder-row-left">
+          <svg class="folder-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span class="folder-name">Macro</span>
+        </div>
+        <div class="folder-row-right">
+          <svg class="folder-chevron" id="fchev-macro" width="6" height="10" viewBox="0 0 6 10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4-4 4"/></svg>
+          <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+        </div>
+      </div>
+      <div class="folder-contents" id="folder-macro">
+        <div class="hist-row" onclick="openTopicDetail('hist-fed')">
+          <div class="hist-row-title">Fed rate decision impact</div>
+          <div class="hist-row-meta">2h ago</div>
+          <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+        </div>
+        <div class="hist-row" onclick="openTopicDetail('hist-aiinfra')">
+          <div class="hist-row-title">AI infrastructure spending cycle</div>
+          <div class="hist-row-meta">May 31</div>
+          <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+        </div>
+      </div>
+
+      <!-- TODAY group -->
+      <div class="hist-section-label" style="padding: 14px 16px 4px;">Today</div>
+
+      <div class="hist-row" data-tid="hist-fed" onclick="openTopicDetail('hist-fed')">
+        <div class="hist-row-title">Fed rate decision impact</div>
+        <div class="hist-row-meta">2h ago</div>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+
+      <!-- PREVIOUS 7 DAYS group -->
+      <div class="hist-section-label" style="padding: 14px 16px 4px;">Previous 7 Days</div>
+
+      <div class="hist-row" data-tid="hist-tsla" onclick="openTopicDetail('hist-tsla')">
+        <div class="hist-row-title">TSLA delivery numbers deep dive</div>
+        <div class="hist-row-meta">Yesterday</div>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+
+      <div class="hist-row" data-tid="hist-semis" onclick="openTopicDetail('hist-semis')">
+        <div class="hist-row-title">Semiconductor supply chain update</div>
+        <div class="hist-row-meta">Mon</div>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+
+      <!-- OLDER group -->
+      <div class="hist-section-label" style="padding: 14px 16px 4px;">Older</div>
+
+      <div class="hist-row" data-tid="hist-aiinfra" onclick="openTopicDetail('hist-aiinfra')">
+        <div class="hist-row-title">AI infrastructure spending cycle</div>
+        <div class="hist-row-meta">May 31</div>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+
+      <div class="hist-row" data-tid="hist-risk" onclick="openTopicDetail('hist-risk')">
+        <div class="hist-row-title">Watchlist risk review</div>
+        <div class="hist-row-meta">May 28</div>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+
+      <div class="hist-row" data-tid="hist-btc" onclick="openTopicDetail('hist-btc')">
+        <div class="hist-row-title">Bitcoin halving aftermath</div>
+        <div class="hist-row-meta">May 14</div>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── TEMPLATES VIEW ─── -->
+  <div class="view" id="view-templates">
+    <div class="history-scroll">
+      <div class="template-row">
+        <span class="template-name">Earnings Briefing</span>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+      <div class="template-row">
+        <span class="template-name">Portfolio Health Check</span>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+      <div class="template-row">
+        <span class="template-name">Thesis Builder</span>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+      <div class="template-row">
+        <span class="template-name">Risk Scan</span>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+      <div class="template-row">
+        <span class="template-name">Sector Deep Dive</span>
+        <button class="hist-more-btn" onclick="event.stopPropagation()">···</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TOPIC DETAIL PANEL ─── -->
+  <div class="topic-detail" id="topicDetail">
+    <div class="topic-detail-nav">
+      <button class="topic-detail-back" onclick="closeTopicDetail()">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1L1 8.5L9 16"/></svg>
+      </button>
+      <div class="topic-detail-nav-body">
+        <div class="topic-detail-topic-label" id="tdTopicLabel">AI Infrastructure</div>
+        <div class="topic-detail-title" id="tdTitle">Thread</div>
+      </div>
+    </div>
+
+    <div class="topic-detail-scroll" id="tdScroll">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="topic-detail-cta">
+      <button class="topic-detail-cta-btn" id="tdCtaBtn" onclick="continueThreadInChat()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Continue this thread
+      </button>
+      <div class="topic-detail-cta-sub">Opens in Chat with full context loaded</div>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+/* ─── TAB SWITCHING ─── */
+function switchTab(tab) {
+  document.querySelectorAll('.seg-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('view-' + tab).classList.add('active');
+}
+
+/* ─── TOPIC GROUP TOGGLE ─── */
+function toggleGroup(id) {
+  const group = document.getElementById(id);
+  if (group) group.classList.toggle('open');
+}
+
+/* ─── TOPIC DETAIL DATA ─── */
+const TOPIC_THREADS = {
+  'ai-1': {
+    topic: 'AI Infrastructure',
+    title: 'Hyperscaler capex cycle — will NVDA demand hold through 2025?',
+    recap: 'We were debating the inference efficiency bear case — cheaper compute may expand usage rather than contract it (Jevons paradox), but could compress the rate of demand growth.',
+    ctaPrompt: 'Continuing our thread on the hyperscaler capex cycle — any updates since we last spoke?',
+    messages: [
+      { role: 'user', text: "Will NVDA demand hold through 2025? I'm seeing some analyst notes saying capex may peak.", date: 'Today, 9:14am' },
+      { role: 'warren', html: `<p>The analyst concern is real but I think it's premature. Here's why demand holds:</p>
+<ul>
+<li><strong>Backlog visibility:</strong> NVDA has disclosed ~$11B in future delivery commitments — that's locked-in demand through mid-2025</li>
+<li><strong>New entrants:</strong> Sovereign AI (UAE, Japan, France) are just starting their build-outs — a wave that wasn't in forecasts 12 months ago</li>
+<li><strong>Software moat:</strong> CUDA ecosystem lock-in makes switching to AMD/Intel painful even if price-per-FLOP improves</li>
+</ul>
+<p>Risk case: if a major hyperscaler publicly cuts AI capex guidance, sentiment shifts fast regardless of fundamentals.</p>` },
+      { role: 'user', text: 'What about the inference efficiency argument — less GPUs needed per model run?', date: null },
+      { role: 'warren', html: `<p>That's the most legitimate bear case in my view. DeepSeek showed you can get GPT-4 level output at a fraction of the compute cost. But historically, efficiency gains in compute have <em>expanded</em> usage rather than contracting it — Jevons paradox.</p>
+<p>Cheaper inference → more apps get built → aggregate GPU demand goes up. That said, it could compress the <em>rate</em> of demand growth even if the direction stays positive.</p>` },
+    ]
+  },
+  'ai-2': {
+    topic: 'AI Infrastructure',
+    title: 'TSMC advanced packaging constraints and H200 supply risk',
+    recap: 'We landed on CoWoS packaging being a supply constraint (not a demand one) — bullish near-term for NVDA, with oversupply a late-2025/2026 risk if TSMC capacity arrives faster than demand scales.',
+    ctaPrompt: 'Can you update me on the TSMC packaging situation and whether H200 supply has improved?',
+    messages: [
+      { role: 'user', text: 'Heard TSMC has packaging constraints. Does this affect my NVDA thesis?', date: 'Mon, 11:02am' },
+      { role: 'warren', html: `<p>Yes, this is worth paying attention to. TSMC's CoWoS advanced packaging is the bottleneck, not the chip fab itself:</p>
+<ul>
+<li>H100/H200 production requires CoWoS-L packaging — TSMC has limited capacity and is building out aggressively</li>
+<li>NVDA reportedly had to turn away orders in Q4 due to packaging constraints, not silicon yield</li>
+<li>TSMC said CoWoS capacity doubles by end of 2024 — but that timeline has slipped before</li>
+</ul>` },
+      { role: 'user', text: 'So this is a supply problem not a demand problem?', date: null },
+      { role: 'warren', html: `<p>Exactly. And from an investment lens, supply constraints are <em>actually bullish</em> for NVDA near-term — it means pricing power and backlog visibility. The risk flips if TSMC capacity comes online faster than demand scales, creating oversupply. That's a late-2025 / 2026 concern, not today's problem.</p>` },
+    ]
+  },
+  'ai-3': {
+    topic: 'AI Infrastructure',
+    title: 'Microsoft Azure vs AWS vs Google Cloud — AI infrastructure race',
+    recap: 'We sized up Azure vs AWS vs Google — Azure leading on enterprise AI momentum (31% growth), AWS more cautious on GPU spend, Google best models but slowest sales motion.',
+    ctaPrompt: 'Can you compare where Microsoft Azure, AWS, and Google Cloud stand in the AI infrastructure race right now?',
+    messages: [
+      { role: 'user', text: "Who's actually winning the cloud AI race — Azure, AWS, or Google?", date: 'May 31, 2:45pm' },
+      { role: 'warren', html: `<p>Current standings based on most recent earnings:</p>
+<ul>
+<li><strong>Azure (MSFT):</strong> Re-accelerated to 31% growth driven by OpenAI integration. Strongest enterprise AI pipeline. Winning on software + infra bundle.</li>
+<li><strong>AWS (AMZN):</strong> Still the market share leader overall but slower AI-specific growth. Betting on Bedrock + custom Trainium chips. More cautious on GPU spend.</li>
+<li><strong>Google Cloud (GOOGL):</strong> Best underlying models (Gemini), but slowest enterprise sales motion. TPU advantage is real but hard to monetize quickly.</li>
+</ul>
+<p>For your thesis: Azure's re-acceleration is the clearest signal that enterprise AI is real, not just hype spending.</p>` },
+    ]
+  },
+  'fed-1': {
+    topic: 'Fed Policy & Rates',
+    title: '25bps cut impact on tech valuations and growth multiples',
+    recap: 'We were tracking Powell\'s dovish signals — market pricing 3 more cuts, which could add 15-20% to forward multiples. Key risk is inflation re-accelerating and forcing a pause.',
+    ctaPrompt: 'Can we revisit how the 25bps cut plays into tech valuations — has anything changed?',
+    messages: [
+      { role: 'user', text: 'Fed just cut 25bps. What does that mean for my tech holdings?', date: 'Today, 8:31am' },
+      { role: 'warren', html: `<p>A 25bp cut is directionally positive for growth/tech, here's the mechanism:</p>
+<ul>
+<li><strong>Lower discount rate</strong> → higher present value of future earnings → expands P/E multiples, especially for high-growth names</li>
+<li><strong>Refinancing tailwind</strong> → companies with floating-rate debt see interest expense fall</li>
+<li><strong>Risk-on sentiment</strong> → money rotates from cash/bonds back into equities</li>
+</ul>
+<p>In practice: a single 25bp cut usually means a 1-2% multiple expansion on high-duration tech. The more important signal is whether this is the start of a cutting cycle or a one-off.</p>` },
+      { role: 'user', text: 'Powell sounded dovish — sounds like more cuts coming?', date: null },
+      { role: 'warren', html: `<p>Market is pricing ~3 more cuts this year. If that holds, the duration tailwind for tech is meaningful — could be worth 15-20% on forward multiples from here. But the risk is inflation re-accelerating and forcing a pause, which would quickly reverse sentiment.</p>` },
+    ]
+  },
+  'fed-2': {
+    topic: 'Fed Policy & Rates',
+    title: 'CPI print reaction — are we done hiking or is there more?',
+    recap: 'We landed on no more hikes likely, but cuts are 2-3 meetings away — shelter inflation still sticky at 5.5%, though it should keep falling as it lags real-world rent data.',
+    ctaPrompt: 'Revisiting the inflation picture — where do things stand now on CPI and the rate path?',
+    messages: [
+      { role: 'user', text: 'CPI came in at 3.4% — lower than expected. Are we done hiking?', date: 'May 28, 10:15am' },
+      { role: 'warren', html: `<p>3.4% is progress but the Fed typically wants to see sustained prints below 3% before declaring victory. Key nuances:</p>
+<ul>
+<li>Shelter inflation remains sticky at 5.5% — it lags real-world rent data by ~12 months, so it should continue falling</li>
+<li>Core services ex-shelter (the Fed's preferred signal) came in at 3.2% — still above target but trending right</li>
+</ul>
+<p>Most likely outcome: no more hikes. But cuts are probably 2-3 meetings away, not imminent.</p>` },
+    ]
+  },
+  'ev-1': {
+    topic: 'EV Sector',
+    title: 'Tesla Q2 deliveries beat — what does China mix mean?',
+    recap: 'We were weighing the BYD price war — Tesla\'s volume is holding but margin is under pressure in China. Bull case rests on US and Europe staying strong enough that China becomes secondary.',
+    ctaPrompt: 'Can we dig further into what the Tesla Q2 China delivery numbers mean for margins and the thesis?',
+    messages: [
+      { role: 'user', text: 'Tesla beat Q2 deliveries. Good news?', date: 'Yesterday, 9:02am' },
+      { role: 'warren', html: `<p>Yes, but with nuance. 444k deliveries vs 436k expected is a solid beat, but the China mix matters more than the headline:</p>
+<ul>
+<li>China deliveries were ~180k — up 14% QoQ, recovering from the Q1 dip</li>
+<li>Model Y was the driver — Shanghai factory running at ~95% utilization</li>
+<li><strong>Margin concern:</strong> Tesla cut prices again in May in China to compete with BYD. That keeps volume up but pressures gross margin</li>
+</ul>
+<p>The question for earnings: does volume beat compensate for margin compression? Historically Tesla's stock reacts more to margin guidance than delivery numbers.</p>` },
+      { role: 'user', text: 'Is the price war with BYD sustainable for Tesla?', date: null },
+      { role: 'warren', html: `<p>Probably not at current pace. BYD's cost structure in China is structurally lower — they're vertically integrated from battery cells to final assembly. Tesla is competing on brand and software, but that premium is eroding in China specifically. The bear case is that Tesla becomes a subscale player in China while BYD dominates — but global demand (US + Europe) stays strong enough to hold overall thesis.</p>` },
+    ]
+  },
+  'ev-2': {
+    topic: 'EV Sector',
+    title: 'BYD competitive pressure on Tesla margins — structural or cyclical?',
+    recap: 'We concluded BYD\'s advantage is structural in China, cyclical globally — tariffs protect Tesla in the US and Europe for now, but BYD\'s Hungary plant is the long-term wildcard.',
+    ctaPrompt: 'Is the BYD vs Tesla margin pressure structural or cyclical — what\'s your current read?',
+    messages: [
+      { role: 'user', text: 'Is the BYD threat to Tesla structural or will it pass?', date: 'Jun 2, 3:11pm' },
+      { role: 'warren', html: `<p>Structural in China, cyclical globally. Here's the split:</p>
+<ul>
+<li><strong>China:</strong> BYD's local supply chain, government relationships, and brand loyalty create a durable advantage. Tesla will compete but won't dominate China the way it once hoped.</li>
+<li><strong>US + Europe:</strong> BYD faces tariffs (100% US, 17-45% EU) that make their price advantage disappear. Tesla's moat in these markets remains intact for now.</li>
+</ul>
+<p>Long-term wild card: if BYD cracks the EU market at scale through local manufacturing (they're building a plant in Hungary), that changes the calculus.</p>` },
+    ]
+  },
+  'crypto-1': {
+    topic: 'Crypto',
+    title: 'Bitcoin post-halving on-chain metrics and price outlook',
+    recap: 'On-chain metrics were constructive — LTH supply at ATH, BlackRock IBIT crossing $20B AUM. We left the price target open, with the key question being whether ETF demand changes the amplitude of this cycle vs prior ones.',
+    ctaPrompt: 'Can you give me an updated read on Bitcoin post-halving on-chain metrics and where you think price goes from here?',
+    messages: [
+      { role: 'user', text: 'It\'s been 6 weeks since the halving. What do the on-chain metrics look like?', date: 'May 14, 1:45pm' },
+      { role: 'warren', html: `<p>On-chain picture is constructive. Key metrics:</p>
+<ul>
+<li><strong>Long-term holder supply:</strong> All-time high at 14.9M BTC — hodlers are not selling into strength</li>
+<li><strong>Exchange outflows:</strong> Sustained net outflows — coins moving off exchanges usually signals accumulation intent</li>
+<li><strong>Miner capitulation:</strong> Hash rate dipped 8% post-halving as less efficient miners turned off, but recovered within 3 weeks — healthy, not distressed</li>
+<li><strong>ETF flows:</strong> BlackRock IBIT crossing $20B AUM is remarkable for a 4-month-old product</li>
+</ul>
+<p>Historically the price reaction to halvings peaks 12-18 months after. We're early in that window.</p>` },
+      { role: 'user', text: 'What\'s the price target you\'d put on it?', date: null },
+      { role: 'warren', html: `<p>I'm cautious about price targets in crypto — too many macro variables. But if the cycle rhymes with 2020-2021: the halving was at ~$63k, post-halving peak was ~3x. That's a rough framework, not a forecast. The more important signal is whether institutional demand (ETFs, sovereign wealth) changes the amplitude of this cycle vs prior ones. If it does, the upside case is higher.</p>` },
+    ]
+  },
+  'hist-fed': {
+    topic: 'History · 2h ago',
+    title: 'Fed rate decision impact',
+    recap: 'We ended on the 3-cut pricing — meaningful duration tailwind for tech if it holds, but next month\'s CPI print is the key signal to watch.',
+    messages: [
+      { role: 'user', text: 'Fed just cut 25bps. What does that mean for my tech holdings?', date: 'Today, 8:31am' },
+      { role: 'warren', html: `<p>A 25bp cut is directionally positive for growth/tech. Here's the mechanism:</p>
+<ul>
+<li><strong>Lower discount rate</strong> → higher present value of future earnings → expands P/E multiples on high-growth names</li>
+<li><strong>Refinancing tailwind</strong> → companies with floating-rate debt see interest expense fall</li>
+<li><strong>Risk-on sentiment</strong> → rotation from cash/bonds back into equities</li>
+</ul>
+<p>In practice: a single 25bp cut usually means 1-2% multiple expansion on high-duration tech. The bigger signal is whether this starts a cutting cycle or is a one-off.</p>` },
+      { role: 'user', text: 'Powell sounded dovish. More cuts likely?', date: null },
+      { role: 'warren', html: `<p>Market is pricing ~3 more cuts this year. If that holds, the duration tailwind for tech is meaningful — could be 15-20% on forward multiples. The risk is inflation re-accelerating and forcing a pause, which would quickly reverse sentiment. Watch next month's CPI print as the key signal.</p>` },
+    ]
+  },
+  'hist-tsla': {
+    topic: 'History · Yesterday',
+    title: 'TSLA delivery numbers deep dive',
+    recap: 'We ended on Tesla\'s China predicament — BYD\'s cost floor is structurally lower, so the bull case for TSLA depends on US and Europe staying strong enough that China becomes a secondary market.',
+    messages: [
+      { role: 'user', text: 'Tesla Q2 deliveries — beat or miss?', date: 'Yesterday, 9:02am' },
+      { role: 'warren', html: `<p>Beat — 444k deliveries vs 436k expected, up 4%. Solid headline number, but the details matter more:</p>
+<ul>
+<li><strong>China:</strong> ~180k deliveries, up 14% QoQ — recovering from the Q1 dip</li>
+<li><strong>Model Y:</strong> Shanghai factory at ~95% utilisation — the volume engine is running</li>
+<li><strong>Price cuts:</strong> Tesla cut prices again in China in May to stay competitive with BYD — keeps volume up but squeezes gross margin</li>
+</ul>
+<p>Key question for earnings: does the volume beat offset the margin compression?</p>` },
+      { role: 'user', text: "Is the BYD price war sustainable for Tesla?", date: null },
+      { role: 'warren', html: `<p>Probably not at current pace. BYD is vertically integrated from battery cells to final assembly — their cost floor is structurally lower. Tesla is competing on brand and software, but that premium is eroding specifically in China. The bull case is that global (US + Europe) demand stays strong enough that China becomes a secondary market rather than a loss-leader one.</p>` },
+    ]
+  },
+  'hist-semis': {
+    topic: 'History · Mon',
+    title: 'Semiconductor supply chain update',
+    recap: 'We flagged two risks to monitor — TSMC CoWoS packaging constraints into Q4, and a possible NVDA H20 export restriction (~10% of revenue). Neither acute today, but worth watching into year-end.',
+    messages: [
+      { role: 'user', text: 'Any new risks I should know about in semis?', date: 'Mon, 11:15am' },
+      { role: 'warren', html: `<p>Two things worth flagging since we last checked in:</p>
+<ul>
+<li><strong>TSMC packaging:</strong> Guided cautiously on CoWoS advanced packaging expansion. The bottleneck is real and could affect H200 supply timelines into Q4. Not a demand problem — a capacity problem.</li>
+<li><strong>Export controls:</strong> US Commerce Dept is reviewing another round of China chip restrictions. If NVDA's H20 (the China-legal chip) gets restricted, that's ~10% of revenue at risk.</li>
+</ul>
+<p>Neither is acute today, but both are worth monitoring into year-end.</p>` },
+      { role: 'user', text: 'Should I be trimming NVDA on the export control risk?', date: null },
+      { role: 'warren', html: `<p>Depends on your time horizon. The H20 restriction risk is real but would likely be a sell-the-news event rather than a structural problem — the US domestic and sovereign AI demand is large enough to absorb it. If you're holding for 2+ years, I wouldn't trim on that alone. If you're sitting on large gains and looking for a reason to reduce, it's a reasonable justification.</p>` },
+    ]
+  },
+  'hist-aiinfra': {
+    topic: 'History · May 31',
+    title: 'AI infrastructure spending cycle',
+    recap: 'We landed on the overbuild risk being less likely here than in prior capex cycles — AI compute generates immediate ROI signals, so any slowdown requires the underlying product market to fail, not just capital misallocation.',
+    messages: [
+      { role: 'user', text: 'Microsoft, Google, Meta all raising capex guidance. Does this change anything for my AI thesis?', date: 'May 31, 2:45pm' },
+      { role: 'warren', html: `<p>It reinforces it. This is the clearest enterprise signal yet that AI spending is real and durable:</p>
+<ul>
+<li><strong>Microsoft:</strong> $60B+ capex planned for FY25 — mostly AI infra. Azure growth re-accelerating to 31%.</li>
+<li><strong>Google:</strong> Raised capex to $12B/quarter. Betting heavily on TPUs and Gemini inference at scale.</li>
+<li><strong>Meta:</strong> Most aggressive revision — now guiding $35-40B capex, driven by Llama training clusters.</li>
+</ul>
+<p>The read-through for NVDA is that these commitments lock in demand well into 2025. Hard to build a bear case when your customers are publicly committing to this level of spend.</p>` },
+      { role: 'user', text: 'Any risk they overbuild and demand collapses after?', date: null },
+      { role: 'warren', html: `<p>That's the classic capex cycle risk — and it's legitimate. But the diff vs prior cycles (e.g. telco overbuilding in 2000) is that AI compute generates immediate ROI signals. Azure's AI workloads are monetised in real time via API pricing. That creates a tighter feedback loop than, say, laying fiber on spec. The overbuild scenario requires a failure of the underlying AI product market, not just capital misallocation.</p>` },
+    ]
+  },
+  'hist-risk': {
+    topic: 'History · May 28',
+    title: 'Watchlist risk review',
+    recap: 'We identified high concentration risk — ~68% tech/semis with high correlation. I suggested looking at 1-2 defensive names (healthcare, energy, or gold) to reduce single-factor exposure.',
+    messages: [
+      { role: 'user', text: 'Can you do a risk check on my current watchlist?', date: 'May 28, 10:30am' },
+      { role: 'warren', html: `<p>Here's what stands out from a risk lens:</p>
+<ul>
+<li><strong>Concentration:</strong> ~68% tech/semis by weight (NVDA, MSFT, TSLA, GOOGL, AVGO). High correlation — a sector-wide de-rating hits everything at once.</li>
+<li><strong>Rate sensitivity:</strong> Your holdings are long-duration. If the Fed pauses or reverses, multiple compression is the first casualty.</li>
+<li><strong>Crypto tail risk:</strong> BTC adds meaningful volatility. Historically 3-5x S&P vol — sizing matters.</li>
+</ul>
+<p>I'd suggest looking at adding 1-2 defensive or uncorrelated names — healthcare, energy, or gold — to reduce the single-factor exposure.</p>` },
+      { role: 'user', text: 'Any specific names you would look at for the defensive angle?', date: null },
+      { role: 'warren', html: `<p>A few directions worth researching:</p>
+<ul>
+<li><strong>Healthcare:</strong> UNH or LLY — both have earnings visibility and low tech correlation</li>
+<li><strong>Energy:</strong> XOM for oil exposure with a strong balance sheet; FANG if you want a leaner E&P play</li>
+<li><strong>Gold proxy:</strong> GLD ETF is the simplest; Agnico Eagle (AEM) if you want a miner with low geopolitical risk</li>
+</ul>
+<p>I'm not recommending these — just illustrating the basket. Worth doing your own research on each before adding.</p>` },
+    ]
+  },
+  'hist-btc': {
+    topic: 'History · May 14',
+    title: 'Bitcoin halving aftermath',
+    recap: 'We left the cycle question open — ETF demand (IBIT at $20B AUM) may make this cycle more sustained and less volatile than prior retail-driven ones, but there\'s no prior data on a halving with this level of institutional inflow baked in.',
+    messages: [
+      { role: 'user', text: "Halving happened 3 weeks ago. What's the read?", date: 'May 14, 1:45pm' },
+      { role: 'warren', html: `<p>Early days, but the on-chain picture looks healthy:</p>
+<ul>
+<li><strong>Long-term holder supply:</strong> Hit an all-time high — hodlers aren't distributing</li>
+<li><strong>Miner capitulation:</strong> Hash rate dipped ~8% as less efficient miners turned off, recovered in 3 weeks — normal cycle behaviour</li>
+<li><strong>ETF inflows:</strong> BlackRock IBIT crossed $20B AUM — institutional demand is absorbing the narrative</li>
+</ul>
+<p>Historically the price reaction to halvings peaks 12-18 months after. We're very early in that window.</p>` },
+      { role: 'user', text: 'Does the ETF dynamic change how the cycle plays out?', date: null },
+      { role: 'warren', html: `<p>Potentially yes — and this is the interesting open question. Prior cycles were retail-driven, which created faster, sharper peaks. ETF demand is stickier (institutional allocation cycles are longer) but also more correlated with broader risk-off events. So the upside might be more sustained and the drawdown less violent. Or it could just extend the cycle timeline. We genuinely don't have prior data on a halving with $20B+ in ETF inflows baked in.</p>` },
+    ]
+  },
+  /* ── compiled topic threads (Topics tab cards) ── */
+  'topic-nvda': {
+    topic: 'NVDA · Instrument',
+    title: 'NVIDIA Corp — All Mentions',
+    recap: 'Last time: weighing the export control risk on H20 — real but manageable if holding 2+ years, given domestic and sovereign AI demand absorbing the gap.',
+    ctaPrompt: 'NVDA is up 2.1% pre-market tonight — what should I be thinking about going into earnings?',
+    messages: [
+      { role: 'user', text: 'Walk me through the NVDA earnings setup for tonight.', date: 'Today, 9:14am' },
+      { role: 'warren', html: `<p>Here's the setup:</p><ul><li><strong>Consensus EPS:</strong> $5.78 (+200% YoY)</li><li><strong>Data center revenue</strong> expected ~$24B — the number that matters most</li><li><strong>Blackwell ramp:</strong> if it's ahead of schedule, that's the beat signal</li><li><strong>Options implied move:</strong> ±9% post-print</li></ul><p>Bullish-skewed setup — an inline print likely gets bought. H200 supply guidance is the only bear trigger.</p>` },
+      { role: 'user', text: "What about inference efficiency — isn't that a demand headwind?", date: null },
+      { role: 'warren', html: `<p>That's the most legitimate bear case. DeepSeek showed GPT-4 level output at a fraction of the compute cost. But historically, efficiency gains in compute have <em>expanded</em> usage rather than contracting it — Jevons paradox. Cheaper inference → more apps → aggregate GPU demand goes up. It could compress the <em>rate</em> of growth, not the direction.</p>` },
+      { role: 'user', text: 'Heard TSMC has packaging constraints affecting H200 supply.', date: 'Mon, 11:02am' },
+      { role: 'warren', html: `<p>Yes — TSMC's CoWoS advanced packaging is the bottleneck, not the chip fab itself. NVDA reportedly turned away orders in Q4 due to packaging, not silicon yield. TSMC said CoWoS capacity doubles by end of 2024 — but that timeline has slipped before.</p><p>From an investment lens, supply constraints are actually <em>bullish</em> for NVDA near-term: pricing power and backlog visibility. The risk flips in late 2025/2026 if capacity comes online faster than demand scales.</p>` },
+      { role: 'user', text: 'Should I be trimming on the export control risk?', date: null },
+      { role: 'warren', html: `<p>Depends on time horizon. H20 restriction risk is real but would likely be a sell-the-news event rather than a structural problem — domestic and sovereign AI demand is large enough to absorb it. If holding 2+ years, no need to trim on that alone. If you're sitting on large gains and looking for a reason to reduce, it's a reasonable justification.</p>` },
+    ]
+  },
+  'topic-tsla': {
+    topic: 'TSLA · Instrument',
+    title: 'Tesla Inc — All Mentions',
+    recap: 'Last time: BYD\'s advantage is structural in China but tariffs protect Tesla in the US and Europe for now — BYD\'s Hungary factory is the 2025 wildcard to watch.',
+    ctaPrompt: 'Catch me up on Tesla — deliveries beat but margins are under pressure. Where does my thesis stand?',
+    messages: [
+      { role: 'user', text: 'Tesla beat Q2 deliveries. Good news?', date: 'Yesterday, 9:02am' },
+      { role: 'warren', html: `<p>Yes, but with nuance. 444k deliveries vs 436k expected is a solid beat, but China mix matters more than the headline.</p><ul><li>China deliveries ~180k — up 14% QoQ, recovering from Q1 dip</li><li>Model Y the driver — Shanghai at ~95% utilisation</li><li><strong>Margin concern:</strong> Tesla cut prices again in China in May to compete with BYD</li></ul><p>The question for earnings: does volume beat compensate for margin compression?</p>` },
+      { role: 'user', text: 'Is the BYD price war sustainable for Tesla?', date: null },
+      { role: 'warren', html: `<p>Probably not at current pace. BYD's cost structure in China is structurally lower — vertically integrated from battery cells to final assembly. Tesla is competing on brand and software, but that premium is eroding specifically in China. The bull case: global demand (US + Europe) stays strong enough to hold the overall thesis.</p>` },
+      { role: 'user', text: 'Is the BYD threat structural or will it pass?', date: 'Jun 2, 3:11pm' },
+      { role: 'warren', html: `<p>Structural in China, cyclical globally. BYD faces 100% US tariffs and 17-45% EU tariffs — price advantage disappears outside China. Tesla's moat in those markets remains intact for now. Long-term wild card: BYD's Hungary factory could change the EU calculus by 2025.</p>` },
+    ]
+  },
+  'topic-ai-infra': {
+    topic: 'AI Infrastructure · Theme',
+    title: 'AI Infrastructure — Compiled Thread',
+    recap: 'Last time: all three hyperscalers raising capex (MSFT $60B+, Google $12B/qtr, Meta $35-40B) — overbuild risk is lower than prior cycles since AI compute generates immediate ROI signals.',
+    ctaPrompt: 'Bring me up to date on the AI infrastructure thesis — any new capex signals or risk flags?',
+    messages: [
+      { role: 'user', text: "Will NVDA demand hold through 2025? I'm seeing analyst notes saying capex may peak.", date: 'Today, 9:14am' },
+      { role: 'warren', html: `<p>The concern is real but I think premature. Three reasons demand holds:</p><ul><li><strong>Backlog visibility:</strong> ~$11B in disclosed forward commitments</li><li><strong>New entrants:</strong> Sovereign AI (UAE, Japan, France) just starting build-outs</li><li><strong>CUDA moat:</strong> switching cost to AMD/Intel remains painful even if price-per-FLOP improves</li></ul>` },
+      { role: 'user', text: "Who's actually winning the cloud AI race — Azure, AWS, or Google?", date: 'May 31, 2:45pm' },
+      { role: 'warren', html: `<p>Current standings:</p><ul><li><strong>Azure (MSFT):</strong> Re-accelerated to 31% growth on OpenAI integration. Winning on software + infra bundle. Strongest enterprise AI pipeline.</li><li><strong>AWS (AMZN):</strong> Still market share leader overall, slower AI-specific growth. Betting on Bedrock + Trainium chips.</li><li><strong>Google Cloud (GOOGL):</strong> Best underlying models (Gemini), slowest enterprise sales motion. TPU advantage real but hard to monetise quickly.</li></ul><p>For your thesis: Azure's re-acceleration is the clearest signal that enterprise AI is real, not hype spending.</p>` },
+      { role: 'user', text: 'Microsoft, Google, Meta all raising capex guidance. Does this change anything?', date: null },
+      { role: 'warren', html: `<p>It reinforces it — MSFT $60B+ capex FY25, Google $12B/quarter, Meta $35-40B capex guided. These commitments lock in demand well into 2025. Hard to build a bear case when customers are publicly committing at this level. The overbuild risk requires a failure of the underlying AI product market, not just capital misallocation.</p>` },
+    ]
+  },
+  'topic-fed-rates': {
+    topic: 'Fed Policy & Rates · Theme',
+    title: 'Fed Policy & Rates — Compiled Thread',
+    recap: 'Last time: market pricing 3 more cuts — could add 15-20% to forward multiples if it holds. No more hikes expected but cuts are 2-3 meetings away, not imminent.',
+    ctaPrompt: "The Fed cut 25bps today. How should I be thinking about the rate path from here?",
+    messages: [
+      { role: 'user', text: 'Fed just cut 25bps. What does that mean for my tech holdings?', date: 'Today, 8:31am' },
+      { role: 'warren', html: `<p>A 25bp cut is directionally positive for growth/tech:</p><ul><li><strong>Lower discount rate</strong> → higher PV of future earnings → expands P/E multiples on high-growth names</li><li><strong>Risk-on sentiment</strong> → rotation from cash/bonds back into equities</li></ul><p>In practice: a single 25bp cut usually means 1-2% multiple expansion on high-duration tech. The bigger signal is whether this starts a cutting cycle — market is pricing ~3 more. If that holds, could be 15-20% on forward multiples from here.</p>` },
+      { role: 'user', text: 'CPI came in at 3.4% — lower than expected. Are we done hiking?', date: 'May 28, 10:15am' },
+      { role: 'warren', html: `<p>3.4% is progress but the Fed typically wants sustained prints below 3% before declaring victory.</p><ul><li>Shelter inflation remains sticky at 5.5% — lags real-world rent data by ~12 months, should continue falling</li><li>Core services ex-shelter (the Fed's preferred signal) at 3.2% — still above target but trending right</li></ul><p>Most likely outcome: no more hikes. Cuts are probably 2-3 meetings away, not imminent.</p>` },
+    ]
+  },
+  'topic-ev-sector': {
+    topic: 'EV Sector · Theme',
+    title: 'EV Sector — Compiled Thread',
+    recap: 'Last time: shakeout is playing out — BYD consolidating China, Tesla holding US/Europe. Supply chain plays (ALB, CHPT) came up as potentially more compelling than OEM given the margin environment.',
+    ctaPrompt: 'Tesla beat deliveries but the margin story is complicated. Where does the EV shakeout thesis stand?',
+    messages: [
+      { role: 'user', text: 'Tesla beat Q2 deliveries. Is the EV thesis playing out?', date: 'Yesterday, 9:02am' },
+      { role: 'warren', html: `<p>The shakeout is playing out, but the winners are clearer than the investors: BYD is consolidating China, Tesla is holding US and Europe. The margin compression from the price war is the unresolved tension in the thesis.</p>` },
+      { role: 'user', text: 'Is the BYD threat structural or cyclical for Tesla?', date: 'Jun 2, 3:11pm' },
+      { role: 'warren', html: `<p>Structural in China, cyclical globally. BYD faces 100% US and 17-45% EU tariffs — price advantage disappears. Tesla's moat intact in those markets. Long-term: BYD Hungary factory (opening ~2025) could crack the EU calculus.</p><p>Supply chain angle (batteries, charging infra) looking more compelling than OEM plays given the margin environment. ALB, CHPT worth monitoring — CHPT is distressed but at pricing that might reflect the risk.</p>` },
+    ]
+  },
+  'topic-crypto-all': {
+    topic: 'Crypto · Theme',
+    title: 'Crypto — Compiled Thread',
+    recap: 'Last time: BTC on-chain constructive post-halving, ETH staking framed as equity exposure not a bond substitute — hold it for ETH exposure, the 4% yield is a bonus.',
+    ctaPrompt: "It's been about 55 days post-halving. Where are we in the cycle and what should I be watching?",
+    messages: [
+      { role: 'user', text: "It's been 6 weeks since the halving. What do the on-chain metrics look like?", date: 'May 14, 1:45pm' },
+      { role: 'warren', html: `<p>On-chain picture is constructive:</p><ul><li><strong>Long-term holder supply:</strong> All-time high at 14.9M BTC — hodlers not selling into strength</li><li><strong>Exchange outflows:</strong> Sustained net outflows — accumulation signal</li><li><strong>ETF flows:</strong> BlackRock IBIT crossing $20B AUM in 4 months is remarkable</li></ul><p>Historically price reaction to halvings peaks 12-18 months after. We're early in that window.</p>` },
+      { role: 'user', text: 'ETH staking is yielding about 4%. How should I think about that vs bonds?', date: 'May 10, 4:20pm' },
+      { role: 'warren', html: `<p>Important framing shift: ETH staking is <em>not</em> a bond substitute. It's crypto equity exposure with a yield component. The right comparison is dividend yield on a growth stock.</p><ul><li>Treasury wins on yield with zero vol — if ETH is flat, bonds win</li><li>If ETH appreciates 20%, staking wins handily on total return</li></ul><p>Hold it because you want ETH exposure. The 4% yield is a bonus, not the primary case.</p>` },
+    ]
+  },
+
+  'crypto-2': {
+    topic: 'Crypto',
+    title: 'ETH staking yield vs traditional fixed income — how to think about it',
+    recap: 'We landed on ETH staking being equity exposure with a yield component, not a bond substitute — the right comparison is dividend yield on a growth stock.',
+    ctaPrompt: 'Can we revisit how to think about ETH staking yield relative to traditional fixed income?',
+    messages: [
+      { role: 'user', text: 'ETH staking is yielding about 4%. How should I think about that vs bonds?', date: 'May 10, 4:20pm' },
+      { role: 'warren', html: `<p>Interesting comparison. The 4% ETH staking yield vs ~5% 10Y Treasury:</p>
+<ul>
+<li><strong>On paper:</strong> Treasury wins on yield with zero volatility. ETH is yielding less for much more risk.</li>
+<li><strong>The nuance:</strong> ETH stakers also benefit from any ETH price appreciation — so the "total return" view is very different from yield alone. If ETH is flat, bonds win. If ETH appreciates 20%, staking wins handily.</li>
+<li><strong>Structural comparison:</strong> ETH yield comes from network fee revenue — it's more like equity dividend than bond coupon. The right comparison is dividend yield on a growth stock, not a fixed income instrument.</li>
+</ul>` },
+      { role: 'user', text: 'So it\'s really an equity-like return, not a bond substitute?', date: null },
+      { role: 'warren', html: `<p>Exactly. ETH staking is crypto equity exposure with a yield component — not a bond substitute. If you're holding ETH for 4% yield while ignoring price risk, you're taking the wrong risk for the wrong reason. Hold it because you want ETH exposure; the yield is a bonus, not the primary case.</p>` },
+    ]
+  },
+};
+
+let currentThreadId = null;
+let activeThreadContext = null; // thread ID currently linked to chat
+
+/* ─── CONTEXT BANNER ─── */
+function showContextBanner(threadId) {
+  activeThreadContext = threadId;
+}
+
+function clearThreadContext() {
+  activeThreadContext = null;
+}
+
+/* ─── MARK THREAD UPDATED ─── */
+function markThreadUpdated(threadId) {
+  // Mark the topic thread item
+  const topicItem = document.querySelector(`.topic-thread-item[data-tid="${threadId}"]`);
+  if (topicItem) {
+    topicItem.classList.add('has-new');
+    topicItem.querySelector('.thread-updated').classList.add('visible');
+  }
+  // Mark the history item
+  const histItem = document.querySelector(`.history-item[data-tid="${threadId}"]`);
+  if (histItem) {
+    histItem.classList.add('has-new');
+    histItem.querySelector('.thread-updated').classList.add('visible');
+  }
+}
+
+function openTopicDetail(threadId) {
+  const data = TOPIC_THREADS[threadId];
+  if (!data) return;
+  currentThreadId = threadId;
+
+  // Reset CTA in case it was overwritten by openThesisStateOfPlay
+  const ctaBtn = document.getElementById('tdCtaBtn');
+  ctaBtn.onclick = continueThreadInChat;
+  ctaBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Continue this thread`;
+  document.querySelector('.topic-detail-cta-sub').textContent = 'Opens in Chat with full context loaded';
+
+  document.getElementById('tdTopicLabel').textContent = data.topic;
+  document.getElementById('tdTitle').textContent = data.title;
+
+  const scroll = document.getElementById('tdScroll');
+  scroll.innerHTML = '';
+
+  data.messages.forEach((msg, i) => {
+    if (msg.date) {
+      const chip = document.createElement('div');
+      chip.className = 'td-date-chip';
+      chip.innerHTML = `<span>${msg.date}</span>`;
+      scroll.appendChild(chip);
+    }
+    const row = document.createElement('div');
+    if (msg.role === 'user') {
+      row.className = 'td-msg-row td-msg-user';
+      row.innerHTML = `<div class="td-bubble-user">${msg.text}</div>`;
+    } else {
+      row.className = 'td-msg-row td-msg-warren';
+      row.innerHTML = `
+        <div class="td-avatar">
+          <svg width="10" height="9" viewBox="0 0 34 28" fill="none">
+            <path d="M13 1 C13 1 14.2 8.5 18.5 13 C14.2 17.5 13 25 13 25 C13 25 11.8 17.5 7.5 13 C11.8 8.5 13 1 13 1Z" fill="white"/>
+            <path d="M1 13 C1 13 8.5 14.2 13 18.5 C17.5 14.2 25 13 25 13 C25 13 17.5 11.8 13 7.5 C8.5 11.8 1 13 1 13Z" fill="white"/>
+          </svg>
+        </div>
+        <div class="td-bubble-warren">${msg.html}</div>`;
+    }
+    scroll.appendChild(row);
+  });
+
+  document.getElementById('topicDetail').classList.add('open');
+}
+
+function closeTopicDetail() {
+  document.getElementById('topicDetail').classList.remove('open');
+  currentThreadId = null;
+}
+
+const THREAD_STARTERS = {
+  'ai-1': [
+    'Any new signals on hyperscaler capex since we last spoke?',
+    'How does the DeepSeek efficiency story affect demand outlook?',
+    'Is NVDA still the best way to play this, or are there better entries?',
+  ],
+  'ai-2': [
+    'Has the TSMC packaging situation improved at all?',
+    'Does the H200 supply risk change my NVDA position sizing?',
+    'When does the CoWoS capacity bottleneck actually resolve?',
+  ],
+  'ai-3': [
+    'Who\'s pulling further ahead — Azure, AWS, or Google?',
+    'Does Azure\'s re-acceleration make MSFT a better AI play than NVDA?',
+    'What\'s the weakest link in this race right now?',
+  ],
+  'fed-1': [
+    'Has the market\'s read on future cuts shifted since we spoke?',
+    'How does the cut affect my bond vs equity allocation?',
+    'Is there a risk the Fed reverses course before year-end?',
+  ],
+  'fed-2': [
+    'Where does CPI stand now — still trending down?',
+    'What\'s the next inflation print to watch?',
+    'How are rate expectations priced in right now?',
+  ],
+  'ev-1': [
+    'What\'s the latest on Tesla margins post delivery beat?',
+    'Is China still a headwind or has it stabilised?',
+    'Should I be reducing TSLA exposure given the margin pressure?',
+  ],
+  'ev-2': [
+    'Has the BYD threat materialised further in Europe?',
+    'Is the Hungary factory news a real risk to Tesla\'s EU moat?',
+    'What\'s the bull case for Tesla from here?',
+  ],
+  'crypto-1': [
+    'Where are we in the halving cycle now?',
+    'Have on-chain metrics shifted since we last looked?',
+    'Is there a macro event that could derail the cycle?',
+  ],
+  'crypto-2': [
+    'How does ETH staking yield look now vs Treasuries?',
+    'Has anything changed in the ETH investment case?',
+    'What would make you more or less bullish on ETH from here?',
+  ],
+  'hist-fed': [
+    'Has the rate cut outlook shifted since we spoke?',
+    'How should I be positioning around the next Fed meeting?',
+    'Is there a scenario where they reverse course this year?',
+  ],
+  'hist-tsla': [
+    'Any update on Tesla margins since the delivery numbers?',
+    'Has the BYD situation in Europe changed?',
+    'Should I be adjusting my TSLA position size?',
+  ],
+  'hist-semis': [
+    'Any new export control news since we spoke?',
+    'Has the TSMC packaging bottleneck improved?',
+    'Which semi names look most insulated from the supply risks?',
+  ],
+  'hist-aiinfra': [
+    'Has any hyperscaler pulled back on their capex guidance?',
+    'Is the overbuild risk starting to show up anywhere?',
+    'Which name in the AI infra stack looks best positioned right now?',
+  ],
+  'hist-risk': [
+    'Has my concentration risk changed since we last looked?',
+    'Should I still be adding a defensive hedge?',
+    'What does my risk profile look like into year-end?',
+  ],
+  'hist-btc': [
+    'Where are we in the halving cycle now?',
+    'Have the ETF flows continued to hold up?',
+    'Is there a macro event that could break the cycle thesis?',
+  ],
+};
+
+function continueThreadInChat() {
+  if (!currentThreadId) return;
+  const data = TOPIC_THREADS[currentThreadId];
+  const starters = THREAD_STARTERS[currentThreadId] || [];
+  const tid = currentThreadId;
+  closeTopicDetail();
+  switchTab('chat');
+  showContextBanner(tid);
+  setTimeout(() => {
+    // inject thread divider into message stream
+    const msgs = document.getElementById('chatMessages');
+    const divider = document.createElement('div');
+    divider.className = 'thread-divider';
+    divider.innerHTML = `<span class="thread-divider-label">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
+      ${data.title}
+    </span>`;
+    msgs.appendChild(divider);
+
+    const pillsHtml = starters.map(s =>
+      `<button class="suggestion-pill" onclick="sendSuggestion(this)">${s}</button>`
+    ).join('');
+    const recapLine = data.recap
+      ? `<p style="color:var(--text-muted); font-size:12px; margin-bottom:10px;">${data.recap}</p>`
+      : '';
+    appendWarrenMsg(
+      recapLine +
+      `<p>Where would you like to take it from here?</p>` +
+      `<div class="suggestions" style="margin-top:10px">${pillsHtml}</div>`
+    );
+  }, 320);
+}
+
+/* ─── THESIS → CHAT ─── */
+const THESIS_STARTERS = {
+  'AI Infrastructure Supercycle': [
+    'Any new developments I should know about?',
+    'How does tonight\'s NVDA earnings change the picture?',
+    'Where are the biggest risks to this thesis right now?',
+  ],
+  'EV Shakeout': [
+    'How is the margin story evolving for Tesla?',
+    'Is there a better way to play this than TSLA directly?',
+    'How has BYD\'s position changed recently?',
+  ],
+  'Bitcoin Halving Cycle': [
+    'Where are we in the cycle now?',
+    'How are the on-chain metrics looking?',
+    'What would change my mind on this thesis?',
+  ],
+};
+
+function openThesisChat(thesisName) {
+  switchTab('chat');
+  setTimeout(() => {
+    const msgs = document.getElementById('chatMessages');
+    const divider = document.createElement('div');
+    divider.className = 'thread-divider';
+    divider.innerHTML = `<span class="thread-divider-label">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      ${thesisName} thesis
+    </span>`;
+    msgs.appendChild(divider);
+
+    const starters = THESIS_STARTERS[thesisName] || [];
+    const pillsHtml = starters.map(s =>
+      `<button class="suggestion-pill" onclick="sendSuggestion(this)">${s}</button>`
+    ).join('');
+    appendWarrenMsg(
+      `<p>Your <strong>${thesisName}</strong> thesis is loaded — what would you like to dig into?</p>` +
+      `<div class="suggestions" style="margin-top:10px">${pillsHtml}</div>`
+    );
+  }, 300);
+}
+
+/* ─── NEW CHAT ─── */
+function newChat() {
+  switchTab('chat');
+  const msgs = document.getElementById('chatMessages');
+  msgs.innerHTML = `
+    <div class="day-divider"><span class="day-divider-label">Today</span></div>
+    <div class="msg-row msg-warren">
+      <div class="msg-avatar">
+        <svg width="12" height="10" viewBox="0 0 34 28" fill="none">
+          <path d="M13 1 C13 1 14.2 8.5 18.5 13 C14.2 17.5 13 25 13 25 C13 25 11.8 17.5 7.5 13 C11.8 8.5 13 1 13 1Z" fill="white"/>
+          <path d="M1 13 C1 13 8.5 14.2 13 18.5 C17.5 14.2 25 13 25 13 C25 13 17.5 11.8 13 7.5 C8.5 11.8 1 13 1 13Z" fill="white"/>
+        </svg>
+      </div>
+      <div class="bubble-warren">
+        <p>Good morning. Markets are mixed — NVDA is up 2.1% pre-market ahead of tonight's earnings. Anything you'd like to dig into?</p>
+        <div class="suggestions" id="chatSuggestions">
+          <button class="suggestion-pill" onclick="sendSuggestion(this)">Walk me through the NVDA earnings setup</button>
+          <button class="suggestion-pill" onclick="sendSuggestion(this)">Any macro risks I should be aware of today?</button>
+          <button class="suggestion-pill" onclick="sendSuggestion(this)">Update me on my AI infrastructure thesis</button>
+        </div>
+      </div>
+    </div>`;
+  activeThreadContext = null;
+  document.getElementById('chatInput').value = '';
+  updateSend();
+}
+
+/* ─── FOLDER TOGGLE ─── */
+function toggleFolder(id) {
+  const contents = document.getElementById(id);
+  const chevId = id.replace('folder-', 'fchev-');
+  const chev = document.getElementById(chevId);
+  if (!contents) return;
+  contents.classList.toggle('open');
+  if (chev) chev.classList.toggle('open');
+}
+
+/* ─── TEMPLATE LOAD ─── */
+function loadTemplate(name, starter) {
+  switchTab('chat');
+  setTimeout(() => {
+    const msgs = document.getElementById('chatMessages');
+    const divider = document.createElement('div');
+    divider.className = 'thread-divider';
+    divider.innerHTML = `<span class="thread-divider-label">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      ${name}
+    </span>`;
+    msgs.appendChild(divider);
+    appendWarrenMsg(`<p>Ready to run the <strong>${name}</strong> template. ${starter}... which stock or sector would you like to focus on?</p>`);
+    document.getElementById('chatInput').focus();
+  }, 280);
+}
+
+/* ─── INSIGHT / THESIS stubs (data kept for thread continuity, panels removed) ─── */
+const INSIGHT_DATA = {
+  'ins-1': {
+    type: 'Earnings Alert', typeColor: '#30D158',
+    headline: 'NVDA beats on data center — revenue +22% vs consensus',
+    tag: 'NVDA', tagColor: 'rgba(48,209,88,0.15)', tagBorder: 'rgba(48,209,88,0.3)',
+    time: '2 hours ago', unread: true,
+    body: `NVDA reported after hours: EPS $6.12 vs $5.78 consensus (+6% beat). Data center revenue came in at $22.6B vs $21.1B estimated — the key line item for your AI Infrastructure thesis.
+
+Blackwell ramp is ahead of internal schedule, with CEO Jensen Huang flagging "insane demand" for the GB200 platform. The implied move was ±9% — stock was up 7.2% in after-hours trading.
+
+Guidance was raised meaningfully: next quarter data center revenue guided to $24–25B, well above the $23.2B consensus. This is a clear thesis confirmation.`,
+    chatHook: 'NVDA just beat — data center +22%, Blackwell ahead of schedule. Your AI Infrastructure thesis is getting confirmation in real-time.',
+    chatStarters: ['How does this change my NVDA price target?', 'Is the after-hours reaction overdone?', 'Does this signal a buy for AMD or TSMC too?'],
+  },
+  'ins-2': {
+    type: 'Thesis Signal', typeColor: '#0A84FF',
+    headline: 'BTC on-chain: new confirming signal for halving thesis',
+    tag: 'BTC thesis', tagColor: 'rgba(10,132,255,0.15)', tagBorder: 'rgba(10,132,255,0.3)',
+    time: '5 hours ago', unread: true,
+    body: `A new confirming signal for your Bitcoin Halving Cycle thesis.
+
+Long-term holder (LTH) supply — coins held 155+ days — has reached 14.2M BTC, near an all-time high. Historically, elevated LTH accumulation in the 6–12 months post-halving has preceded major price moves.
+
+On-chain data also shows exchange reserves declining — coins moving off exchanges, reducing available sell pressure. Combined with the ETF flow data we've been tracking, this aligns with the mid-cycle accumulation phase of past halving cycles.`,
+    chatHook: 'A new on-chain signal confirms your Bitcoin halving cycle thesis — long-term holders accumulating at near all-time highs.',
+    chatStarters: ['How does this compare to past halving cycles?', 'Is this a signal to add, or wait for a pullback?', 'What would invalidate this signal?'],
+  },
+  'ins-3': {
+    type: 'Macro Alert', typeColor: '#FF9F0A',
+    headline: 'Fed minutes more hawkish than expected — rate path shifts',
+    tag: 'Macro', tagColor: 'rgba(255,159,10,0.15)', tagBorder: 'rgba(255,159,10,0.3)',
+    time: '7 hours ago', unread: true,
+    body: `The FOMC meeting minutes released today were more hawkish than markets expected.
+
+Key language shift: "limited progress toward the 2% objective" — a clear step back from the dovish pivot narrative. Several members flagged that the policy rate may need to stay elevated "for longer than previously anticipated."
+
+Rate futures repriced from 2 cuts in 2025 to 1 cut. The 10-year yield rose 12bps on the day. This is a direct headwind to your AI Infrastructure thesis, which assumed falling rates would support multiple expansion in tech.`,
+    chatHook: 'Fed minutes were more hawkish than expected — futures repriced from 2 cuts to 1 in 2025. This is a headwind to your AI thesis via multiple compression.',
+    chatStarters: ['How should I adjust my AI thesis for higher-for-longer?', 'Is this a serious risk or temporary noise?', 'Which of my holdings is most rate-sensitive?'],
+  },
+  'ins-4': {
+    type: 'Earnings Alert', typeColor: '#30D158',
+    headline: 'Tesla Q2 deliveries beat — 422K vs 410K estimate',
+    tag: 'TSLA', tagColor: 'rgba(48,209,88,0.15)', tagBorder: 'rgba(48,209,88,0.3)',
+    time: 'Yesterday', unread: false,
+    body: `Tesla delivered 422,000 vehicles in Q2, beating the 410,000 consensus by 3%. This is the first delivery beat in three consecutive quarters.
+
+The recovery was driven primarily by China, where Model Y maintained market share despite BYD competition. Energy storage (Megapack) had a record quarter, partially offsetting auto margin pressure.
+
+Automotive margins remain the key watch item for the actual Q2 earnings call — delivery beats don't guarantee margin recovery, and that's where the real debate is.`,
+    chatHook: 'TSLA beat deliveries for the first time in 3 quarters — 422K vs 410K, driven by China recovery.',
+    chatStarters: ['Does this change the EV Shakeout thesis at all?', 'Should I read more into the China recovery?', 'What are margins likely to look like this quarter?'],
+  },
+  'ins-5': {
+    type: 'Macro Alert', typeColor: '#FF9F0A',
+    headline: 'CPI: 3.2% — below 3.4% estimate, core also softer',
+    tag: 'Macro', tagColor: 'rgba(255,159,10,0.15)', tagBorder: 'rgba(255,159,10,0.3)',
+    time: 'Jun 12', unread: false,
+    body: `June CPI came in at 3.2% year-over-year, below the 3.4% estimate — the first CPI print to come in at or below consensus in four months.
+
+Core CPI (ex food and energy) was 3.1% vs 3.3% estimated. Housing/shelter — the stickiest component — showed a modest decline for the first time in 11 months.
+
+Markets rallied 1.2% on the data. Rate cut expectations shifted toward 2 cuts in 2025. The subsequent hawkish minutes today have reversed some of that move — a sign of how fragile the disinflation narrative remains.`,
+    chatHook: 'June CPI came in at 3.2% vs 3.4% expected — the first below-consensus print in 4 months. Markets rallied 1.2%.',
+    chatStarters: ['How does CPI interact with today\'s hawkish minutes?', 'Is inflation still the main risk to watch?', 'What\'s the next key macro print?'],
+  },
+};
+
+let currentInsightId = null;
+let insightUnreadCount = 3;
+
+function openInsightDetail(id) {
+  const data = INSIGHT_DATA[id];
+  if (!data) return;
+  currentInsightId = id;
+
+  document.getElementById('idTypeLabel').textContent = data.type;
+  document.getElementById('idTypeLabel').style.color = 'var(--text-muted)';
+  document.getElementById('idTitle').textContent = data.headline;
+  document.getElementById('idHeadline').textContent = data.headline;
+  document.getElementById('idBody').textContent = data.body;
+  document.getElementById('idTime').textContent = data.time;
+
+  const tagEl = document.getElementById('idTag');
+  tagEl.textContent = data.tag;
+  tagEl.style.color = 'var(--text-muted)';
+  tagEl.style.background = 'var(--bg-card)';
+  tagEl.style.borderColor = 'var(--border)';
+
+  // Mark as read
+  if (data.unread) {
+    data.unread = false;
+    const dot = document.getElementById('idot-' + id);
+    if (dot) dot.style.display = 'none';
+    const card = document.getElementById('icard-' + id);
+    if (card) card.classList.add('read');
+    insightUnreadCount = Math.max(0, insightUnreadCount - 1);
+    const badge = document.getElementById('insights-badge');
+    if (badge) {
+      if (insightUnreadCount === 0) {
+        badge.style.display = 'none';
+      } else {
+        badge.textContent = insightUnreadCount;
+      }
+    }
+  }
+
+  document.getElementById('insightDetail').classList.add('open');
+}
+
+function closeInsightDetail() {
+  document.getElementById('insightDetail').classList.remove('open');
+  currentInsightId = null;
+}
+
+function dismissInsight(e, id) {
+  e.stopPropagation();
+  const data = INSIGHT_DATA[id];
+  if (data && data.unread) {
+    data.unread = false;
+    insightUnreadCount = Math.max(0, insightUnreadCount - 1);
+    const dot = document.getElementById('idot-' + id);
+    if (dot) dot.style.display = 'none';
+    const badge = document.getElementById('insights-badge');
+    if (badge) {
+      if (insightUnreadCount === 0) badge.style.display = 'none';
+      else badge.textContent = insightUnreadCount;
+    }
+  }
+  const card = document.getElementById('icard-' + id);
+  if (card) {
+    card.style.transition = 'opacity 0.2s ease, max-height 0.25s ease';
+    card.style.overflow = 'hidden';
+    card.style.maxHeight = card.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      card.style.opacity = '0';
+      card.style.maxHeight = '0';
+      card.style.padding = '0';
+    });
+    setTimeout(() => card.remove(), 260);
+  }
+}
+
+function continueInsightInChat() {
+  if (!currentInsightId) return;
+  const data = INSIGHT_DATA[currentInsightId];
+  closeInsightDetail();
+  switchTab('chat');
+  setTimeout(() => {
+    const msgs = document.getElementById('chatMessages');
+    const divider = document.createElement('div');
+    divider.className = 'thread-divider';
+    divider.innerHTML = `<span class="thread-divider-label">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      ${data.type}: ${data.tag}
+    </span>`;
+    msgs.appendChild(divider);
+
+    const pillsHtml = data.chatStarters.map(s =>
+      `<button class="suggestion-pill" onclick="sendSuggestion(this)">${s}</button>`
+    ).join('');
+    appendWarrenMsg(
+      `<p style="color:var(--text-muted); font-size:12px; margin-bottom:10px;">I flagged this ${data.time}.</p>` +
+      `<p>${data.chatHook} Want to dig in?</p>` +
+      `<div class="suggestions" style="margin-top:10px">${pillsHtml}</div>`
+    );
+  }, 320);
+}
+
+/* ─── THESIS STATE OF PLAY ─── */
+const THESIS_STATE_DATA = {
+  'ai': {
+    name: 'AI Infrastructure Supercycle',
+    status: 'bullish',
+    statusLabel: '↑ High conviction',
+    currentState: 'Thesis intact and gaining confirmation. NVDA trades at 35x forward vs your 22x entry — thesis has performed but valuation has stretched. Key remaining risk is inference efficiency reducing per-task GPU demand; Jevons paradox likely absorbs it but worth watching closely.',
+    milestones: [
+      { date: 'Apr 12', label: 'Thesis formed', note: 'Hyperscaler capex guidance accelerating across MSFT, GOOGL, Meta. Initial thesis: multi-year GPU supercycle driven by enterprise AI ROI crossing a deployment threshold.' },
+      { date: 'May 31', label: 'Thesis confirmed', note: 'All three major hyperscalers raised capex guidance. Azure re-accelerated to 31% growth. Conviction increased — hard to build a bear case when customers are publicly committing at this level.' },
+      { date: 'Jun 2', label: 'Supply risk flagged', note: 'TSMC CoWoS advanced packaging constraints could affect H200 ramp. Supply problem, not demand problem — actually bullish near-term for NVDA pricing power.' },
+      { date: 'Today', label: 'NVDA earnings tonight', note: 'Consensus $5.78 EPS. Data center revenue guidance is the key signal. Blackwell ramp pace is the beat/miss driver. Implied move ±9%.' },
+    ],
+    signals: [
+      { type: 'confirms', text: 'Hyperscaler capex rising across MSFT, GOOGL, Meta — all raised guidance' },
+      { type: 'confirms', text: 'Sovereign AI build-outs (UAE, Japan, France) adding demand not in original forecast' },
+      { type: 'confirms', text: 'CUDA ecosystem lock-in — switching cost to AMD/Intel remains high' },
+      { type: 'challenges', text: 'Inference efficiency gains (DeepSeek) could reduce GPU-hours per model run' },
+      { type: 'watching', text: 'TSMC packaging bottleneck — late 2025/2026 oversupply risk if capacity comes online faster than demand scales' },
+    ]
+  },
+  'ev': {
+    name: 'EV Shakeout — Survivors Win Big',
+    status: 'cautious',
+    statusLabel: '↔ Medium conviction',
+    currentState: 'Shakeout is playing out as expected, but BYD is the primary beneficiary rather than Tesla. Margin compression from the China price war is the unresolved tension. The supply chain angle — batteries, charging infra — looks increasingly more compelling than pure OEM exposure.',
+    milestones: [
+      { date: 'Mar 3', label: 'Thesis formed', note: 'Consolidation play: weak EV players exit, Tesla and BYD emerge dominant. Secondary bet: EV supply chain over OEMs on margin resilience.' },
+      { date: 'Jun 2', label: 'BYD surges', note: 'BYD crosses 300k monthly deliveries. China price war intensifying — structural cost advantage confirmed. Tesla competing on brand, not cost.' },
+      { date: 'Jun 12', label: 'Tesla beats, caveat', note: 'TSLA Q2 deliveries 444k vs 436k expected. Volume beat but China price cuts pressure gross margin. Key watch: does volume compensate for compression?' },
+      { date: 'Today', label: 'OEM angle reassessing', note: 'Considering rotation from TSLA toward supply chain names. ALB for battery materials; CHPT distressed but possibly at risk-reflective pricing.' },
+    ],
+    signals: [
+      { type: 'confirms', text: 'Weaker EV players exiting — Fisker bankrupt, Rivian cash burn accelerating' },
+      { type: 'confirms', text: 'BYD China dominance reinforcing the consolidation narrative as expected' },
+      { type: 'challenges', text: 'Tesla gross margin trending toward 15% vs 25% thesis assumption — price war eroding' },
+      { type: 'watching', text: 'BYD Hungary factory — could crack EU moat and change the global calculus if operational by 2025' },
+    ]
+  },
+  'btc': {
+    name: 'Bitcoin Halving Cycle Play',
+    status: 'bullish',
+    statusLabel: '↑ Medium-high conviction',
+    currentState: 'Early in the typical 12-18 month post-halving reaction window. ETF institutional inflows are the structural differentiator vs prior cycles — demand is stickier and less retail-driven. Main risk remains a macro-driven risk-off event correlating BTC with equities.',
+    milestones: [
+      { date: 'Feb 18', label: 'Thesis formed', note: 'Post-halving supply shock + ETF institutional demand = demand/supply imbalance thesis. Framed as a 12-18 month play, not a short-term trade.' },
+      { date: 'Apr 19', label: 'Halving confirmed', note: 'Block reward halved from 6.25 to 3.125 BTC. Hash rate dipped 8% as inefficient miners adjusted — recovered in 3 weeks. Normal cycle behaviour, not distress.' },
+      { date: 'May 14', label: 'On-chain check — constructive', note: 'Long-term holder supply at ATH (14.9M BTC). BlackRock IBIT crossed $20B AUM. Exchange outflows sustained — accumulation dynamic intact.' },
+      { date: 'Today', label: '~55 days post-halving', note: 'Price reaction historically peaks 3-6 months in. We remain in the early window. No major thesis-challenging developments.' },
+    ],
+    signals: [
+      { type: 'confirms', text: 'BlackRock IBIT at $20B+ AUM — institutional demand structural, not speculative' },
+      { type: 'confirms', text: 'Long-term holder supply at all-time high — no distribution pressure from HODLers' },
+      { type: 'confirms', text: 'Miner capitulation resolved in 3 weeks — healthy cycle behaviour confirmed' },
+      { type: 'challenges', text: 'Correlation with risk assets remains high — macro risk-off can override the halving cycle thesis' },
+      { type: 'watching', text: 'Regulatory posture — SEC stance and global clarity will shape pace of institutional participation' },
+    ],
+    insights: [],
+    holdings: [
+      { ticker: 'BTC', name: 'Bitcoin', shares: '0.42 BTC', basis: '$48,200 avg', current: '$67,800', pnl: '+$8,232', pnlPct: '+40.7%', positive: true, plan: 'Hold full position through the 12-18mo halving window. Exit scale: 25% at $80k, 25% at $100k, 50% at cycle peak signal.', flag: null }
+    ]
+  }
+};
+
+// Patch ai and ev thesis data with insights and holdings
+THESIS_STATE_DATA['ai'].insights = [
+  { type: 'Earnings Alert', headline: 'NVDA beats on data center — revenue +22% vs consensus', time: '2 hours ago' },
+  { type: 'Macro Signal', headline: 'Jevons paradox paper: inference demand rebounds despite efficiency gains', time: '1 day ago' },
+];
+THESIS_STATE_DATA['ai'].holdings = [
+  { ticker: 'NVDA', name: 'Nvidia', shares: '45 shares', basis: '$495 avg', current: '$875', pnl: '+$17,100', pnlPct: '+76.8%', positive: true, plan: 'Hold through earnings. Trim 20% if data center guidance disappoints.', flag: 'Earnings tonight — data center revenue guidance is the make-or-break number for this position.' },
+  { ticker: 'MSFT', name: 'Microsoft', shares: '12 shares', basis: '$370 avg', current: '$425', pnl: '+$660', pnlPct: '+12.4%', positive: true, plan: 'Core long. Adding on any pullback below $400 — Azure acceleration supports thesis.', flag: null },
+  { ticker: 'GOOGL', name: 'Alphabet', shares: '8 shares', basis: '$155 avg', current: '$178', pnl: '+$184', pnlPct: '+14.8%', positive: true, plan: 'Underweight vs thesis. Watching TPU/Gemini traction before adding.', flag: null },
+];
+THESIS_STATE_DATA['ev'].insights = [
+  { type: 'Risk Flag', headline: 'BYD announces EU factory delay — moat risk reduced short-term', time: '3 days ago' },
+];
+THESIS_STATE_DATA['ev'].holdings = [
+  { ticker: 'TSLA', name: 'Tesla', shares: '20 shares', basis: '$220 avg', current: '$188', pnl: '-$640', pnlPct: '-14.5%', positive: false, plan: 'Hold position pending margin recovery. Stop-loss at $170.', flag: 'Q2 gross margin coming in at 16.4% vs 18% expected — below thesis assumption of 20%+ recovery.' },
+  { ticker: 'ALB', name: 'Albemarle', shares: '15 shares', basis: '$145 avg', current: '$128', pnl: '-$255', pnlPct: '-11.7%', positive: false, plan: 'Battery materials thesis — adding to full position at $120 if lithium prices stabilize.', flag: null },
+];
+
+function openThesisStateOfPlay(thesisId) {
+  const data = THESIS_STATE_DATA[thesisId];
+  if (!data) return;
+
+  document.getElementById('tdTopicLabel').textContent = 'State of Play';
+  document.getElementById('tdTitle').textContent = data.name;
+
+  // Update CTA
+  const ctaBtn = document.getElementById('tdCtaBtn');
+  ctaBtn.onclick = function() {
+    closeTopicDetail();
+    openThesisChat(data.name);
+  };
+  ctaBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Continue in Chat`;
+  document.querySelector('.topic-detail-cta-sub').textContent = 'Pick up the conversation with full context loaded';
+
+  const scroll = document.getElementById('tdScroll');
+  scroll.innerHTML = '';
+
+  // Status badge
+  const statusRow = document.createElement('div');
+  statusRow.className = 'sop-status-row';
+  statusRow.innerHTML = `
+    <span class="sop-status-badge ${data.status}">${data.statusLabel}</span>
+  `;
+  scroll.appendChild(statusRow);
+
+  // Current state
+  const current = document.createElement('p');
+  current.className = 'sop-current-state';
+  current.textContent = data.currentState;
+  scroll.appendChild(current);
+
+  // ── Signals ──
+  const signalsLabel = document.createElement('div');
+  signalsLabel.className = 'sop-section-header';
+  signalsLabel.style.marginTop = '18px';
+  signalsLabel.innerHTML = `<span class="sop-section-header-text">Signals tracked</span>`;
+  scroll.appendChild(signalsLabel);
+
+  const signals = document.createElement('div');
+  signals.className = 'sop-signals';
+  const icons = { confirms: '✓', challenges: '↕', watching: '◎' };
+  data.signals.forEach(s => {
+    const sig = document.createElement('div');
+    sig.className = `sop-signal ${s.type}`;
+    sig.innerHTML = `<span class="sop-signal-icon">${icons[s.type]}</span><span>${s.text}</span>`;
+    signals.appendChild(sig);
+  });
+  scroll.appendChild(signals);
+
+  // ── Section A: New for this thesis ──
+  if (data.insights && data.insights.length > 0) {
+    const insightHeader = document.createElement('div');
+    insightHeader.className = 'sop-section-header';
+    insightHeader.innerHTML = `
+      <span class="sop-section-header-text">New for this thesis</span>
+      <div class="sop-new-dot"></div>`;
+    scroll.appendChild(insightHeader);
+
+    const insightList = document.createElement('div');
+    insightList.className = 'sop-insight-list';
+    const typeClass = { 'Earnings Alert': 'type-earnings', 'Macro Signal': 'type-macro', 'Risk Flag': 'type-risk' };
+    data.insights.forEach(ins => {
+      const card = document.createElement('div');
+      card.className = `sop-insight-card ${typeClass[ins.type] || 'type-default'}`;
+      card.innerHTML = `
+        <div class="sop-insight-body">
+          <div class="sop-insight-type">${ins.type}</div>
+          <div class="sop-insight-headline">${ins.headline}</div>
+          <div class="sop-insight-time">${ins.time}</div>
+        </div>
+        <button class="sop-insight-discuss">Discuss →</button>`;
+      card.querySelector('.sop-insight-discuss').addEventListener('click', () => discussThesisInsight(thesisId, ins.headline));
+      insightList.appendChild(card);
+    });
+    scroll.appendChild(insightList);
+  }
+
+  // ── Section B: Your positions ──
+  if (data.holdings && data.holdings.length > 0) {
+    const posHeader = document.createElement('div');
+    posHeader.className = 'sop-section-header';
+    posHeader.innerHTML = `<span class="sop-section-header-text">Your positions</span>`;
+    scroll.appendChild(posHeader);
+
+    const posList = document.createElement('div');
+    posList.className = 'sop-positions-list';
+    data.holdings.forEach(h => {
+      const row = document.createElement('div');
+      row.className = 'sop-position-row';
+      const flagHtml = h.flag ? `<div class="sop-position-flag"><div class="sop-position-flag-dot"></div>Update</div>` : '';
+      const alertHtml = h.flag ? `
+        <div class="sop-position-alert">
+          ${h.flag}
+          <button class="sop-position-alert-cta">Discuss with Warren →</button>
+        </div>` : '';
+      row.innerHTML = `
+        <div class="sop-position-top">
+          <div class="sop-position-ticker-block">
+            <div class="sop-position-ticker">${h.ticker}</div>
+            <div class="sop-position-name">${h.name}</div>
+          </div>
+          <div class="sop-position-right-block">
+            <div class="sop-position-pnl ${h.positive ? 'pos' : 'neg'}">${h.pnl}</div>
+            <div class="sop-position-pnl-pct ${h.positive ? 'pos' : 'neg'}">${h.pnlPct}</div>
+            ${flagHtml}
+          </div>
+        </div>
+        <div class="sop-position-plan"><span style="color:var(--text-sec);font-weight:600">Plan:</span> ${h.plan}</div>
+        ${alertHtml}`;
+      if (h.flag) {
+        row.querySelector('.sop-position-alert-cta').addEventListener('click', () => discussThesisInsight(thesisId, h.ticker + ' position update'));
+      }
+      posList.appendChild(row);
+    });
+    scroll.appendChild(posList);
+  }
+
+  // ── Timeline (collapsible) ──
+  const timelineToggle = document.createElement('div');
+  timelineToggle.className = 'sop-timeline-toggle';
+  timelineToggle.innerHTML = `
+    <span class="sop-timeline-toggle-chevron" id="tlChevron">▶</span>
+    <span class="sop-timeline-toggle-label">How it evolved</span>`;
+  scroll.appendChild(timelineToggle);
+
+  const timelineBody = document.createElement('div');
+  timelineBody.className = 'sop-timeline-body';
+  timelineBody.id = 'tlBody';
+  const timelineInner = document.createElement('div');
+  timelineInner.className = 'sop-timeline';
+  data.milestones.forEach((m, i) => {
+    const ms = document.createElement('div');
+    ms.className = 'sop-milestone';
+    ms.innerHTML = `
+      <div class="sop-milestone-spine">
+        <div class="sop-milestone-dot"></div>
+        ${i < data.milestones.length - 1 ? '<div class="sop-milestone-line"></div>' : ''}
+      </div>
+      <div class="sop-milestone-right">
+        <div class="sop-milestone-date">${m.date}</div>
+        <div class="sop-milestone-label">${m.label}</div>
+        <div class="sop-milestone-note">${m.note}</div>
+      </div>`;
+    timelineInner.appendChild(ms);
+  });
+  timelineBody.appendChild(timelineInner);
+  scroll.appendChild(timelineBody);
+
+  timelineToggle.addEventListener('click', () => {
+    const body = document.getElementById('tlBody');
+    const chevron = document.getElementById('tlChevron');
+    body.classList.toggle('open');
+    chevron.classList.toggle('open');
+  });
+
+  document.getElementById('topicDetail').classList.add('open');
+}
+
+function discussThesisInsight(thesisId, headline) {
+  document.getElementById('topicDetail').classList.remove('open');
+  switchTab('chat');
+  const msg = `I saw the ${headline} — how does this affect my ${THESIS_STATE_DATA[thesisId]?.name || thesisId} thesis?`;
+  setTimeout(() => {
+    appendUserMsg(msg);
+    showTyping();
+    setTimeout(() => {
+      removeTyping();
+      appendWarrenMsg(`<p>Great question. Let me connect that signal to your thesis...</p><p style="margin-top:8px">The <strong>${headline}</strong> is directly relevant. I'll walk you through the implications for your current positions and whether it shifts the conviction level.</p>`);
+    }, 1800);
+  }, 300);
+}
+
+/* ─── CHAT LOGIC ─── */
+let sendDisabled = true;
+
+function updateSend() {
+  const input = document.getElementById('chatInput');
+  const btn = document.getElementById('chatSendBtn');
+  btn.disabled = input.value.trim() === '';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter') {
+    const btn = document.getElementById('chatSendBtn');
+    if (!btn.disabled) sendMessage();
+  }
+}
+
+function sendSuggestion(pill) {
+  const text = pill.textContent.trim();
+  document.getElementById('chatSuggestions') && (document.getElementById('chatSuggestions').style.display = 'none');
+  appendUserMsg(text);
+  // stitch user message into active thread
+  if (activeThreadContext && TOPIC_THREADS[activeThreadContext]) {
+    TOPIC_THREADS[activeThreadContext].messages.push({ role: 'user', text, date: 'Just now' });
+    markThreadUpdated(activeThreadContext);
+  }
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    const replies = [
+      `<p>NVDA earnings setup looks like this:</p>
+<ul>
+<li><strong>Consensus EPS:</strong> $5.78 (+200% YoY)</li>
+<li><strong>Data center revenue</strong> expected ~$24B — this is the number that matters</li>
+<li><strong>Key watch:</strong> H100/H200 vs Blackwell revenue mix. If Blackwell ramps faster than expected, that's a beat signal</li>
+<li><strong>Options implied move:</strong> ±9% post-earnings</li>
+</ul>
+<p style="margin-top:8px">The setup is bullish-skewed — any inline print will likely be bought. A guide-down on H200 supply is the bear case.</p>`,
+      `<p>Main macro risks on my radar today:</p>
+<ul>
+<li><strong>CPI revision risk</strong> — BLS releases seasonal adjustment revisions this week. Could shift rate cut expectations</li>
+<li><strong>Dollar strength</strong> — DXY is at 104.5. If it breaks 106, watch for emerging market stress and commodity headwinds</li>
+<li><strong>China slowdown</strong> — PMI came in at 49.5 (contraction territory). Affects your semis with China revenue exposure</li>
+</ul>
+<p style="margin-top:8px">None of these are acute risks today, but they're worth watching into the week.</p>`,
+      `<p>Your AI Infrastructure thesis is holding up well. Here's the latest:</p>
+<ul>
+<li>NVDA up 156% since you first built the thesis in April</li>
+<li>MSFT Azure re-accelerated to 31% growth — validates the hyperscaler capex cycle</li>
+<li><strong>New risk flagged:</strong> inference efficiency improvements (DeepSeek, etc.) could reduce GPU-hours per model. Worth monitoring but not thesis-breaking yet</li>
+</ul>
+<p style="margin-top:8px">Want me to pull the full thesis summary with all our research threads?</p>`,
+    ];
+    const reply = replies[Math.floor(Math.random() * replies.length)];
+    appendWarrenMsg(reply);
+    // stitch Warren reply into active thread
+    if (activeThreadContext && TOPIC_THREADS[activeThreadContext]) {
+      TOPIC_THREADS[activeThreadContext].messages.push({ role: 'warren', html: reply });
+      markThreadUpdated(activeThreadContext);
+    }
+  }, 2000);
+}
+
+const warrenReplies = [
+  `<p>Based on your watchlist and our recent discussions, here's what stands out:</p>
+<ul>
+<li><strong>NVDA</strong> — earnings tonight are the key catalyst. Implied move is ±9%.</li>
+<li><strong>TSLA</strong> — China delivery data due this week. Watch for monthly NIO/BYD comparison.</li>
+<li><strong>BTC</strong> — ETF inflows accelerating. On-chain metrics remain bullish.</li>
+</ul>`,
+  `<p>Good question. Let me think through that...</p><p>The short answer is that the data supports your current positioning, but there's a tail risk worth hedging around the Fed decision next week. Want me to walk through the scenario analysis?</p>`,
+  `<p>Here's the key signal I'd focus on: the spread between NVDA's implied vol and realized vol has compressed to near-zero — options are fairly priced going into earnings. That usually means the market is uncertain rather than directionally positioned.</p><p>Historically, that setup favors owning the move rather than selling premium.</p>`,
+];
+let replyIdx = 0;
+
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  document.getElementById('chatSuggestions') && (document.getElementById('chatSuggestions').style.display = 'none');
+  appendUserMsg(text);
+  // stitch user message into active thread
+  if (activeThreadContext && TOPIC_THREADS[activeThreadContext]) {
+    TOPIC_THREADS[activeThreadContext].messages.push({ role: 'user', text, date: 'Just now' });
+    markThreadUpdated(activeThreadContext);
+  }
+  input.value = '';
+  updateSend();
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    const reply = warrenReplies[replyIdx % warrenReplies.length];
+    appendWarrenMsg(reply);
+    replyIdx++;
+    // stitch Warren reply into active thread
+    if (activeThreadContext && TOPIC_THREADS[activeThreadContext]) {
+      TOPIC_THREADS[activeThreadContext].messages.push({ role: 'warren', html: reply });
+      markThreadUpdated(activeThreadContext);
+    }
+  }, 2000);
+}
+
+function appendUserMsg(text) {
+  const msgs = document.getElementById('chatMessages');
+  const row = document.createElement('div');
+  row.className = 'msg-row msg-user';
+  row.innerHTML = `<div class="bubble-user">${text}</div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function appendWarrenMsg(html) {
+  const msgs = document.getElementById('chatMessages');
+  // collapse all previous suggestion sets
+  msgs.querySelectorAll('.suggestions').forEach(s => {
+    s.style.overflow = 'hidden';
+    s.style.maxHeight = s.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      s.style.transition = 'max-height 0.2s ease, opacity 0.2s ease';
+      s.style.maxHeight = '0';
+      s.style.opacity = '0';
+    });
+  });
+  const row = document.createElement('div');
+  row.className = 'msg-row msg-warren';
+  row.innerHTML = `
+    <div class="msg-avatar">
+      <svg width="12" height="10" viewBox="0 0 34 28" fill="none">
+        <path d="M13 1 C13 1 14.2 8.5 18.5 13 C14.2 17.5 13 25 13 25 C13 25 11.8 17.5 7.5 13 C11.8 8.5 13 1 13 1Z" fill="white"/>
+        <path d="M1 13 C1 13 8.5 14.2 13 18.5 C17.5 14.2 25 13 25 13 C25 13 17.5 11.8 13 7.5 C8.5 11.8 1 13 1 13Z" fill="white"/>
+      </svg>
+    </div>
+    <div class="bubble-warren">${html}</div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+let typingRow = null;
+function showTyping() {
+  const msgs = document.getElementById('chatMessages');
+  typingRow = document.createElement('div');
+  typingRow.className = 'msg-row msg-warren';
+  typingRow.innerHTML = `
+    <div class="msg-avatar">
+      <svg width="12" height="10" viewBox="0 0 34 28" fill="none">
+        <path d="M13 1 C13 1 14.2 8.5 18.5 13 C14.2 17.5 13 25 13 25 C13 25 11.8 17.5 7.5 13 C11.8 8.5 13 1 13 1Z" fill="white"/>
+        <path d="M1 13 C1 13 8.5 14.2 13 18.5 C17.5 14.2 25 13 25 13 C25 13 17.5 11.8 13 7.5 C8.5 11.8 1 13 1 13Z" fill="white"/>
+      </svg>
+    </div>
+    <div class="bubble-warren"><div class="wai-typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(typingRow);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function removeTyping() {
+  if (typingRow) { typingRow.remove(); typingRow = null; }
+}
+</script>
+</div><!-- /.device-shell -->
+</body>
+</html>
