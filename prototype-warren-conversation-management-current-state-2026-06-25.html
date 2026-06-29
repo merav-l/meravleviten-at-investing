@@ -1110,6 +1110,65 @@ html, body {
 }
 .sop-timeline-body.open { display: block; }
 
+/* ===== NEW CHAT EMPTY STATE ===== */
+.new-chat-empty {
+  padding: 28px 16px 24px;
+  display: flex; flex-direction: column; align-items: stretch; gap: 0;
+}
+.new-chat-heading {
+  font-size: 24px; font-weight: 800; color: var(--text-pri);
+  letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 16px;
+  text-align: center;
+}
+.new-chat-fake-input {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px;
+  background: #1a1a24;
+  border-radius: 14px;
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  cursor: text;
+  margin-bottom: 10px;
+  box-shadow: 0 0 0 1.5px transparent;
+  /* gradient border via outline trick */
+  outline: 1.5px solid transparent;
+  background-image: linear-gradient(#1a1a24, #1a1a24), linear-gradient(90deg, #FF6B00, #9B59B6);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  border: 1.5px solid transparent;
+}
+.new-chat-fake-placeholder {
+  font-size: 16px; color: var(--text-muted); font-family: var(--font);
+}
+.new-chat-credits {
+  font-size: 12px; color: #0A84FF; text-align: center; margin-bottom: 24px;
+}
+.new-chat-credits-num { font-weight: 700; }
+.new-chat-upgrade {
+  background: none; border: none; color: #0A84FF; font-size: 12px;
+  font-weight: 600; cursor: pointer; padding: 0; font-family: var(--font);
+}
+.new-chat-explore-label {
+  font-size: 15px; font-weight: 700; color: var(--text-pri);
+  margin-bottom: 14px; text-align: center;
+}
+.new-chat-pills {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.new-chat-pill {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 22px; padding: 11px 14px;
+  font-size: 13px; font-weight: 600; color: var(--text-sec);
+  font-family: var(--font); cursor: pointer;
+  display: flex; align-items: center; gap: 7px;
+  transition: background 0.12s; text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+.new-chat-pill:last-child:nth-child(odd) { grid-column: 1 / -1; justify-content: center; }
+.new-chat-pill:active { background: rgba(255,255,255,0.08); }
+.ncp-icon { font-size: 15px; flex-shrink: 0; }
+
 /* ===== PROTOTYPE CONTROLS ===== */
 #controls {
   position: fixed; bottom: 0; left: 0; right: 0;
@@ -1992,23 +2051,25 @@ function openThesisChat(thesisName) {
 /* ─── NEW CHAT ─── */
 function newChat() {
   switchTab('chat');
+  document.querySelector('.chat-input-area').style.display = 'none';
   const msgs = document.getElementById('chatMessages');
   msgs.innerHTML = `
-    <div class="day-divider"><span class="day-divider-label">Today</span></div>
-    <div class="msg-row msg-warren">
-      <div class="msg-avatar">
-        <svg width="12" height="10" viewBox="0 0 34 28" fill="none">
-          <path d="M13 1 C13 1 14.2 8.5 18.5 13 C14.2 17.5 13 25 13 25 C13 25 11.8 17.5 7.5 13 C11.8 8.5 13 1 13 1Z" fill="white"/>
-          <path d="M1 13 C1 13 8.5 14.2 13 18.5 C17.5 14.2 25 13 25 13 C25 13 17.5 11.8 13 7.5 C8.5 11.8 1 13 1 13Z" fill="white"/>
-        </svg>
+    <div class="new-chat-empty">
+      <div class="new-chat-heading">Doing investment research?</div>
+      <div class="new-chat-fake-input" onclick="document.querySelector('.chat-input-area').style.display=''; document.getElementById('chatInput').focus()">
+        <span class="new-chat-fake-placeholder">Ask WarrenAI</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="color:#0A84FF;flex-shrink:0"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <div class="bubble-warren">
-        <p>Good morning. Markets are mixed — NVDA is up 2.1% pre-market ahead of tonight's earnings. Anything you'd like to dig into?</p>
-        <div class="suggestions" id="chatSuggestions">
-          <button class="suggestion-pill" onclick="sendSuggestion(this)">Walk me through the NVDA earnings setup</button>
-          <button class="suggestion-pill" onclick="sendSuggestion(this)">Any macro risks I should be aware of today?</button>
-          <button class="suggestion-pill" onclick="sendSuggestion(this)">Update me on my AI infrastructure thesis</button>
-        </div>
+      <div class="new-chat-credits"><span class="new-chat-credits-num">2/5</span> credits used <button class="new-chat-upgrade">Upgrade to Pro</button></div>
+      <div class="new-chat-explore-label">Explore what WarrenAI can do</div>
+      <div class="new-chat-pills">
+        <button class="new-chat-pill" onclick="sendSuggestion(this)"><span class="ncp-icon ncp-orange">📄</span>Stock Picks &amp; Analysis</button>
+        <button class="new-chat-pill" onclick="sendSuggestion(this)"><span class="ncp-icon ncp-green">📈</span>Market Trends</button>
+        <button class="new-chat-pill" onclick="sendSuggestion(this)"><span class="ncp-icon ncp-red">📅</span>Earnings &amp; Fundamentals</button>
+        <button class="new-chat-pill" onclick="sendSuggestion(this)"><span class="ncp-icon ncp-blue">📊</span>Technical Insights</button>
+        <button class="new-chat-pill" onclick="sendSuggestion(this)"><span class="ncp-icon ncp-orange">💼</span>Watchlist Insights</button>
+        <button class="new-chat-pill" onclick="sendSuggestion(this)"><span class="ncp-icon ncp-red">⚖️</span>Screener</button>
+        <button class="new-chat-pill" onclick="sendSuggestion(this)"><span class="ncp-icon ncp-blue">📰</span>News</button>
       </div>
     </div>`;
   activeThreadContext = null;
@@ -2571,6 +2632,7 @@ function sendMessage() {
 }
 
 function appendUserMsg(text) {
+  document.querySelector('.chat-input-area').style.display = '';
   const msgs = document.getElementById('chatMessages');
   const row = document.createElement('div');
   row.className = 'msg-row msg-user';
